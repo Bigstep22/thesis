@@ -1,7 +1,8 @@
 {-# OPTIONS --guardedness #-}
 module core where
 
-open import cat.funct
+open import cat.initial
+open import cat.terminal
 open import cat.funext
 open import cat.free
 

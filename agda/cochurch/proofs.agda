@@ -8,7 +8,7 @@ open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
 open RawFunctor ⦃ ... ⦄
 open import Data.Product
-open import cat.funct
+open import cat.terminal
 open ν
 open import cat.free
 open import cat.flaws
@@ -16,32 +16,6 @@ open import cat.funext
 open import cochurch.defs
 
 -- PAGE 52 - Proof 1
-postulate νExt : {x y : ν F} → (out x ≡ out y) → x ≡ y
--- TODO: Is the above postulate valid? Something something, terminal therefore uniqueness?
-
-reflection-out : (x : ν F) → out (⟦ out ⟧ x) ≡ out x
-reflection : (x : ν F) → ⟦ out ⟧ x ≡ x
-
-reflection-out x = begin
-    out (⟦ out ⟧ x)
-  ≡⟨⟩ -- Am I sure that reflection and reflection-out don't just form a loop?
-    ⟦ out ⟧ <$> (out x)
-  ≡⟨ cong (_<$> (out x)) (funext reflection) ⟩
-    id <$> (out x)
-  ≡⟨ cong-app fmap-id (out x) ⟩
-    out x
-  ∎
-  {-
-  ≡⟨ cong out  (reflection  x)  ⟩
-    out x
-  ∎-}
-reflection x = begin
-     ⟦ out ⟧ x
-   ≡⟨ νExt (reflection-out x) ⟩
-     x
-   ∎
-
-
 from-to-id : fromCoCh ∘ toCoCh ≡ id
 from-to-id = funext (λ (x : ν F) → begin
     fromCoCh (toCoCh x)
@@ -54,7 +28,6 @@ from-to-id = funext (λ (x : ν F) → begin
   ≡⟨⟩
     id x
   ∎)
-
 
 -- PAGE 52 - Proof 2
 to-from-id : {X : Set}(c : X → F X)(x : X) →
@@ -71,8 +44,6 @@ to-from-id c x = begin
     CoCh c x
   ∎
 
-
-
 -- PAGE 52 - Proof 3
 -- New function constitutes an implementation for the produces function being replaced
 prod-pres : {X : Set} (c : X → F X) (x : X) →
@@ -84,8 +55,6 @@ prod-pres c x = begin
   ≡⟨⟩ -- definition of toCh
     ⟦ c ⟧ x
   ∎
-
-
 
 -- PAGE 52 - Proof 4
 -- New function constitutes an implementation for the produces function being replaced
@@ -101,12 +70,8 @@ cons-pres f x = begin
     f out x
   ∎
 
-
-
 -- PAGE 52 - Proof 5
 -- New function constitutes an implementation for the transformation function being replaced
-postulate unfold-fusion : {C D : Set} (h : C → D) (c : C → F C) (d : D → F D) →
-                          (_<$>_ h ∘ c ≡ d ∘ h) →  ⟦ c ⟧ ≡ ⟦ d ⟧ ∘ h
 postulate valid-hom : {X : Set}(h : X → F X)(f : {Y : Set} → Y → Y) →
                       (_<$>_ ⟦ h ⟧) ∘ f ∘ h ≡ f ∘ out ∘ ⟦ h ⟧
 
@@ -120,6 +85,6 @@ trans-pred h f x = begin
     fromCoCh (CoCh (f ∘ h) x)
   ≡⟨⟩ -- Definition of fromCh
     ⟦ f ∘ h ⟧ x
-  ≡⟨ flip cong-app x $ unfold-fusion ⟦ h ⟧ (f ∘ h) (f ∘ out) (valid-hom h f) ⟩
+  ≡⟨ flip cong-app x $ fusion ⟦ h ⟧ (f ∘ h) (f ∘ out) (valid-hom h f) ⟩
     (⟦ f ∘ out ⟧ ∘ ⟦ h ⟧) x
   ∎

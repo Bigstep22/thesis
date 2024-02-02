@@ -4,7 +4,7 @@
 open import Effect.Functor
 module cochurch.defs {F : Set → Set}⦃ _ : RawFunctor F ⦄ where
 open RawFunctor ⦃ ... ⦄
-open import cat.funct
+open import cat.terminal
 open ν
 
 
