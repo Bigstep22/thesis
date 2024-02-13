@@ -2,9 +2,10 @@
 module core where
 
 open import cat.container
+open import cat.flaws
+open import cat.funext
 open import cat.initial
 open import cat.terminal
-open import cat.funext
 open import cat.free
 
 open import church.defs

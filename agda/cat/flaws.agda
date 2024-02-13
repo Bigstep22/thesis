@@ -7,6 +7,9 @@ open import Data.Product
 
 fmap : {X Y : Set} → (Y → X) → ⟦ F ⟧ Y → ⟦ F ⟧ X
 fmap ca (op , ar) = op , ca ∘ ar
-postulate fmap-id : {X : Set} → (fmap (id {_} {X})) ≡ id {_} {⟦ F ⟧ X}
-postulate fmap-comp : {X Y Z : Set}{x : ⟦ F ⟧ X}{f : Y → Z}{g : X → Y} →
+
+fmap-id : {X : Set} → (fmap (id {_} {X})) ≡ id {_} {⟦ F ⟧ X}
+fmap-id = refl
+fmap-comp : {X Y Z : Set}{x : ⟦ F ⟧ X}{f : Y → Z}{g : X → Y} →
                       (fmap (f ∘ g)) ≡ (fmap f) ∘ (fmap g)
+fmap-comp = refl
