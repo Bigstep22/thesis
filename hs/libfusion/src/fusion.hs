@@ -77,15 +77,12 @@ unfold h s = case h s of
 -- between
 between1 :: (Int, Int) -> Tree Int
 between1 (x, y)
-
   | x > y  = Empty
   | x == y = Leaf x
   | x < y  = Fork (between1 (x, mid))
                   (between1 (mid + 1, y))
   where mid = (x + y) `div` 2
 
-betweenCh :: (Int, Int) -> TreeCh Int
-betweenCh (x, y) = TreeCh (\a -> b a (x, y))
 b :: (Tree_ Int b -> b) -> (Int, Int) -> b
 b a (x, y)
   | x > y  = a Empty_
@@ -93,6 +90,8 @@ b a (x, y)
   | x < y  = a (Fork_ (b a (x, mid))
                       (b a (mid + 1, y)))
   where mid = (x + y) `div` 2
+betweenCh :: (Int, Int) -> TreeCh Int
+betweenCh (x, y) = TreeCh (\a -> b a (x, y))
 
 between2 :: (Int, Int) -> Tree Int
 between2 = fromCh . betweenCh

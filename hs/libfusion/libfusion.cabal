@@ -59,7 +59,7 @@ executable libfusion
     import:           warnings
 
     -- .hs or .lhs file containing the Main module.
-    main-is:          freemon.hs
+    main-is:          fusion_list.hs
 
     -- Modules included in this executable, other than Main.
     -- other-modules:    hefty.hs
@@ -71,7 +71,8 @@ executable libfusion
                         TypeOperators
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.17.2.1
+    build-depends:    base ^>=4.17.2.1,
+                      tasty-bench
 
     -- Directories containing source files.
     hs-source-dirs:   src
