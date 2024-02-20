@@ -1,4 +1,3 @@
-{-# OPTIONS --no-termination-check #-}
 open import cat.container
 module cat.initial {F : Container}  where
 open import Function.Base using (id; _∘_)
@@ -35,20 +34,22 @@ universal-propₗ h a eq = begin
 comp-law : {A : Set}(a : ⟦ F ⟧ A → A) → ⦅ a ⦆ ∘ in' ≡ a ∘ (fmap ⦅ a ⦆)
 comp-law a = universal-propₗ ⦅ a ⦆ a refl
 
+fmap2 : {X Y : Set} → (Y → X) → ⟦ F ⟧ Y → ⟦ F ⟧ X
+fmap2 {X} {Y} = λ ca ((op , ar) :  ⟦ F ⟧ Y)  -> op , ca ∘ ar
 
 -- This will likely need a broader proof if I want to disable termination checking...
-reflection-law : ⦅ in' ⦆ ≡ id
 reflection : (y : μ F) → ⦅ in' ⦆ y ≡ y
-reflection-law = funext reflection
-reflection (in' x) = begin
-     ⦅ in' ⦆ (in' x)
+reflection (in' (op , ar)) = begin
+     ⦅ in' ⦆ (in' (op , ar))
    ≡⟨⟩
-     in' (fmap ⦅ in' ⦆ x)
-   ≡⟨ cong in' (cong (flip fmap x) reflection-law) ⟩
-     in' (fmap id x)
-   ≡⟨ cong in' (cong-app fmap-id x) ⟩
-     in' x
+     in' (op , λ x -> ⦅ in' ⦆ (ar x))
+   ≡⟨ cong (λ x -> in' (op , x)) (funext (reflection ∘ ar)) ⟩
+     in' (op , ar)
    ∎
+
+reflection-law : ⦅ in' ⦆ ≡ id
+reflection-law = funext reflection
+
 
 postulate fusion : {A B : Set}(h : A → B)(a : ⟦ F ⟧ A → A)(b : ⟦ F ⟧ B → B) →
                    (h ∘ a ≡ b ∘ fmap h) →  h ∘ ⦅ a ⦆ ≡ ⦅ b ⦆

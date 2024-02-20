@@ -5,7 +5,7 @@ open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
 open import Data.Product
 
-fmap : {X Y : Set} → (Y → X) → ⟦ F ⟧ Y → ⟦ F ⟧ X
+fmap : {X Y : Set} → (X → Y) → ⟦ F ⟧ X → ⟦ F ⟧ Y
 fmap ca (op , ar) = op , ca ∘ ar
 
 fmap-id : {X : Set} → (fmap (id {_} {X})) ≡ id {_} {⟦ F ⟧ X}
