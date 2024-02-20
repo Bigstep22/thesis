@@ -1,20 +1,32 @@
-# First-stage review meeting
+# Overview of current proof and postulates:
+Current structure in two main parts:
+- \[cat/\] The more 'categorical' proofs
+	- \[container.agda\] Definition of containers
+	- \[flaws.agda\] Definition of fmap and the functor laws
+	- \[funext.agda\] Postulate of functional extensionality.
+	- \[initial/terminal.agda\] Definition of initial, terminal, ana- and catamorphisms as well as corresponding proofs for their universal properties, reflection laws, and fusion properties.
+- \[(co)church/\] The proofs of the paper for both Church and CoChurch encoded datatypes
+	- \[defs.agda\] Definition of (Co)Church encodings and the \[to/from\](Co)Ch functions
+	-  \[proofs.agda\] 5 Proofs (and associated lemmas) for both the Church and CoChurch encodings in the paper's page 51-52
+		- to-from composition is same as identity (both ways).
+		- Proofs of encodings constitute implementations of functions being replaced for consuming, producing, and transforming functions.
 
-Postulates:
-- $\nu$Ext
+## Postulates:
+- $\nu$Ext (Slow or non-terminating type checking with ETA $\nu$ pragma)
 - Fusion (cata- and ana-)
 - Funext (for implicit and explicit functions)
 - Free theorems (for the initial and terminal parametric functions)
-- Valid-hom (in cochurch proof nr.5)
+	- Are these provable in Agda?
+- Valid-hom (in cochurch proof for transforming functions)
 	- Will likely require definitions of natural transformations and proof of coherence property.
-Termination-check disable:
+## Termination-check disable:
 - Initial.agda (only for the proof of the reflection law)
 - Terminal.agda (proof of reflection and _definition of ana-_...)
 	- Termination check for ana- needs to be fixed.
 Guardedness for all proof and definitions involving coinduction (e.g. anamorphisms and cochurch definitions and proof).
 
 
-## How does this fit into the big picture?
+# How does this fit into the big picture?
 In functional languages it is important to have code run performantly.
 This can be achieved in a number of ways, one of which is fusion.
 When one has a pipeline of functions, it is possible to fuse them into one single function, reducing computational overhead and allowing the compiler to apply further optimizations.
@@ -24,7 +36,9 @@ My project:
 - Aims to formally verify the proofs:
 	- By implementing them safely in Agda relying on only well-known postulates, such as functional extensionality.
 - Aims to tie the proofs back to the code that ends up being written:
-	- By implementing a system that can (hopefully) auto-generate this fusable code, reducing the space for errors to be made by people wanting this optimization.
+	- By implementing the above proofs for an example datatype, and
+	- By implementing a system (perhaps in Haskell) that can (hopefully) auto-generate this fusable code, reducing the space for errors to be made by people wanting this optimization.
+- This will hopefully aid in the faster creation of fused and performant code.
 
 ## How does church-encoded fusion work?
 Say we want the chain of the following functions as one:
@@ -102,8 +116,8 @@ Remember the pipeline? Now it looks like this:
 ```haskell
 f = sum . map (+1) . filter odd . between
 
-f =	     sumCh .        toCh .
-fromCh . mapCh (+1) .   toCh .
+f =	     sumCh        . toCh .
+fromCh . mapCh (+1)   . toCh .
 fromCh . filterCh odd . toCh .
 fromCh . betweenCh
 ```
@@ -149,3 +163,34 @@ f' = b (s . m (+1) . filt odd) (x, y)
 $\blacksquare$
 This is how the fusion for church encodings work.
 CoChurch encodings seem to work slightly differently, in that they express this recursion in terms of an unfold instead of direct recursion.
+
+For CoChurch it would look something like this:
+```haskell
+f = sum . map (+1) . filter odd . between
+
+f =	fromCoCh . sumCh    . toCoCh .
+fromCoCh . mapCh (+1)   . toCoCh .
+fromCoCh . filterCh odd . toCoCh .
+fromCoCh . betweenCh    . toCoCh
+```
+So when fused it looks more like this:
+```haskell
+fromCoCh . sumCh . mapCh (+1) . filterCh odd . betweenCh . toCoCh
+```
+This 'leftover' of the from/toCoCh functions at the ends is my suspicion as to why 'full' pipelines are faster for cochurch encoding, as the corecursion does not have to be done by the initial functions in the pipeline and is instead handled by the recursion principle 'at the end'.
+
+# Next steps/possibilities:
+- Further develop the code:
+	- Remove category theory postulates and base them on actual category theory
+	- Fix termination checking problems
+	- Auto-generation of container types from functors?
+	- Implement an example church-encoded datastructure in Agda and show that the fusion rule holds
+- Start working with Haskell more:
+	- Implement auto-generation of church encodings in (template) Haskell.
+	- Investigate further why Church/CoChurch encodings are faster sometimes.
+- More research/theory investigation:
+	- Encoding/fusion for natural transformations? Just a thought.
+	- 
+- Start writing!
+	- Use this agenda as a basis for an introduction and background
+	- 
