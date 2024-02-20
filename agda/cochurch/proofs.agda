@@ -1,4 +1,3 @@
-{-# OPTIONS --type-in-type #-}
 {-# OPTIONS --guardedness #-}
 open import cat.container
 module cochurch.proofs {F : Container} where
@@ -70,8 +69,21 @@ cons-pres f x = begin
 
 -- PAGE 52 - Proof 5
 -- New function constitutes an implementation for the transformation function being replaced
-postulate valid-hom : {X : Set}(h : X → ⟦ F ⟧ X)(f : {Y : Set} → Y → Y) →
-                      (fmap 【 h 】) ∘ f ∘ h ≡ f ∘ out ∘ 【 h 】
+postulate coherence : {G : Container}{A B : Set}(h : A → B)
+                      (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
+                      fmap h ∘ f ≡ f ∘ fmap h
+
+valid-hom : {X : Set}(h : X → ⟦ F ⟧ X)(f : {Y : Set} → Y → Y) →
+            fmap 【 h 】 ∘ f ∘ h ≡ f ∘ out ∘ 【 h 】
+valid-hom h f = begin
+    (fmap 【 h 】 ∘ f) ∘ h
+  ≡⟨ cong (_∘ h) (coherence 【 h 】 f) ⟩
+    (f ∘ fmap 【 h 】) ∘ h
+  ≡⟨⟩
+    f ∘ out ∘ 【 h 】
+  ∎
+--【_】 : {X : Set} → (X → ⟦ F ⟧ X) → X → ν F
+--out (【 c 】 x) = (λ (op , ar) -> op , 【 c 】 ∘ ar) (c x)
 -- This will require some work w.r.t. natural transformations, time for some more definitions!
 
 chTrans : ∀ (f : {Y : Set} → Y → Y) → CoChurch {F} F → CoChurch {F} F

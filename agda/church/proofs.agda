@@ -1,4 +1,3 @@
-{-# OPTIONS --type-in-type #-}
 open import cat.container
 module church.proofs {F : Container} where
 open import Relation.Binary.PropositionalEquality as Eq
@@ -35,7 +34,7 @@ to-from-id {g} = begin
     toCh (g in')
   ≡⟨⟩ -- definition of toCh
     Ch (λ { X : Set} → λ (a : ⟦ F ⟧ X → X) → ⦅ a ⦆ (g in'))
-  ≡⟨ cong Ch (funexti (λ (Y : Set) → funext λ (a : ⟦ F ⟧ Y → Y) → fold-invariance g a)) ⟩
+  ≡⟨ cong Ch (funexti (λ {Y : Set} → funext λ (a : ⟦ F ⟧ Y → Y) → fold-invariance g a)) ⟩
     Ch g
   ∎
 
