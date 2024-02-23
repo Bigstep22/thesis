@@ -69,15 +69,18 @@ cons-pres f x = begin
 
 -- PAGE 52 - Proof 5
 -- New function constitutes an implementation for the transformation function being replaced
-postulate coherence : {G : Container}{A B : Set}(h : A → B)
-                      (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
-                      fmap h ∘ f ≡ f ∘ fmap h
+--(nat f)
+record nat {G : Container}(f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X): Set₁ where
+  field
+    coherence : {A B : Set}(h : A → B) → fmap {G} h ∘ f ≡ f ∘ fmap {F} h
+open nat ⦃ ... ⦄
 
-valid-hom : {X : Set}(h : X → ⟦ F ⟧ X)(f : {Y : Set} → Y → Y) →
+
+valid-hom : {X : Set}(h : X → ⟦ F ⟧ X)(f : {Y : Set} → Y → Y)⦃ _ : nat f ⦄ →
             fmap 【 h 】 ∘ f ∘ h ≡ f ∘ out ∘ 【 h 】
 valid-hom h f = begin
     (fmap 【 h 】 ∘ f) ∘ h
-  ≡⟨ cong (_∘ h) (coherence 【 h 】 f) ⟩
+  ≡⟨ cong (_∘ h) (coherence 【 h 】) ⟩
     (f ∘ fmap 【 h 】) ∘ h
   ≡⟨⟩
     f ∘ out ∘ 【 h 】
@@ -88,7 +91,7 @@ valid-hom h f = begin
 
 chTrans : ∀ (f : {Y : Set} → Y → Y) → CoChurch {F} F → CoChurch {F} F
 chTrans f (CoCh c s) = CoCh (f ∘ c) s
-trans-pred :  {X : Set} (h : X → ⟦ F ⟧ X) (f : {Y : Set} → Y → Y)  (x : X) →
+trans-pred :  {X : Set} (h : X → ⟦ F ⟧ X) (f : {Y : Set} → Y → Y)(x : X)⦃ _ : nat f ⦄ →
              fromCoCh (chTrans f (CoCh h x)) ≡ (【 f ∘ out 】 ∘ 【 h 】) x
 trans-pred h f x = begin
     fromCoCh (chTrans f (CoCh h x))
