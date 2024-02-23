@@ -1,4 +1,3 @@
-{-# OPTIONS --no-termination-check #-}
 {-# OPTIONS --guardedness #-}
 open import cat.container
 module cat.terminal {F : Container } where
@@ -7,8 +6,8 @@ open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
 open import cat.flaws
 open import cat.funext
-open import Function.Base
-
+open import Function
+open import Data.Product
 
 
 -- An initial algebra
@@ -19,14 +18,13 @@ record ν (F : Container) : Set where
 open ν
 -- an anamorphism
 【_】 : {X : Set} → (X → ⟦ F ⟧ X) → X → ν F
-out (【 c 】 x) = fmap 【 c 】 (c x)
---⦅ a ⦆ (in' (op , ar)) = a (op , ⦅ a ⦆ ∘ ar)
+out (【 c 】 x) = (λ (op , ar) -> op , 【 c 】 ∘ ar) (c x)
 --fmap : {X Y : Set} → (Y → X) → ⟦ F ⟧ Y → ⟦ F ⟧ X
 --fmap ca (op , ar) = op , ca ∘ ar
 
-universal-propₗ : {C : Set}(h : C → ν F)(c : C → ⟦ F ⟧ C) →
+universal-propₗ : {C : Set}(c : C → ⟦ F ⟧ C)(h : C → ν F) →
                  h ≡ 【 c 】 → out ∘ h ≡ fmap h ∘ c
-universal-propₗ h c eq = begin
+universal-propₗ c h eq = begin
     out ∘ h
   ≡⟨ cong (_∘_ out) eq ⟩
     out ∘ 【 c 】
@@ -35,32 +33,32 @@ universal-propₗ h c eq = begin
   ≡⟨ cong (_∘ c) (cong fmap (sym eq)) ⟩
     fmap h ∘ c
   ∎
---postulate universal-propᵣ : {C : Set}(h : C → ν F)(c : C → ⟦ F ⟧ C) → ((out ∘ h ≡ (fmap h) ∘ c) → (h ≡ 【 c 】))
+--universal-propᵣ : {C : Set}(c : C → ⟦ F ⟧ C)(h : C → ν F) →
+--                            out ∘ h ≡ fmap h ∘ c → h ≡ 【 c 】
+--universal-propᵣ c h eq = {!!}
 
-comp-law : {C : Set}(c : C → ⟦ F ⟧ C) → out ∘ 【 c 】 ≡ (fmap 【 c 】) ∘ c
-comp-law c = universal-propₗ 【 c 】 c refl
+comp-law : {C : Set}(c : C → ⟦ F ⟧ C) → out ∘ 【 c 】 ≡ fmap 【 c 】 ∘ c
+comp-law c = refl
 
 --{-# ETA ν #-} -- Seems to cause a hang (or major slowdown) in compilation
+              -- in combination with reflection,
+              -- have a chat with Casper
 postulate νExt : {x y : ν F} → (out x ≡ out y) → x ≡ y
 --νExt refl = refl
 
-reflection-out : (x : ν F) → out (【 out 】 x) ≡ out x
+{-# NON_TERMINATING #-}
 reflection : (x : ν F) → 【 out 】 x ≡ x
-
-reflection-out x = begin
+reflection x = νExt (begin
     out (【 out 】 x)
-  ≡⟨⟩ -- Am I sure that reflection and reflection-out don't just form trivial proof-loop?
-    fmap 【 out 】 (out x)
-  ≡⟨ cong (flip fmap (out x)) (funext reflection) ⟩
+  ≡⟨ cong-app (comp-law out) x ⟩
+    fmap 【 out 】 (out x) -- (λ (op , ar) -> op , 【 out 】 ∘ ar) (out x)
+  ≡⟨ cong (flip fmap (out x)) $ funext reflection ⟩
+    -- cong (λ f -> f (out x)) $ funext (λ (op , ar) → cong (λ x -> op , x) (funext (reflection ∘ ar)))
     fmap id (out x)
-  ≡⟨ cong-app fmap-id (out x) ⟩
+  ≡⟨ cong-app  fmap-id (out x) ⟩
     out x
-  ∎
-reflection x = begin
-     【 out 】 x
-   ≡⟨ νExt (reflection-out x) ⟩
-     x
-   ∎
+  ∎)
+
 
 postulate fusion : {C D : Set}(h : C → D)(c : C → ⟦ F ⟧ C)(d : D → ⟦ F ⟧ D) →
                    (fmap h ∘ c ≡ d ∘ h) → 【 c 】 ≡ 【 d 】 ∘ h

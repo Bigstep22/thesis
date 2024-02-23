@@ -16,10 +16,9 @@ data μ (F : Container) : Set where
 ⦅ a ⦆ (in' (op , ar)) = a (op , ⦅ a ⦆ ∘ ar)
 -- Look! The reflection law: https://wiki.haskell.org/Catamorphisms
 
-
-universal-propₗ : {A : Set}(h : μ F → A)(a : ⟦ F ⟧ A → A) →
-                           h ≡ ⦅ a ⦆ → h ∘ in' ≡ a ∘ fmap h
-universal-propₗ h a eq = begin
+universal-propₗ : {X : Set}(a : ⟦ F ⟧ X → X)(h : μ F → X) →
+                  h ≡ ⦅ a ⦆ → h ∘ in' ≡ a ∘ fmap h
+universal-propₗ a h eq = begin
     h ∘ in'
   ≡⟨ cong (_∘ in') eq ⟩
     ⦅ a ⦆ ∘ in'
@@ -28,21 +27,19 @@ universal-propₗ h a eq = begin
   ≡⟨ cong (_∘_ a) (cong fmap (sym eq)) ⟩
     a ∘ fmap h
   ∎
--- postulate universal-propᵣ : {A : Set}(h : μ F → A)(a : ⟦ F ⟧ A → A) → (h ∘ in' ≡ a ∘ fmap h) → (h ≡ ⦅ a ⦆)
--- Should we use ≡ or ⇔ (or similar) for this?
 
-comp-law : {A : Set}(a : ⟦ F ⟧ A → A) → ⦅ a ⦆ ∘ in' ≡ a ∘ (fmap ⦅ a ⦆)
-comp-law a = universal-propₗ ⦅ a ⦆ a refl
+--universal-propᵣ : {X : Set}(a : ⟦ F ⟧ X → X)(h : μ F → X) →
+--                            h ∘ in' ≡ a ∘ fmap h → ⦅ a ⦆ ≡ h
+--universal-propᵣ a h eq = {!!}
 
-fmap2 : {X Y : Set} → (Y → X) → ⟦ F ⟧ Y → ⟦ F ⟧ X
-fmap2 {X} {Y} = λ ca ((op , ar) :  ⟦ F ⟧ Y)  -> op , ca ∘ ar
+comp-law : {A : Set}(a : ⟦ F ⟧ A → A) → ⦅ a ⦆ ∘ in' ≡ a ∘ fmap ⦅ a ⦆
+comp-law a = refl
 
--- This will likely need a broader proof if I want to disable termination checking...
 reflection : (y : μ F) → ⦅ in' ⦆ y ≡ y
 reflection (in' (op , ar)) = begin
      ⦅ in' ⦆ (in' (op , ar))
    ≡⟨⟩
-     in' (op , λ x -> ⦅ in' ⦆ (ar x))
+     in' (op , ⦅ in' ⦆ ∘ ar)
    ≡⟨ cong (λ x -> in' (op , x)) (funext (reflection ∘ ar)) ⟩
      in' (op , ar)
    ∎
