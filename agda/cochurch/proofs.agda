@@ -1,15 +1,15 @@
 {-# OPTIONS --guardedness #-}
-open import cat.container
+open import funct.container
 module cochurch.proofs {F : Container} where
 open import Function.Base using (id; _∘_; flip; _$_)
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
 open import Data.Product
-open import cat.terminal
+open import funct.terminal
 open ν
-open import cat.free
-open import cat.flaws
-open import cat.funext
+open import funct.free
+open import funct.flaws
+open import funct.funext
 open import cochurch.defs
 
 -- PAGE 52 - Proof 1

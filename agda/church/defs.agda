@@ -1,6 +1,6 @@
-open import cat.container
+open import funct.container
 module church.defs {F : Container} where
-open import cat.initial
+open import funct.initial
 
 data Church (F : Container) : Set₁ where
   Ch : ({X : Set} → (⟦ F ⟧ X → X) → X) → Church F
