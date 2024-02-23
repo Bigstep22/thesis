@@ -1,11 +1,11 @@
 {-# OPTIONS --guardedness #-}
-open import cat.container
-module cat.terminal {F : Container } where
+open import funct.container
+module funct.terminal {F : Container } where
 open import Function.Base using (id; _∘_)
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
-open import cat.flaws
-open import cat.funext
+open import funct.flaws
+open import funct.funext
 open import Function
 open import Data.Product
 

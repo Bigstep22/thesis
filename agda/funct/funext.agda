@@ -1,4 +1,4 @@
-module cat.funext where
+module funct.funext where
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
 open import Axiom.Extensionality.Propositional

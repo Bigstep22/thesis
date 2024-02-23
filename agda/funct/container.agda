@@ -1,6 +1,6 @@
 open import Data.Product
 
-module cat.container where
+module funct.container where
 
 record Container : Set₁ where
   constructor _▹_
