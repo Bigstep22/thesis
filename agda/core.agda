@@ -1,6 +1,8 @@
 {-# OPTIONS --guardedness #-}
 module core where
 
+open import cat.cat
+
 open import funct.container
 open import funct.flaws
 open import funct.funext
