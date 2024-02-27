@@ -147,11 +147,11 @@ sum2 = sumCh . toCh
 
 {-TAIL RECURSION!!!-}
 su' :: (s -> List'_ Int s) -> s -> Int
-su' h s = loop s
-  where loop s' = case h s' of
-              Nil'_ -> 0
-              NilT'_ xs -> loop xs 
-              Cons'_ x xs -> x + loop xs
+su' h s = loop s 0
+  where loop s' sum = case h s' of
+              Nil'_ -> sum
+              NilT'_ xs -> loop xs sum
+              Cons'_ x xs -> loop xs (x+sum)
 
 sumCoCh :: ListCoCh Int -> Int
 sumCoCh (ListCoCh h s) = su' h s
@@ -234,6 +234,13 @@ main = defaultMain
      version it is just a DEFAULT declaration, returning the sum of some value.
  - For both there is further optimization possible removing some overhead:
    Passing around the 'y' of the tuple.  This is the case for both fused and cofused.
+ - Furthremore, after implementing a 'hand-fused' version of the pipeline,
+   it was discovered that it performed identically to the cofused implementation.
+   - This 'hand fused' pipeline was then further optimized using tail recursion.
+     This turned out to give another 40% speedup, a bummer when compared to cofusion
+   - However, with a small change in the definition of the 'final' function of the fused pipeline,
+     su', such that it is also tail recursive gave an identical speedup to the cofused pipeline.
+   - An analogous change for the church-fused pipeline seems more difficult...
     -}
 {- pipeline 3 Rec { 
 $wloop :: Int# -> Int# -> Int#
