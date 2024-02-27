@@ -1,0 +1,3 @@
+- For the example with lists:
+	- Make sure you also accompany it with a proof for the fusion.
+- 

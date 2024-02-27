@@ -159,6 +159,11 @@ f' = b (s . m (+1) . filt odd) (x, y)
 | x <= y = if odd x
             then (x+1) + (f' (x+1, y))
             else f' (x+1, y)
+-- y is invariant, so we can make a specialized version of this function that doesn't pass y through recursively:
+| x > y = 0
+| x <= y = if odd x
+            then (x+1) + (f' x+1)
+            else f' x+1
 ```
 $\blacksquare$
 This is how the fusion for church encodings work.
