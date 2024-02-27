@@ -147,11 +147,15 @@ sum2 = sumCh . toCh
 
 {-TAIL RECURSION!!!-}
 su' :: (s -> List'_ Int s) -> s -> Int
-su' h s = loop s 0
-  where loop s' sum = case h s' of
-              Nil'_ -> sum
-              NilT'_ xs -> loop xs sum
-              Cons'_ x xs -> loop xs (x+sum)
+su' h s = loopt s 0
+  where loop s' = case h s' of
+          Nil'_ -> 0
+          NilT'_ xs -> loop xs
+          Cons'_ x xs -> x + loop xs
+        loopt s' sum = case h s' of
+          Nil'_ -> sum
+          NilT'_ xs -> loopt xs sum
+          Cons'_ x xs -> loopt xs (x + sum)
 
 sumCoCh :: ListCoCh Int -> Int
 sumCoCh (ListCoCh h s) = su' h s
@@ -164,13 +168,13 @@ trodd :: Int -> Bool
 trodd n = n `mod` 3 == 0
 
 
-pipeline1 = sum1 . map1 (+2) . filter1 trodd . between1
-pipeline2 = sum2 . map2 (+2) . filter2 trodd . between2
-pipeline3 = sum3 . map3 (+2) . filter3 trodd . between3
+pipeline1 = sum1 . map1 (+2) . filter1 odd . between1
+pipeline2 = sum2 . map2 (+2) . filter2 odd . between2
+pipeline3 = sum3 . map3 (+2) . filter3 odd . between3
 pipeline4 (x, y) = loop x 0
   where loop z sum = case z > y of
                      True -> sum
-                     False -> if trodd z
+                     False -> if odd z
                               then loop (z+1) (sum+z+2)
                               else loop (z+1) sum
 
@@ -179,7 +183,7 @@ pipeline4 (x, y) = loop x 0
 -- sumApp3 (x, y)  = sum3 (append3 (between3 (x, y)) (between3 (x, y)))
 
 input :: (Int, Int)
-input = (1, 10000)
+input = (1, 100000)
 -- main :: IO ()
 -- main = print (pipeline3 input)
 main :: IO ()
@@ -240,6 +244,9 @@ main = defaultMain
      This turned out to give another 40% speedup, a bummer when compared to cofusion
    - However, with a small change in the definition of the 'final' function of the fused pipeline,
      su', such that it is also tail recursive gave an identical speedup to the cofused pipeline.
+   - One interesting thing of note is that the Core representation of the cofused tai-recursive
+     function does not make use of gotos like the hand-written one does. It does, however, seem
+     to have identical performance.
    - An analogous change for the church-fused pipeline seems more difficult...
     -}
 {- pipeline 3 Rec { 

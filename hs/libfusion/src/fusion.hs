@@ -1,6 +1,11 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ExistentialQuantification #-}
+{-# OPTIONS_GHC -ddump-simpl -ddump-to-file -dsuppress-all -dno-suppress-type-signatures -dno-typeable-binds -dsuppress-uniques #-}
+{-# OPTIONS_GHC -Wno-missing-signatures #-}
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
+{-# OPTIONS_GHC -Wno-unused-matches #-}
 import Test.Tasty.Bench
 
 
@@ -19,8 +24,8 @@ f' (x, y) = loop x
 
 
 
-data List_ a b = Nil_ | Cons_ a b deriving Functor
-data List a = Nil | Cons a (List a) deriving Functor
+-- data List_ a b = Nil_ | Cons_ a b deriving Functor
+-- data List a = Nil | Cons a (List a) deriving Functor
 
 
 -- data Church F = Ch (forall A . (f A -> A) -> A)
@@ -76,19 +81,19 @@ unfold h s = case h s of
 
 -- between
 between1 :: (Int, Int) -> Tree Int
-between1 (x, y)
-  | x > y  = Empty
-  | x == y = Leaf x
-  | x < y  = Fork (between1 (x, mid))
-                  (between1 (mid + 1, y))
+between1 (x, y) = case compare x y of
+  GT -> Empty
+  EQ -> Leaf x
+  LT -> Fork (between1 (x, mid))
+               (between1 (mid + 1, y))
   where mid = (x + y) `div` 2
 
 b :: (Tree_ Int b -> b) -> (Int, Int) -> b
-b a (x, y)
-  | x > y  = a Empty_
-  | x == y = a (Leaf_ x)
-  | x < y  = a (Fork_ (b a (x, mid))
-                      (b a (mid + 1, y)))
+b a (x, y) = case compare x y of
+  GT -> a Empty_
+  EQ -> a (Leaf_ x)
+  LT -> a (Fork_ (b a (x, mid))
+                 (b a (mid + 1, y)))
   where mid = (x + y) `div` 2
 betweenCh :: (Int, Int) -> TreeCh Int
 betweenCh (x, y) = TreeCh (\a -> b a (x, y))
@@ -97,17 +102,15 @@ between2 :: (Int, Int) -> Tree Int
 between2 = fromCh . betweenCh
 {-# INLINE between2 #-}
 
-between3 :: (Int, Int) -> Tree Int
-between3 = fromCoCh . TreeCoCh h
 h :: (Int, Int) -> Tree_ Int (Int, Int)
-h (x, y)
-  | x > y = Empty_
-  | x == y = Leaf_ x
-  | x < y = Fork_ (x, mid) (mid + 1, y)
+h (x, y) = case compare x y of
+  GT -> Empty_
+  EQ -> Leaf_ x
+  LT -> Fork_ (x, mid) (mid + 1, y)
   where mid = (x + y) `div` 2
 
--- between3 :: (Int, Int) -> Tree Int
--- between3 = fromCoCh . betweenCoCh
+between3 :: (Int, Int) -> Tree Int
+between3 = fromCoCh . TreeCoCh h
 {-# INLINE between3 #-}
 
 -- append
@@ -210,28 +213,34 @@ sum2 :: Tree Int -> Int
 sum2 = sumCh . toCh
 {-# INLINE sum2 #-}
 
+{-
+Implementing the below function as tail recursive using
+an accumulator and list of remaining computations does not
+result in a tail recursive Core representation using gotos...
+-}
 sumCoCh :: TreeCoCh Int -> Int
-sumCoCh (TreeCoCh h s) = loop s
-  where loop s = case h s of
-          Empty_ -> 0
-          Leaf_ x -> x
-          Fork_ l r -> loop l + loop r
+sumCoCh (TreeCoCh h s') = loop 0 [s']
+  where loop sum (s:ss) = case h s of
+          Empty_ -> loop sum ss
+          Leaf_ x -> loop (sum+x) ss
+          Fork_ l r -> loop sum (l:r:ss)
+        loop sum [] = sum
 sum3 :: Tree Int -> Int
 sum3 = sumCoCh . toCoCh
 {-# INLINE sum3 #-}
 
 
 
-pipeline1 = sum1 . map1 (+1) . filter1 odd . between1
-pipeline2 = sum2 . map2 (+1) . filter2 odd . between2
-pipeline3 = sum3 . map3 (+1) . filter3 odd . between3
+pipeline1 = sum1 . map1 (+2) . filter1 odd . between1
+pipeline2 = sum2 . map2 (+2) . filter2 odd . between2
+pipeline3 = sum3 . map3 (+2) . filter3 odd . between3
 
 sumApp1 (x, y)  = sum1 (append1 (between1 (x, y)) (between1 (x, y)))
 sumApp2 (x, y)  = sum2 (append2 (between2 (x, y)) (between2 (x, y)))
 sumApp3 (x, y)  = sum3 (append3 (between3 (x, y)) (between3 (x, y)))
 
 input = (1, 10000)
--- main = print (pipeline'' input)
+-- main = print (pipeline2 input)
 main = defaultMain
   [
     bgroup "Filter pipeline"
@@ -266,3 +275,64 @@ main = defaultMain
     -- ]
   ]
 
+-- With tastybench
+{- chfused
+Rec {
+$s$wb :: Int -> Int# -> Int
+$s$wb
+  = \ (ww :: Int) (ww1 :: Int#) ->
+      case ww of wild { I# x ->
+      case ># x ww1 of {
+        __DEFAULT ->
+          case ==# x ww1 of {
+            __DEFAULT ->
+              case <# x ww1 of {
+                __DEFAULT -> case lvl7 of wild1 { };
+                1# ->
+                  let {
+                    mid :: Int#
+                    mid = uncheckedIShiftRA# (+# x ww1) 1# } in
+                  case $s$wb wild mid of { I# x1 ->
+                  case $s$wb (I# (+# mid 1#)) ww1 of { I# y -> I# (+# x1 y) }
+                  }
+              };
+            1# ->
+              case remInt# x 2# of {
+                __DEFAULT -> I# (+# x 2#);
+                0# -> lvl4
+              }
+          };
+        1# -> lvl4
+      }
+      }
+end Rec }
+-}
+{- cofused
+Rec {
+$wloop :: Int# -> Int# -> Int#
+$wloop
+  = \ (ww :: Int#) (ww1 :: Int#) ->
+      case ># ww ww1 of {
+        __DEFAULT ->
+          case ==# ww ww1 of {
+            __DEFAULT ->
+              case <# ww ww1 of {
+                __DEFAULT -> case lvl3 of wild { };
+                1# ->
+                  let {
+                    mid :: Int#
+                    mid = uncheckedIShiftRA# (+# ww ww1) 1# } in
+                  case $wloop ww mid of ww2 { __DEFAULT ->
+                  case $wloop (+# mid 1#) ww1 of ww3 { __DEFAULT -> +# ww2 ww3 }
+                  }
+              };
+            1# ->
+              case remInt# ww 2# of {
+                __DEFAULT -> +# ww 2#;
+                0# -> 0#
+              }
+          };
+        1# -> 0#
+      }
+end Rec }
+-}
