@@ -9,8 +9,8 @@ open import funct.flaws
 open import funct.funext
 open import Function
 
-contendo : Endofunctor (Sets lzero)
-contendo = record
+contEndo : Endofunctor (Sets lzero)
+contEndo = record
              { F₀ = I⟦ F ⟧
              ; F₁ = fmap
              ; identity = refl
