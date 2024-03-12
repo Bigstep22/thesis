@@ -10,13 +10,13 @@ open import Function.Base
 
 -- An initial algebra
 data μ (F : Container) : Set where
-  in' : ⟦ F ⟧ (μ F) → μ F
+  in' : I⟦ F ⟧ (μ F) → μ F
 -- Formerly cata - a catamorhpism
-⦅_⦆ : {X : Set} → (⟦ F ⟧ X → X) → μ F → X
+⦅_⦆ : {X : Set} → (I⟦ F ⟧ X → X) → μ F → X
 ⦅ a ⦆ (in' (op , ar)) = a (op , ⦅ a ⦆ ∘ ar)
 -- Look! The reflection law: https://wiki.haskell.org/Catamorphisms
 
-universal-propₗ : {X : Set}(a : ⟦ F ⟧ X → X)(h : μ F → X) →
+universal-propₗ : {X : Set}(a : I⟦ F ⟧ X → X)(h : μ F → X) →
                   h ≡ ⦅ a ⦆ → h ∘ in' ≡ a ∘ fmap h
 universal-propₗ a h eq = begin
     h ∘ in'
@@ -32,7 +32,7 @@ universal-propₗ a h eq = begin
 --                            h ∘ in' ≡ a ∘ fmap h → ⦅ a ⦆ ≡ h
 --universal-propᵣ a h eq = {!!}
 
-comp-law : {A : Set}(a : ⟦ F ⟧ A → A) → ⦅ a ⦆ ∘ in' ≡ a ∘ fmap ⦅ a ⦆
+comp-law : {A : Set}(a : I⟦ F ⟧ A → A) → ⦅ a ⦆ ∘ in' ≡ a ∘ fmap ⦅ a ⦆
 comp-law a = refl
 
 reflection : (y : μ F) → ⦅ in' ⦆ y ≡ y
@@ -48,5 +48,5 @@ reflection-law : ⦅ in' ⦆ ≡ id
 reflection-law = funext reflection
 
 
-postulate fusion : {A B : Set}(h : A → B)(a : ⟦ F ⟧ A → A)(b : ⟦ F ⟧ B → B) →
+postulate fusion : {A B : Set}(h : A → B)(a : I⟦ F ⟧ A → A)(b : I⟦ F ⟧ B → B) →
                    (h ∘ a ≡ b ∘ fmap h) →  h ∘ ⦅ a ⦆ ≡ ⦅ b ⦆

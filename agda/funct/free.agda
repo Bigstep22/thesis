@@ -7,11 +7,11 @@ open import funct.flaws
 open import Level
 
 
-postulate freetheorem-initial  : {B C : Set}{b : ⟦ F ⟧ B → B}{c : ⟦ F ⟧ C → C}(h : B → C)
-                                 (g : {X : Set} → (⟦ F ⟧ X → X) → X) →
+postulate freetheorem-initial  : {B C : Set}{b : I⟦ F ⟧ B → B}{c : I⟦ F ⟧ C → C}(h : B → C)
+                                 (g : {X : Set} → (I⟦ F ⟧ X → X) → X) →
                                  (h ∘ b ≡ (c ∘ (fmap h))) → h (g b) ≡ g c
 postulate freetheorem-terminal : {ℓ : Level}
-                                 {C D : Set}{Y : Set ℓ}{c : C → ⟦ F ⟧ C}{d : D → ⟦ F ⟧ D}(h : C → D)
-                                 (f : {X : Set} → (X → ⟦ F ⟧ X) → X → Y) →
+                                 {C D : Set}{Y : Set ℓ}{c : C → I⟦ F ⟧ C}{d : D → I⟦ F ⟧ D}(h : C → D)
+                                 (f : {X : Set} → (X → I⟦ F ⟧ X) → X → Y) →
                                  ((fmap h ∘ c) ≡ d ∘ h) → f c ≡ f d ∘ h
                                  -- TODO: Do D and Y need to be the same thing? This may be a cop-out...

@@ -8,5 +8,5 @@ record Container : Set₁ where
     Op : Set
     Ar : Op → Set
 
-⟦_⟧ : Container → Set → Set
-⟦ op ▹ ar ⟧ A = Σ[ x ∈ op ] (ar x → A)
+I⟦_⟧ : Container → Set → Set
+I⟦ op ▹ ar ⟧ A = Σ[ x ∈ op ] (ar x → A)

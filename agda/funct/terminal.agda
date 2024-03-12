@@ -14,22 +14,22 @@ open import Data.Product
 record ν (F : Container) : Set where
   coinductive
   field
-    out : ⟦ F ⟧ (ν F)
+    out : I⟦ F ⟧ (ν F)
 open ν
 -- an anamorphism
-【_】 : {X : Set} → (X → ⟦ F ⟧ X) → X → ν F
-out (【 c 】 x) = (λ (op , ar) -> op , 【 c 】 ∘ ar) (c x)
---fmap : {X Y : Set} → (Y → X) → ⟦ F ⟧ Y → ⟦ F ⟧ X
+⟦_⟧ : {X : Set} → (X → I⟦ F ⟧ X) → X → ν F
+out (⟦ c ⟧ x) = (λ (op , ar) -> op , ⟦ c ⟧ ∘ ar) (c x)
+--fmap : {X Y : Set} → (Y → X) → I⟦ F ⟧ Y → I⟦ F ⟧ X
 --fmap ca (op , ar) = op , ca ∘ ar
 
-universal-propₗ : {C : Set}(c : C → ⟦ F ⟧ C)(h : C → ν F) →
-                 h ≡ 【 c 】 → out ∘ h ≡ fmap h ∘ c
+universal-propₗ : {C : Set}(c : C → I⟦ F ⟧ C)(h : C → ν F) →
+                 h ≡ ⟦ c ⟧ → out ∘ h ≡ fmap h ∘ c
 universal-propₗ c h eq = begin
     out ∘ h
   ≡⟨ cong (_∘_ out) eq ⟩
-    out ∘ 【 c 】
+    out ∘ ⟦ c ⟧
   ≡⟨⟩
-    fmap 【 c 】 ∘ c
+    fmap ⟦ c ⟧ ∘ c
   ≡⟨ cong (_∘ c) (cong fmap (sym eq)) ⟩
     fmap h ∘ c
   ∎
@@ -37,7 +37,7 @@ universal-propₗ c h eq = begin
 --                            out ∘ h ≡ fmap h ∘ c → h ≡ 【 c 】
 --universal-propᵣ c h eq = {!!}
 
-comp-law : {C : Set}(c : C → ⟦ F ⟧ C) → out ∘ 【 c 】 ≡ fmap 【 c 】 ∘ c
+comp-law : {C : Set}(c : C → I⟦ F ⟧ C) → out ∘ ⟦ c ⟧ ≡ fmap ⟦ c ⟧ ∘ c
 comp-law c = refl
 
 --{-# ETA ν #-} -- Seems to cause a hang (or major slowdown) in compilation
@@ -47,12 +47,12 @@ postulate νExt : {x y : ν F} → (out x ≡ out y) → x ≡ y
 --νExt refl = refl
 
 {-# NON_TERMINATING #-}
-reflection : (x : ν F) → 【 out 】 x ≡ x
+reflection : (x : ν F) → ⟦ out ⟧ x ≡ x
 reflection x = νExt (begin
-    out (【 out 】 x)
+    out (⟦ out ⟧ x)
   ≡⟨ cong-app (comp-law out) x ⟩
-    fmap 【 out 】 (out x) -- (λ (op , ar) -> op , 【 out 】 ∘ ar) (out x)
-  ≡⟨ cong (flip fmap (out x)) $ funext reflection ⟩
+    fmap ⟦ out ⟧ (out x) -- (λ (op , ar) -> op , 【 out 】 ∘ ar) (out x)
+  ≡⟨ cong (flip fmap (out x)) (funext reflection) ⟩
     -- cong (λ f -> f (out x)) $ funext (λ (op , ar) → cong (λ x -> op , x) (funext (reflection ∘ ar)))
     fmap id (out x)
   ≡⟨ cong-app  fmap-id (out x) ⟩
@@ -60,5 +60,5 @@ reflection x = νExt (begin
   ∎)
 
 
-postulate fusion : {C D : Set}(h : C → D)(c : C → ⟦ F ⟧ C)(d : D → ⟦ F ⟧ D) →
-                   (fmap h ∘ c ≡ d ∘ h) → 【 c 】 ≡ 【 d 】 ∘ h
+postulate fusion : {C D : Set}(h : C → D)(c : C → I⟦ F ⟧ C)(d : D → I⟦ F ⟧ D) →
+                   (fmap h ∘ c ≡ d ∘ h) → ⟦ c ⟧ ≡ ⟦ d ⟧ ∘ h
