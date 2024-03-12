@@ -5,6 +5,7 @@ open import Categories.Category
 
 open import funct.container
 open import funct.flaws
+open import funct.endo
 open import funct.funext
 open import funct.initial
 open import funct.terminal
