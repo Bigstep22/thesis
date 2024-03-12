@@ -1,7 +1,7 @@
 {-# OPTIONS --guardedness #-}
 module core where
 
-open import cat.cat
+open import Categories.Category
 
 open import funct.container
 open import funct.flaws
