@@ -6,21 +6,12 @@ open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
 open import funct.flaws
 open import funct.funext
+open import funct.termcoalg {F}
+open ν
 open import Function
 open import Data.Product
 
 
--- An initial algebra
-record ν (F : Container) : Set where
-  coinductive
-  field
-    out : I⟦ F ⟧ (ν F)
-open ν
--- an anamorphism
-⟦_⟧ : {X : Set} → (X → I⟦ F ⟧ X) → X → ν F
-out (⟦ c ⟧ x) = (λ (op , ar) -> op , ⟦ c ⟧ ∘ ar) (c x)
---fmap : {X Y : Set} → (Y → X) → I⟦ F ⟧ Y → I⟦ F ⟧ X
---fmap ca (op , ar) = op , ca ∘ ar
 
 universal-propₗ : {C : Set}(c : C → I⟦ F ⟧ C)(h : C → ν F) →
                  h ≡ ⟦ c ⟧ → out ∘ h ≡ fmap h ∘ c
@@ -40,11 +31,6 @@ universal-propₗ c h eq = begin
 comp-law : {C : Set}(c : C → I⟦ F ⟧ C) → out ∘ ⟦ c ⟧ ≡ fmap ⟦ c ⟧ ∘ c
 comp-law c = refl
 
---{-# ETA ν #-} -- Seems to cause a hang (or major slowdown) in compilation
-              -- in combination with reflection,
-              -- have a chat with Casper
-postulate νExt : {x y : ν F} → (out x ≡ out y) → x ≡ y
---νExt refl = refl
 
 {-# NON_TERMINATING #-}
 reflection : (x : ν F) → ⟦ out ⟧ x ≡ x
@@ -60,5 +46,3 @@ reflection x = νExt (begin
   ∎)
 
 
-postulate fusion : {C D : Set}(h : C → D)(c : C → I⟦ F ⟧ C)(d : D → I⟦ F ⟧ D) →
-                   (fmap h ∘ c ≡ d ∘ h) → ⟦ c ⟧ ≡ ⟦ d ⟧ ∘ h

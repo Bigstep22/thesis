@@ -4,11 +4,16 @@ module core where
 open import Categories.Category
 
 open import funct.container
+open import funct.funext
 open import funct.flaws
 open import funct.endo
+
 open import funct.initalg
-open import funct.funext
+open import funct.fusion
 open import funct.initial
+
+open import funct.termcoalg
+open import funct.cofusion
 open import funct.terminal
 open import funct.free
 

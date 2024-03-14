@@ -1,7 +1,7 @@
 {-# OPTIONS --guardedness #-}
 open import funct.container
 module cochurch.defs {F : Container} where
-open import funct.terminal
+open import funct.termcoalg
 open ν
 open import Data.Product
 

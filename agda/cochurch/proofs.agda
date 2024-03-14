@@ -5,8 +5,10 @@ open import Function.Base using (id; _∘_; flip; _$_)
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
 open import Data.Product
-open import funct.terminal
+open import funct.termcoalg
 open ν
+open import funct.terminal
+open import funct.cofusion
 open import funct.free
 open import funct.flaws
 open import funct.funext
@@ -99,6 +101,6 @@ trans-pred h f x = begin
     fromCoCh (CoCh (f ∘ h) x)
   ≡⟨⟩ -- Definition of fromCh
     ⟦ f ∘ h ⟧ x
-  ≡⟨ flip cong-app x $ fusion ⟦ h ⟧ (f ∘ h) (f ∘ out) (valid-hom h f) ⟩
+  ≡⟨ flip cong-app x $ fusion ⟦ h ⟧ (sym (valid-hom h f)) ⟩
     (⟦ f ∘ out ⟧ ∘ ⟦ h ⟧) x
   ∎

@@ -41,5 +41,3 @@ reflection-law : ⦅ in' ⦆ ≡ id
 reflection-law = funext reflection
 
 
-postulate fusion : {A B : Set}(h : A → B)(a : I⟦ F ⟧ A → A)(b : I⟦ F ⟧ B → B) →
-                   (h ∘ a ≡ b ∘ fmap h) →  h ∘ ⦅ a ⦆ ≡ ⦅ b ⦆
