@@ -3,6 +3,7 @@ module church.proofs {F : Container} where
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
 open import Function.Base using (id; _∘_)
+open import funct.initalg
 open import funct.initial
 open import funct.free
 open import funct.flaws

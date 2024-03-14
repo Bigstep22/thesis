@@ -7,14 +7,7 @@ open import funct.flaws
 open import funct.funext
 open import Data.Product
 open import Function.Base
-
--- An initial algebra
-data μ (F : Container) : Set where
-  in' : I⟦ F ⟧ (μ F) → μ F
--- Formerly cata - a catamorhpism
-⦅_⦆ : {X : Set} → (I⟦ F ⟧ X → X) → μ F → X
-⦅ a ⦆ (in' (op , ar)) = a (op , ⦅ a ⦆ ∘ ar)
--- Look! The reflection law: https://wiki.haskell.org/Catamorphisms
+open import funct.initalg
 
 universal-propₗ : {X : Set}(a : I⟦ F ⟧ X → X)(h : μ F → X) →
                   h ≡ ⦅ a ⦆ → h ∘ in' ≡ a ∘ fmap h

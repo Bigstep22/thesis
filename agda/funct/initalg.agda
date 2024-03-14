@@ -1,23 +1,19 @@
 open import funct.container
 open import Data.Product
 open import Level
-module funct.initalg (F : Container {0ℓ}) where
-open import Categories.Category hiding (_[_,_]) renaming (Category to Cat)
+module funct.initalg {F : Container {0ℓ}} where
+open import Categories.Category renaming (Category to Cat)
 open import Categories.Category.Instance.Sets
 open import Categories.Functor
 open import Categories.Functor.Algebra
-open import Relation.Binary.PropositionalEquality as Eq
+open import Relation.Binary.PropositionalEquality as Eq hiding ([_])
 open ≡-Reasoning
 open import funct.flaws
 open import funct.funext
 open import Function
-open import Categories.Category.Construction.F-Algebras
-open import funct.endo F
+open import funct.endo
+open import Categories.Object.Initial C⟦ F ⟧
 
-
---falg : Cat (suc 0ℓ) 0ℓ 0ℓ
---falg = F-Algebras contEndo
-open import Categories.Object.Initial (F-Algebras contEndo)
 
 
 data μ (F : Container) : Set where
@@ -25,38 +21,36 @@ data μ (F : Container) : Set where
 ⦅_⦆ : {X : Set} → (I⟦ F ⟧ X → X) → μ F → X
 ⦅ a ⦆ (in' (op , ar)) = a (op , ⦅ a ⦆ ∘ ar)
 
-valid-falghom : {X : Cat.Obj (Sets 0ℓ)} → (a : I⟦ F ⟧ X → X) →
-                F-Algebra-Morphism {_}{_}{_}{_}{contEndo} (to-Algebra in') (to-Algebra a)
-valid-falghom {X} a = record
-         { f = ⦅ a ⦆
-         ; commutes = refl
-         }
+_Alg⟦_,_⟧ : {X Y : Set}(F : Container)(x : I⟦ F ⟧ X → X)(Y : I⟦ F ⟧ Y → Y) → Set
+F Alg⟦ x , y ⟧ = C⟦ F ⟧ [ to-Algebra x , to-Algebra y ]
 
 
-isequiv : (A : F-Algebra contEndo) → (f : F-Algebra-Morphism (to-Algebra in') A) (x : μ F) →
-          ⦅ F-Algebra.α A ⦆ x ≡ F-Algebra-Morphism.f f x
-isequiv A f (in' (op , ar)) = begin
-                   ⦅ F-Algebra.α A ⦆ (in' (op , ar))
-                     ≡⟨ refl ⟩ -- Dfn of ⦅_⦆
-                   F-Algebra.α A (op , ⦅ F-Algebra.α A ⦆ ∘ ar)
-                     ≡⟨ cong (λ h → F-Algebra.α A (op , h)) (funext (λ x → isequiv A f (ar x))) ⟩
-                   F-Algebra.α A (op , (F-Algebra-Morphism.f f) ∘ ar)
+valid-falghom : {X : Set}(a : I⟦ F ⟧ X → X) → F Alg⟦ in' , a ⟧
+valid-falghom {X} a = record { f = ⦅ a ⦆ ; commutes = refl }
+
+
+isunique : {X : Set}{a : I⟦ F ⟧ X → X}(fhom : F Alg⟦ in' , a ⟧){x : μ F} →
+           ⦅ a ⦆ x ≡ F-Algebra-Morphism.f fhom x
+isunique {X}{a} fhom {(in' (op , ar))} = begin
+                   ⦅ a ⦆ (in' (op , ar))
+                     ≡⟨⟩ -- Dfn of ⦅_⦆
+                   a (op , ⦅ a ⦆ ∘ ar)
+                     ≡⟨ cong (λ h → a (op , h)) (funext (λ x → isunique fhom {(ar x)})) ⟩ -- induction
+                   a (op , f ∘ ar)
                      ≡⟨⟩ -- Dfn of composition
-                   (F-Algebra.α A ∘ fmap (F-Algebra-Morphism.f f)) (op , ar)
-                     ≡⟨ flip cong-app (op , ar) (sym (funext (λ x → F-Algebra-Morphism.commutes f {x}))) ⟩
-                   ((F-Algebra-Morphism.f f) ∘ in') (op , ar)
+                   (a ∘ fmap f) (op , ar)
+                     ≡⟨ flip cong-app (op , ar) (sym (funext commutes)) ⟩
+                   (f ∘ in') (op , ar)
                  ∎
+                 where f = F-Algebra-Morphism.f fhom
+                       commutes = λ x → F-Algebra-Morphism.commutes fhom {x}
 
 initial-in : IsInitial (to-Algebra in')
 initial-in = record
-             { ! = λ {A} → record
-                 { f = ⦅ F-Algebra.α A ⦆
-                 ; commutes = refl
-                 }
-             ; !-unique = λ {A} f {x} → isequiv A f x
+             { ! = λ {A} → valid-falghom (F-Algebra.α A)
+             ; !-unique = isunique
              }
 
--- IsInitial.! (Initial.⊥-is-initial r) {X} (Initial.⊥ r)
 
 
 
