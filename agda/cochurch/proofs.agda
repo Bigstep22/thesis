@@ -5,10 +5,10 @@ open import Function.Base using (id; _∘_; flip; _$_)
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
 open import Data.Product
-open import funct.termcoalg
+open import term.termcoalg
 open ν
-open import funct.terminal
-open import funct.cofusion
+open import term.terminal
+open import term.cofusion
 open import funct.free
 open import funct.flaws
 open import funct.funext

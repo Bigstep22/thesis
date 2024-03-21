@@ -1,5 +1,5 @@
 open import funct.container
-module funct.initalg {F : Container} where
+module init.initalg {F : Container} where
 open import Data.Product
 open import Level
 open import Categories.Category renaming (Category to Cat)
@@ -17,8 +17,8 @@ C[ F ]Alg = F-Algebras F[ F ]
 
 open import Categories.Object.Initial C[ F ]Alg
 
-_Alg[_,_] : {X Y : Set}(F : Container)(x : I⟦ F ⟧ X → X)(Y : I⟦ F ⟧ Y → Y) → Set
-F Alg[ x , y ] = C[ F ]Alg [ to-Algebra x , to-Algebra y ]
+_Alghom[_,_] : {X Y : Set}(F : Container)(x : I⟦ F ⟧ X → X)(Y : I⟦ F ⟧ Y → Y) → Set
+F Alghom[ x , y ] = C[ F ]Alg [ to-Algebra x , to-Algebra y ]
 
 data μ (F : Container) : Set where
   in' : I⟦ F ⟧ (μ F) → μ F
@@ -30,11 +30,11 @@ open F-Algebra-Morphism
 open F-Algebra
 
 
-valid-falghom : {X : Set}(a : I⟦ F ⟧ X → X) → F Alg[ in' , a ]
+valid-falghom : {X : Set}(a : I⟦ F ⟧ X → X) → F Alghom[ in' , a ]
 valid-falghom {X} a = record { f = ⦅ a ⦆ ; commutes = refl }
 
 
-isunique : {X : Set}{a : I⟦ F ⟧ X → X}(fhom : F Alg[ in' , a ])(x : μ F) →
+isunique : {X : Set}{a : I⟦ F ⟧ X → X}(fhom : F Alghom[ in' , a ])(x : μ F) →
            ⦅ a ⦆ x ≡ fhom .f x
 isunique {_}{a} fhom (in' (op , ar)) = begin
                    ⦅ a ⦆ (in' (op , ar))

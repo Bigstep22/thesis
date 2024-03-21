@@ -1,11 +1,8 @@
 open import Data.Product
-open import Level renaming (suc to lsuc; zero to lzero)
-open import Agda.Builtin.Equality
-
+open import Level
 module funct.container where
 
-
-record Container {ℓ : Level} : Set (lsuc ℓ) where
+record Container {ℓ : Level} : Set (suc ℓ) where
   constructor _▹_
   field
     Op : Set ℓ

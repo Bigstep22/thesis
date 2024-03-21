@@ -1,5 +1,5 @@
 open import funct.container
-module funct.initial {F : Container}  where
+module init.initial {F : Container}  where
 open import Function.Base using (id; _∘_)
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
@@ -7,7 +7,7 @@ open import funct.flaws
 open import funct.funext
 open import Data.Product
 open import Function.Base
-open import funct.initalg
+open import init.initalg
 
 universal-propₗ : {X : Set}(a : I⟦ F ⟧ X → X)(h : μ F → X) →
                   h ≡ ⦅ a ⦆ → h ∘ in' ≡ a ∘ fmap h

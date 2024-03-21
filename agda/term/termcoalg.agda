@@ -1,6 +1,6 @@
 {-# OPTIONS --guardedness #-}
 open import funct.container
-module funct.termcoalg {F : Container} where
+module term.termcoalg {F : Container} where
 open import Data.Product
 open import Level
 open import Categories.Category renaming (Category to Cat)
@@ -18,8 +18,8 @@ C[ F ]CoAlg = F-Coalgebras F[ F ]
 
 open import Categories.Object.Terminal C[ F ]CoAlg
 
-_CoAlg[_,_] : {X Y : Set}(F : Container)(x : X → I⟦ F ⟧ X)(Y : Y → I⟦ F ⟧ Y) → Set
-F CoAlg[ x , y ] = C[ F ]CoAlg [ to-Coalgebra x , to-Coalgebra y ]
+_CoAlghom[_,_] : {X Y : Set}(F : Container)(x : X → I⟦ F ⟧ X)(Y : Y → I⟦ F ⟧ Y) → Set
+F CoAlghom[ x , y ] = C[ F ]CoAlg [ to-Coalgebra x , to-Coalgebra y ]
 
 
 record ν (F : Container) : Set where
@@ -40,25 +40,31 @@ open F-Coalgebra-Morphism
 open F-Coalgebra
 
 
-valid-fcoalghom : {X : Set}(a : X → I⟦ F ⟧ X) → F CoAlg[ a , out ]
-valid-fcoalghom {X} a = record { f = ⟦ a ⟧ ; commutes = refl }
+valid-fcoalghom : {X : Set}(a : X → I⟦ F ⟧ X) → F CoAlghom[ a , out ]
+valid-fcoalghom {X} a .f = ⟦ a ⟧
+valid-fcoalghom {X} a .commutes = refl
 
 {-# NON_TERMINATING #-}
-isunique : {X : Set}{c : X → I⟦ F ⟧ X}(fhom : F CoAlg[ c , out ])(x : X) →
+isunique : {X : Set}{c : X → I⟦ F ⟧ X}(fhom : F CoAlghom[ c , out ])(x : X) →
            ⟦ c ⟧ x ≡ fhom .f x
 isunique {_}{c} fhom x = νExt (begin
                          (out ∘ ⟦ c ⟧) x
                        ≡⟨⟩ -- Definition of ⟦_⟧
                          fmap ⟦ c ⟧ (c x)
-                       -- This doesn't terminate becaues I'm doing cong on (flip fmap (c x)), so I'm not recursing on my input....
+                       ≡⟨⟩
+                         (λ(op , ar) → (op , ⟦ c ⟧ ∘ ar)) (c x)
                        -- Same issue as with the proof of reflection it seems...
-                       ≡⟨ cong (flip fmap (c x)) (funext (λ y → isunique fhom y)) ⟩
+                       ≡⟨ cong (λ f → op , f) (funext $ isunique fhom ∘ ar) ⟩ -- induction
+                         (op , fhom .f ∘ ar)
+                       ≡⟨⟩
                          fmap (fhom .f) (c x)
                        ≡⟨⟩ -- Definition of composition
                          (fmap (fhom .f) ∘ c) x
                        ≡⟨ cong-app (sym $ funext (λ x → fhom .commutes {x}))  x ⟩
                          (out ∘ fhom .f) x
                        ∎)
+                       where op = Σ.proj₁ (c x)
+                             ar = Σ.proj₂ (c x)
 
 
 terminal-out : IsTerminal (to-Coalgebra out)

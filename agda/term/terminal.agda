@@ -1,12 +1,12 @@
 {-# OPTIONS --guardedness #-}
 open import funct.container
-module funct.terminal {F : Container } where
+module term.terminal {F : Container } where
 open import Function.Base using (id; _∘_)
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
 open import funct.flaws
 open import funct.funext
-open import funct.termcoalg {F}
+open import term.termcoalg {F}
 open ν
 open import Function
 open import Data.Product
@@ -36,13 +36,17 @@ comp-law c = refl
 reflection : (x : ν F) → ⟦ out ⟧ x ≡ x
 reflection x = νExt (begin
     out (⟦ out ⟧ x)
-  ≡⟨ cong-app (comp-law out) x ⟩
+  ≡⟨⟩
     fmap ⟦ out ⟧ (out x) -- (λ (op , ar) -> op , 【 out 】 ∘ ar) (out x)
-  ≡⟨ cong (flip fmap (out x)) (funext reflection) ⟩
+  ≡⟨⟩
+    op , ⟦ out ⟧ ∘ ar
+  ≡⟨ cong (λ f → op , f) (funext $ reflection ∘ ar) ⟩
     -- cong (λ f -> f (out x)) $ funext (λ (op , ar) → cong (λ x -> op , x) (funext (reflection ∘ ar)))
+    op , id ∘ ar
+  ≡⟨⟩
     fmap id (out x)
   ≡⟨ cong-app  fmap-id (out x) ⟩
     out x
   ∎)
-
-
+  where op = Σ.proj₁ (out x)
+        ar = Σ.proj₂ (out x)

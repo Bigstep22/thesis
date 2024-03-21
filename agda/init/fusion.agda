@@ -1,10 +1,10 @@
 open import funct.container
-module funct.fusion {F : Container} where
+module init.fusion {F : Container} where
 open import Function.Base
 open import Relation.Binary.PropositionalEquality as Eq hiding ([_])
 open import funct.flaws
 open import funct.funext
-open import funct.initalg {F}
+open import init.initalg {F}
 open import funct.endo
 open import Categories.Functor.Algebra
 open import Categories.Category renaming (Category to Cat)
@@ -12,7 +12,7 @@ open import Categories.Object.Initial
 open IsInitial
 
 fusionprop : {A B μ : Set}{ϕ : I⟦ F ⟧ A → A}{ψ : I⟦ F ⟧ B → B}{init : I⟦ F ⟧ μ → μ}
-             (i : IsInitial C[ F ]Alg (to-Algebra init))(f : F Alg[ ϕ , ψ ]) →
+             (i : IsInitial C[ F ]Alg (to-Algebra init))(f : F Alghom[ ϕ , ψ ]) →
              C[ F ]Alg [ i .! ≈ C[ F ]Alg [ f ∘ i .! ] ]
 fusionprop i f = i .!-unique (C[ F ]Alg [ f ∘ i .! ])
 

@@ -1,11 +1,11 @@
 {-# OPTIONS --guardedness #-}
 open import funct.container
-module funct.cofusion {F : Container} where
+module term.cofusion {F : Container} where
 open import Function.Base
 open import Relation.Binary.PropositionalEquality as Eq hiding ([_])
 open import funct.flaws
 open import funct.funext
-open import funct.termcoalg {F}
+open import term.termcoalg {F}
 open import funct.endo
 open import Categories.Functor.Coalgebra
 open import Categories.Category renaming (Category to Cat)
@@ -13,7 +13,7 @@ open import Categories.Object.Terminal
 open IsTerminal
 
 fusionprop : {C D ν : Set}{ϕ : C → I⟦ F ⟧ C}{ψ : D → I⟦ F ⟧ D}{term : ν → I⟦ F ⟧ ν}
-             (i : IsTerminal C[ F ]CoAlg (to-Coalgebra term))(f : F CoAlg[ ψ , ϕ ]) →
+             (i : IsTerminal C[ F ]CoAlg (to-Coalgebra term))(f : F CoAlghom[ ψ , ϕ ]) →
              C[ F ]CoAlg [ i .! ≈ C[ F ]CoAlg [ i .! ∘ f ] ]
 fusionprop i f = i .!-unique (C[ F ]CoAlg [ i .! ∘ f ])
 

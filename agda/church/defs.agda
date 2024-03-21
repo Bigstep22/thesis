@@ -1,6 +1,6 @@
 open import funct.container
 module church.defs {F : Container} where
-open import funct.initalg
+open import init.initalg
 
 data Church (F : Container) : Set₁ where
   Ch : ({X : Set} → (I⟦ F ⟧ X → X) → X) → Church F
