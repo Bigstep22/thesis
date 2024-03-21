@@ -5,7 +5,6 @@ open ≡-Reasoning
 open import Function.Base using (id; _∘_)
 open import init.initalg
 open import init.initial
-open import funct.free
 open import funct.flaws
 open import funct.funext
 open import church.defs
@@ -25,6 +24,9 @@ from-to-id = funext (λ (x : μ F) → begin
   ∎)
 
 -- PAGE 51 - Proof 2
+postulate freetheorem-initial  : {B C : Set}{b : I⟦ F ⟧ B → B}{c : I⟦ F ⟧ C → C}(h : B → C)
+                                 (g : {X : Set} → (I⟦ F ⟧ X → X) → X) →
+                                 (h ∘ b ≡ (c ∘ (fmap h))) → h (g b) ≡ g c
 fold-invariance : {Y : Set}(g : {X : Set} → (I⟦ F ⟧ X → X) → X)(a : I⟦ F ⟧ Y → Y) →
                   ⦅ a ⦆ (g in') ≡ g a
 fold-invariance g a = freetheorem-initial ⦅ a ⦆ g refl

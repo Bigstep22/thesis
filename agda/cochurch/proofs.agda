@@ -1,4 +1,5 @@
 {-# OPTIONS --guardedness #-}
+open import Level
 open import funct.container
 module cochurch.proofs {F : Container} where
 open import Function.Base using (id; _∘_; flip; _$_)
@@ -9,7 +10,6 @@ open import term.termcoalg
 open ν
 open import term.terminal
 open import term.cofusion
-open import funct.free
 open import funct.flaws
 open import funct.funext
 open import cochurch.defs
@@ -29,6 +29,11 @@ from-to-id = funext (λ (x : ν F) → begin
   ∎)
 
 -- PAGE 52 - Proof 2
+postulate freetheorem-terminal : {ℓ : Level}
+                                 {C D : Set}{Y : Set ℓ}{c : C → I⟦ F ⟧ C}{d : D → I⟦ F ⟧ D}(h : C → D)
+                                 (f : {X : Set} → (X → I⟦ F ⟧ X) → X → Y) →
+                                 ((fmap h ∘ c) ≡ d ∘ h) → f c ≡ f d ∘ h
+                                 -- TODO: Do D and Y need to be the same thing? This may be a cop-out...
 to-from-id : {X : Set}(c : X → I⟦ F ⟧ X)(x : X) →
              toCoCh (fromCoCh (CoCh c x)) ≡ CoCh c x
 to-from-id c x = begin

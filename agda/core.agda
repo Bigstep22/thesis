@@ -7,7 +7,6 @@ open import funct.container
 open import funct.funext
 open import funct.flaws
 open import funct.endo
-open import funct.free
 
 open import init.initalg
 open import init.fusion
