@@ -18,6 +18,7 @@ open import term.terminal
 
 open import church.defs
 open import church.proofs
+open import church.inst.list
 
 open import cochurch.defs
 open import cochurch.proofs
