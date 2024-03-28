@@ -1,6 +1,6 @@
 open import Level renaming (zero to lzero; suc to lsuc)
 open import funct.container
-module funct.flaws {F : Container {lzero}} where
+module funct.flaws {F : Container} where
 open import Function.Base using (id; _∘_)
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning

@@ -30,7 +30,8 @@ postulate freetheorem-initial  : {B C : Set}{b : I⟦ F ⟧ B → B}{c : I⟦ F 
 fold-invariance : {Y : Set}(g : {X : Set} → (I⟦ F ⟧ X → X) → X)(a : I⟦ F ⟧ Y → Y) →
                   ⦅ a ⦆ (g in') ≡ g a
 fold-invariance g a = freetheorem-initial ⦅ a ⦆ g refl
-to-from-id : {g : {X : Set} → (I⟦ F ⟧ X → X) → X} → toCh (fromCh (Ch g)) ≡ Ch g
+to-from-id : {g : {X : Set} → (I⟦ F ⟧ X → X) → X} →
+             toCh (fromCh (Ch g)) ≡ Ch g
 to-from-id {g} = begin
     toCh (fromCh (Ch g))
   ≡⟨⟩ -- definition of fromCh
@@ -60,7 +61,7 @@ cons-pres b x = begin
 
 -- PAGE 51 - Proof 4
 -- New function constitutes an implementation for the produces function being replaced
-prod-pres : (f : {Y : Set} → (I⟦ F ⟧ Y → Y) → μ F → Y)(s : μ {F} F) →
+prod-pres : (f : {Y : Set} → (I⟦ F ⟧ Y → Y) → μ F → Y)(s : μ F) →
             fromCh ((λ x → Ch (λ a → f a x)) s) ≡ f in' s
 prod-pres f s = begin
     fromCh ((λ (x : μ F) → Ch (λ a → f a x)) s)

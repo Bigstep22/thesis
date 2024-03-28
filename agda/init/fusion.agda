@@ -4,7 +4,7 @@ open import Function.Base
 open import Relation.Binary.PropositionalEquality as Eq hiding ([_])
 open import funct.flaws
 open import funct.funext
-open import init.initalg {F}
+open import init.initalg
 open import funct.endo
 open import Categories.Functor.Algebra
 open import Categories.Category renaming (Category to Cat)
