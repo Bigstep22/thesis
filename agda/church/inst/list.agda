@@ -65,19 +65,19 @@ l2 : μ (F ℕ)
 l2 = 3 :: 6 :: []
 proof : (map1 (_+_ 2) l2) ≡ l1
 proof = refl
-proof2 : {A B : Set} → (f : A → B) → (map1 f ≡ map2 f)
-proof2 f = funext (λ where
-                    (in' (nil , _)) → refl
-                    (in' (cons x , l)) → begin
-                           map1 f (in' (cons x , l))
-                         ≡⟨ refl ⟩
-                           (in' (cons (f x) , (map1 f) ∘ l))
-                         ≡⟨ cong (λ h → in' (cons (f x) , h ∘ l)) {!!} ⟩
-                         -- Close, but no cigar....
-                           (in' (cons (f x) , (map2 f) ∘ l))
-                         ≡⟨ refl ⟩
-                           map2 f (in' (cons x , l))
-                         ∎)
+--proof2 : {A B : Set} → (f : A → B) → (map1 f ≡ map2 f)
+--proof2 f = funext (λ where
+--                    (in' (nil , _)) → refl
+--                    (in' (cons x , l)) → begin
+--                           map1 f (in' (cons x , l))
+--                         ≡⟨ refl ⟩
+--                           (in' (cons (f x) , (map1 f) ∘ l))
+--                         ≡⟨ cong (λ h → in' (cons (f x) , h ∘ l)) {!!} ⟩
+--                         -- Close, but no cigar....
+--                           (in' (cons (f x) , (map2 f) ∘ l))
+--                         ≡⟨ refl ⟩
+--                           map2 f (in' (cons x , l))
+--                         ∎)
 
 
 
@@ -94,11 +94,6 @@ sum2 = sumCh ∘ toCh
 sumworks : sum (5 :: 6 :: 7 :: []) ≡ 18
 sumworks = refl
 
---b : (μ (F ℕ) → μ (F ℕ)) → ℕ → ℕ → μ (F ℕ)
---b a x y = if (x >> y)
---          then a []
---          else a (x :: (b a (suc x) y))
-
 
 applyUpTo : {A : Set} → (ℕ → A) → ℕ → μ (F A)
 applyUpTo f zero    = []
@@ -107,18 +102,21 @@ applyUpTo f (suc n) = f zero :: applyUpTo (f ∘ suc) n
 upTo : ℕ → μ (F ℕ)
 upTo = applyUpTo id
 
+between1 : ℕ → ℕ → List ℕ
+between1 x y = applyUpTo (_+_ x) (suc (y - x))
+b' : {B : Set} → (a : List' ℕ B → B) → ℕ → ℕ → B
+b' a x zero = a (nil , λ())
+b' a x (suc n) = a (cons x , λ tt → (b' a (suc x) n))
 
 b : {B : Set} → (a : List' ℕ B → B) → ℕ → ℕ → B
-b a x y = {!!}
+b a x y = b' a x (suc (y - x))
 betweenCh : ℕ → ℕ → Church (F ℕ)
 betweenCh x y = Ch (λ a → b a x y)
 between2 : ℕ → ℕ → List ℕ
 between2 x y = fromCh (betweenCh x y)
 
-between : ℕ → ℕ → List ℕ
-between x y = applyUpTo (_+_ x) (suc (y - x))
 
-check : 2 :: 3 :: 4 :: 5 :: 6 :: [] ≡ between 2 6
+check : 2 :: 3 :: 4 :: 5 :: 6 :: [] ≡ between1 2 6
 check = refl
 
 
