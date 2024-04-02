@@ -36,7 +36,7 @@ valid-falghom {X} a = record { f = ⦅ a ⦆ ; commutes = refl }
 
 isunique : {F : Container}{X : Set}{a : I⟦ F ⟧ X → X}(fhom : F Alghom[ in' , a ])(x : μ F) →
            ⦅ a ⦆ x ≡ fhom .f x
-isunique {F}{_}{a} fhom (in' (op , ar)) = begin
+isunique {_}{_}{a} fhom (in' (op , ar)) = begin
                    ⦅ a ⦆ (in' (op , ar))
                      ≡⟨⟩ -- Dfn of ⦅_⦆
                    a (op , ⦅ a ⦆ ∘ ar)

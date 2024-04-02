@@ -1,5 +1,5 @@
 open import funct.container
-module church.proofs {F : Container} where
+module church.proofs where
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
 open import Function.Base using (id; _∘_)
@@ -10,8 +10,8 @@ open import funct.funext
 open import church.defs
 
 -- PAGE 51 - Proof 1
-from-to-id : fromCh ∘ toCh ≡ id
-from-to-id = funext (λ (x : μ F) → begin
+from-to-id : {F : Container} → fromCh ∘ toCh ≡ id
+from-to-id {F} = funext (λ (x : μ F) → begin
     fromCh (toCh x)
   ≡⟨⟩ -- Definition of toCh
      fromCh (Ch (λ {X : Set} → λ (a : I⟦ F ⟧ X → X) → ⦅ a ⦆ x))
@@ -24,15 +24,16 @@ from-to-id = funext (λ (x : μ F) → begin
   ∎)
 
 -- PAGE 51 - Proof 2
-postulate freetheorem-initial  : {B C : Set}{b : I⟦ F ⟧ B → B}{c : I⟦ F ⟧ C → C}(h : B → C)
-                                 (g : {X : Set} → (I⟦ F ⟧ X → X) → X) →
+postulate freetheorem-initial  : {F : Container}{B C : Set}{b : I⟦ F ⟧ B → B}{c : I⟦ F ⟧ C → C}
+                                 (h : B → C) (g : {X : Set} → (I⟦ F ⟧ X → X) → X) →
                                  (h ∘ b ≡ (c ∘ (fmap h))) → h (g b) ≡ g c
-fold-invariance : {Y : Set}(g : {X : Set} → (I⟦ F ⟧ X → X) → X)(a : I⟦ F ⟧ Y → Y) →
+fold-invariance : {F : Container}{Y : Set}(g : {X : Set} →
+                  (I⟦ F ⟧ X → X) → X)(a : I⟦ F ⟧ Y → Y) →
                   ⦅ a ⦆ (g in') ≡ g a
 fold-invariance g a = freetheorem-initial ⦅ a ⦆ g refl
-to-from-id : {g : {X : Set} → (I⟦ F ⟧ X → X) → X} →
+to-from-id : {F : Container}{g : {X : Set} → (I⟦ F ⟧ X → X) → X} →
              toCh (fromCh (Ch g)) ≡ Ch g
-to-from-id {g} = begin
+to-from-id {F}{g} = begin
     toCh (fromCh (Ch g))
   ≡⟨⟩ -- definition of fromCh
     toCh (g in')
@@ -41,13 +42,15 @@ to-from-id {g} = begin
   ≡⟨ cong Ch (funexti (λ {Y : Set} → funext λ (a : I⟦ F ⟧ Y → Y) → fold-invariance g a)) ⟩
     Ch g
   ∎
+to-from-id' : {F : Container} → toCh ∘ fromCh ≡ id
+to-from-id' {F} = funext (λ where
+                        (Ch g) → to-from-id {F}{g})
 
 -- PAGE 51 - Proof 3
-unCh : {X : Set} (b : I⟦ F ⟧ X → X) (c : Church {F} F) → X
+unCh : {F : Container}{X : Set}(b : I⟦ F ⟧ X → X)(c : Church F) → X
 unCh b (Ch g) = g b
 -- New function constitutes an implementation for the consumer function being replaced
-cons-pres : {g : {X : Set} → (I⟦ F ⟧ X → X) → X}{X : Set}
-            (b : I⟦ F ⟧ X → X)(x : μ F) →
+cons-pres : {F : Container}{X : Set}(b : I⟦ F ⟧ X → X)(x : μ F) →
             (unCh b) (toCh x) ≡ ⦅ b ⦆ x
 cons-pres b x = begin
     unCh b (toCh x)
@@ -60,11 +63,11 @@ cons-pres b x = begin
   ∎
 
 -- PAGE 51 - Proof 4
--- New function constitutes an implementation for the produces function being replaced
-prod-pres : (f : {Y : Set} → (I⟦ F ⟧ Y → Y) → μ F → Y)(s : μ F) →
+-- New function constitutes an implementation for the producer function being replaced
+prod-pres : {F : Container}{X : Set}(f : {Y : Set} → (I⟦ F ⟧ Y → Y) → X → Y)(s : X) →
             fromCh ((λ x → Ch (λ a → f a x)) s) ≡ f in' s
-prod-pres f s = begin
-    fromCh ((λ (x : μ F) → Ch (λ a → f a x)) s)
+prod-pres {F}{X} f s = begin
+    fromCh ((λ (x : X) → Ch (λ a → f a x)) s)
   ≡⟨⟩ -- function application
     fromCh (Ch (λ a → f a s))
   ≡⟨⟩ -- definition of fromCh
@@ -73,11 +76,15 @@ prod-pres f s = begin
     f in' s
   ∎
 
+record nat {F G : Container}(f : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X): Set₁ where
+  field
+    coherence : {A B : Set}(h : A → B) → fmap {G} h ∘ f ≡ f ∘ fmap {F} h
+open nat ⦃ ... ⦄
 -- PAGE 51 - Proof 5
 -- New function constitutes an implementation for the transformation function being replaced
-chTrans : ∀ (f : {Y : Set} → Y → Y) → Church {F} F → Church {F} F
+chTrans : {F G : Container}(f : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X) → Church F → Church G
 chTrans f (Ch g) = Ch (λ a → g (a ∘ f))
-trans-pred : ( g : {X : Set} → (I⟦ F ⟧ X → X) → X ) → (f : {Y : Set} → Y → Y) →
+trans-pred : {F G : Container}( g : {X : Set} → (I⟦ F ⟧ X → X) → X ) → (f : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X) →
              fromCh (chTrans f (Ch g)) ≡ ⦅ in' ∘ f ⦆ (fromCh (Ch g))
 trans-pred g f = begin
     fromCh (chTrans f (Ch g))
