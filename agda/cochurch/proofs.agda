@@ -48,6 +48,9 @@ to-from-id c x = begin
     CoCh c x
   ∎
 
+to-from-id' : {F : Container 0ℓ 0ℓ} → toCoCh ∘ fromCoCh ≡ id
+to-from-id' {F} = funext (λ where (CoCh c x) → to-from-id {F} c x)
+
 -- PAGE 52 - Proof 3
 -- New function constitutes an implementation for the produces function being replaced
 prod-pres : {F : Container 0ℓ 0ℓ}{X : Set} (c : X → I⟦ F ⟧ X) (x : X) →
