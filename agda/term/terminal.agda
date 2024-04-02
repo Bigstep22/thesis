@@ -6,7 +6,7 @@ open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
 open import funct.flaws
 open import funct.funext
-open import term.termcoalg {F}
+open import term.termcoalg
 open ν
 open import Function
 open import Data.Product

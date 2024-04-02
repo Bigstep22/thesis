@@ -5,7 +5,7 @@ open import Function.Base
 open import Relation.Binary.PropositionalEquality as Eq hiding ([_])
 open import funct.flaws
 open import funct.funext
-open import term.termcoalg {F}
+open import term.termcoalg
 open import funct.endo
 open import Categories.Functor.Coalgebra
 open import Categories.Category renaming (Category to Cat)

@@ -1,6 +1,6 @@
 {-# OPTIONS --guardedness #-}
 open import funct.container
-module cochurch.defs {F : Container} where
+module cochurch.defs where
 open import term.termcoalg
 open ν
 open import Data.Product
@@ -8,9 +8,9 @@ open import Data.Product
 
 data CoChurch (F : Container) : Set₁ where
   CoCh : {X : Set} → (X → I⟦ F ⟧ X) → X → CoChurch F
-toCoCh : ν {F} F → CoChurch F
+toCoCh : {F : Container} → ν F → CoChurch F
 toCoCh x = CoCh out x
-fromCoCh : CoChurch F → ν {F} F
+fromCoCh : {F : Container} → CoChurch F → ν F
 fromCoCh (CoCh h x) = ⟦ h ⟧ x
 
 
