@@ -1,6 +1,7 @@
 {-# OPTIONS --guardedness #-}
-open import funct.container
-module term.terminal {F : Container } where
+open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym)
+open import Level
+module term.terminal {F : Container 0ℓ 0ℓ} where
 open import Function.Base using (id; _∘_)
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning

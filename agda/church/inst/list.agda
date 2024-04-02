@@ -1,5 +1,7 @@
-open import funct.container
 module church.inst.list where
+open import Data.Container renaming (refl to C-refl; sym to C-sym)
+open import Data.W renaming (sup to in')
+open import Level hiding (zero; suc)
 open import Data.Product hiding (map)
 open import Data.Nat
 open import Data.Fin hiding (_+_; _>_; _-_)
@@ -22,15 +24,16 @@ data ListOp (A : Set) : Set where
   cons : A → ListOp A
 
 --open import funct.flaws {ℕ ▹ Fin}
-F : (A : Set) → Container
-F A = ListOp A ▹ λ where
+F : (A : Set) → Container 0ℓ 0ℓ
+F A = ListOp A ▷ λ where
                  nil → ⊥
                  (cons n) → ⊤
+
 
 List : (A : Set) → Set
 List A = μ (F A)
 List' : (A B : Set) → Set
-List' A B = I⟦ F A ⟧ B
+List' A B = ⟦ F A ⟧ B
 
 [] : {A : Set} → μ (F A)
 [] = in' (nil , λ())
@@ -113,9 +116,9 @@ eq1 {xy}{f} = begin
     (sum2 ∘ map2 f) (between2 xy)
   ≡⟨⟩ -- dfn of all of the functions
     (sumCh ∘ toCh ∘ fromCh ∘ mapCh f ∘ toCh ∘ fromCh) (betweenCh xy)
-  ≡⟨ cong sumCh (cong-app to-from-id' ((mapCh f ∘ toCh ∘ fromCh) (betweenCh xy))) ⟩
+  ≡⟨ cong (λ g → ((sumCh ∘ g ∘ mapCh f ∘ toCh ∘ fromCh) (betweenCh xy))) to-from-id' ⟩
     (sumCh ∘ mapCh f ∘ toCh ∘ fromCh) (betweenCh xy)
-  ≡⟨ cong (sumCh ∘ mapCh f) (cong-app to-from-id' (betweenCh xy)) ⟩
+  ≡⟨ cong (λ g → (sumCh ∘ mapCh f ∘ g) (betweenCh xy)) to-from-id' ⟩
     (sumCh ∘ mapCh f) (betweenCh xy)
   ∎
 
@@ -150,25 +153,25 @@ eqbetween = refl
 
 
 -- Generalization of the above proofs for any container
-prodCh : {F : Container}{X : Set}(g : {Y : Set} → (I⟦ F ⟧ Y → Y) → X → Y)(x : X) → Church F
+prodCh : {F : Container 0ℓ 0ℓ}{X : Set}(g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y)(x : X) → Church F
 prodCh g x = Ch (λ a → g a x)
-eqprod : {F : Container}{X : Set}{g : {Y : Set} → (I⟦ F ⟧ Y → Y) → X → Y} →
+eqprod : {F : Container 0ℓ 0ℓ}{X : Set}{g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y} →
          fromCh ∘ prodCh g ≡ g in'
 eqprod = refl
-transCh : {F G : Container}(nat : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X) → Church F → Church G
+transCh : {F G : Container 0ℓ 0ℓ}(nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) → Church F → Church G
 transCh n (Ch g) = Ch (λ a → g (a ∘ n))
-eqtrans : {F G : Container}{nat : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X} →
+eqtrans : {F G : Container 0ℓ 0ℓ}{nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X} →
           fromCh ∘ transCh nat ∘ toCh ≡ ⦅ in' ∘ nat ⦆
 eqtrans = refl
-consCh : {F : Container}{Y : Set} → (c : (I⟦ F ⟧ Y → Y)) → Church F → Y
+consCh : {F : Container 0ℓ 0ℓ}{Y : Set} → (c : (⟦ F ⟧ Y → Y)) → Church F → Y
 consCh c (Ch g) = g c
-eqcons : {F : Container}{X : Set}{c : (I⟦ F ⟧ X → X)} →
+eqcons : {F : Container 0ℓ 0ℓ}{X : Set}{c : (⟦ F ⟧ X → X)} →
          consCh c ∘ toCh ≡ ⦅ c ⦆
 eqcons = refl
 
 
-transfuse : {F G H : Container}(nat1 : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X) →
-            (nat2 : {X : Set} → I⟦ G ⟧ X → I⟦ H ⟧ X) →
+transfuse : {F G H : Container 0ℓ 0ℓ}(nat1 : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
+            (nat2 : {X : Set} → ⟦ G ⟧ X → ⟦ H ⟧ X) →
             transCh nat2 ∘ toCh ∘ fromCh ∘ transCh nat1 ≡ transCh (nat2 ∘ nat1)
 transfuse nat1 nat2 = begin
             transCh nat2 ∘ toCh ∘ fromCh ∘ transCh nat1
@@ -177,8 +180,8 @@ transfuse nat1 nat2 = begin
           ≡⟨ funext (λ where (Ch g) → refl) ⟩
             transCh (nat2 ∘ nat1)
           ∎
-pipfuse : {F G : Container}{X : Set}{g : {Y : Set} → (I⟦ F ⟧ Y → Y) → X → Y}
-          {nat : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X}{c : (I⟦ G ⟧ X → X)} →
+pipfuse : {F G : Container 0ℓ 0ℓ}{X : Set}{g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y}
+          {nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X}{c : (⟦ G ⟧ X → X)} →
           consCh c ∘ transCh nat ∘ prodCh g ≡ g (c ∘ nat)
 pipfuse = refl
 
