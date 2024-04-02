@@ -9,6 +9,7 @@ open import Function.Base
 open import Data.Bool
 open import Agda.Builtin.Nat
 open import church.defs
+open import church.proofs
 
 open import funct.funext
 open import init.initalg
@@ -45,11 +46,11 @@ fold' {A}{X} n c = ⦅ (λ where
                         (nil , _) → n
                         (cons n , g) → c n (g tt) ) ⦆
 
-map1 : {A B : Set}(f : A → B) → List A → List B
-map1 f = fold' [] (λ x xs → (f x) :: xs)
 m : {A B C : Set}(f : A → B) → List' A C → List' B C
 m f (nil , _) = (nil , λ())
 m f (cons n , l) = (cons (f n) , l)
+map1 : {A B : Set}(f : A → B) → List A → List B
+map1 f = ⦅ in' ∘ m f ⦆ --fold' [] (λ x xs → (f x) :: xs)
 mapCh : {A B : Set}(f : A → B) → Church (F A) → Church (F B)
 mapCh f (Ch g) = Ch (λ a → g (a ∘ m f))
 map2 : {A B : Set}(f : A → B) → List A → List B
@@ -65,33 +66,19 @@ l2 : μ (F ℕ)
 l2 = 3 :: 6 :: []
 proof : (map1 (_+_ 2) l2) ≡ l1
 proof = refl
---proof2 : {A B : Set} → (f : A → B) → (map1 f ≡ map2 f)
---proof2 f = funext (λ where
---                    (in' (nil , _)) → refl
---                    (in' (cons x , l)) → begin
---                           map1 f (in' (cons x , l))
---                         ≡⟨ refl ⟩
---                           (in' (cons (f x) , (map1 f) ∘ l))
---                         ≡⟨ cong (λ h → in' (cons (f x) , h ∘ l)) {!!} ⟩
---                         -- Close, but no cigar....
---                           (in' (cons (f x) , (map2 f) ∘ l))
---                         ≡⟨ refl ⟩
---                           map2 f (in' (cons x , l))
---                         ∎)
-
 
 
 su : List' ℕ ℕ → ℕ
 su (nil , _) = 0
 su (cons n , f) = n + f tt
 
-sum : μ (F ℕ) → ℕ
-sum = ⦅ su ⦆
+sum1 : μ (F ℕ) → ℕ
+sum1 = ⦅ su ⦆
 sumCh : Church (F ℕ) → ℕ
 sumCh (Ch g) = g su
 sum2 = sumCh ∘ toCh
 
-sumworks : sum (5 :: 6 :: 7 :: []) ≡ 18
+sumworks : sum1 (5 :: 6 :: 7 :: []) ≡ 18
 sumworks = refl
 
 
@@ -102,28 +89,56 @@ applyUpTo f (suc n) = f zero :: applyUpTo (f ∘ suc) n
 upTo : ℕ → μ (F ℕ)
 upTo = applyUpTo id
 
-between1 : ℕ → ℕ → List ℕ
-between1 x y = applyUpTo (_+_ x) (suc (y - x))
 b' : {B : Set} → (a : List' ℕ B → B) → ℕ → ℕ → B
 b' a x zero = a (nil , λ())
-b' a x (suc n) = a (cons x , λ tt → (b' a (suc x) n))
+b' a x (suc n) = a (cons x , λ tt → (b' a (suc x)  n))
 
-b : {B : Set} → (a : List' ℕ B → B) → ℕ → ℕ → B
-b a x y = b' a x (suc (y - x))
-betweenCh : ℕ → ℕ → Church (F ℕ)
-betweenCh x y = Ch (λ a → b a x y)
-between2 : ℕ → ℕ → List ℕ
-between2 x y = fromCh (betweenCh x y)
+b : {B : Set} → (a : List' ℕ B → B) → ℕ × ℕ → B
+b a (x , y) = b' a x (suc (y - x))
+
+between1 : ℕ × ℕ → List ℕ
+between1 xy = b in' xy
+
+betweenCh : ℕ × ℕ → Church (F ℕ)
+betweenCh xy = Ch (λ a → b a xy)
+between2 : ℕ × ℕ → List ℕ
+between2 xy = fromCh (betweenCh xy)
 
 
-check : 2 :: 3 :: 4 :: 5 :: 6 :: [] ≡ between1 2 6
+check : 2 :: 3 :: 4 :: 5 :: 6 :: [] ≡ between1 (2 , 6)
 check = refl
 
+eq1 : {xy : ℕ × ℕ}{f : ℕ → ℕ} → (sum2 ∘ map2 f) (between2 xy) ≡ (sumCh ∘ mapCh f) (betweenCh xy)
+eq1 {xy}{f} = begin
+    (sum2 ∘ map2 f) (between2 xy)
+  ≡⟨⟩ -- dfn of all of the functions
+    (sumCh ∘ toCh ∘ fromCh ∘ mapCh f ∘ toCh ∘ fromCh) (betweenCh xy)
+  ≡⟨ cong sumCh (cong-app to-from-id' ((mapCh f ∘ toCh ∘ fromCh) (betweenCh xy))) ⟩
+    (sumCh ∘ mapCh f ∘ toCh ∘ fromCh) (betweenCh xy)
+  ≡⟨ cong (sumCh ∘ mapCh f) (cong-app to-from-id' (betweenCh xy)) ⟩
+    (sumCh ∘ mapCh f) (betweenCh xy)
+  ∎
 
-
-
-
-
+eq2 : {xy : ℕ × ℕ}{f : ℕ → ℕ} → (sumCh ∘ mapCh f) (betweenCh xy) ≡ (sum1 ∘ map1 f) (between1 xy)
+eq2 {xy}{f} = begin
+    (sumCh ∘ mapCh f) (betweenCh xy)
+  ≡⟨⟩
+    (sumCh (Ch (λ a → b (a ∘ m f) xy)))
+  ≡⟨⟩
+    b (su ∘ m f) xy
+  ≡⟨⟩
+    unCh su (Ch (λ a → b (a ∘ m f) xy))
+  ≡⟨ cong (unCh su) (sym $ cong-app to-from-id' (Ch (λ a → b (a ∘ m f) xy))) ⟩
+    unCh su (toCh (fromCh (Ch (λ a → b (a ∘ m f) xy))))
+  ≡⟨ cons-pres su (fromCh (Ch (λ a → b (a ∘ m f) xy))) ⟩
+    ⦅ su ⦆ (fromCh (Ch (λ a → b (a ∘ m f) xy)))
+  ≡⟨ cong ⦅ su ⦆ (trans-pred (flip b xy) (m f)) ⟩
+    ⦅ su ⦆ (⦅ in' ∘ m f ⦆ (fromCh (Ch (λ a → b a xy))))
+  ≡⟨ cong (⦅ su ⦆ ∘ ⦅ in' ∘ m f ⦆) (prod-pres b xy) ⟩
+    (⦅ su ⦆ ∘ ⦅ in' ∘ m f ⦆) (b in' xy)
+  ≡⟨⟩
+    (sum1 ∘ map1 f) (between1 xy)
+  ∎
 
 count : (ℕ → Bool) → μ (F ℕ) → ℕ
 count p = ⦅ (λ where
