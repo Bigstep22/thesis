@@ -86,13 +86,6 @@ sumworks : sum1 (5 :: 6 :: 7 :: []) ≡ 18
 sumworks = refl
 
 
-applyUpTo : {A : Set} → (ℕ → A) → ℕ → μ (F A)
-applyUpTo f zero    = []
-applyUpTo f (suc n) = f zero :: applyUpTo (f ∘ suc) n
-
-upTo : ℕ → μ (F ℕ)
-upTo = applyUpTo id
-
 b' : {B : Set} → (a : List' ℕ B → B) → ℕ → ℕ → B
 b' a x zero = a (nil , λ())
 b' a x (suc n) = a (cons x , λ tt → (b' a (suc x)  n))
