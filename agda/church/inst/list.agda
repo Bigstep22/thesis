@@ -72,10 +72,11 @@ su : List' ℕ ℕ → ℕ
 su (nil , _) = 0
 su (cons n , f) = n + f tt
 
-sum1 : μ (F ℕ) → ℕ
+sum1 : List ℕ → ℕ
 sum1 = ⦅ su ⦆
 sumCh : Church (F ℕ) → ℕ
 sumCh (Ch g) = g su
+sum2 : List ℕ → ℕ
 sum2 = sumCh ∘ toCh
 
 sumworks : sum1 (5 :: 6 :: 7 :: []) ≡ 18
@@ -149,16 +150,45 @@ eqbetween = refl
 
 
 -- Generalization of the above proofs for any container
+prodCh : {F : Container}{X : Set}(g : {Y : Set} → (I⟦ F ⟧ Y → Y) → X → Y)(x : X) → Church F
+prodCh g x = Ch (λ a → g a x)
+eqprod : {F : Container}{X : Set}{g : {Y : Set} → (I⟦ F ⟧ Y → Y) → X → Y} →
+         fromCh ∘ prodCh g ≡ g in'
+eqprod = refl
 transCh : {F G : Container}(nat : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X) → Church F → Church G
 transCh n (Ch g) = Ch (λ a → g (a ∘ n))
-eqtrans : {F G : Container}{nat : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X} → fromCh ∘ transCh nat ∘ toCh ≡ ⦅ in' ∘ nat ⦆
+eqtrans : {F G : Container}{nat : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X} →
+          fromCh ∘ transCh nat ∘ toCh ≡ ⦅ in' ∘ nat ⦆
 eqtrans = refl
-eqprod : {F : Container}{X : Set}{g : {Y : Set} → (I⟦ F ⟧ Y → Y) → X → Y} → fromCh ∘ (λ x → Ch (λ a → g a x)) ≡ g in'
-eqprod = refl
 consCh : {F : Container}{Y : Set} → (c : (I⟦ F ⟧ Y → Y)) → Church F → Y
 consCh c (Ch g) = g c
-eqcons : {F : Container}{X : Set}{c : (I⟦ F ⟧ X → X)} → consCh c ∘ toCh ≡ ⦅ c ⦆
+eqcons : {F : Container}{X : Set}{c : (I⟦ F ⟧ X → X)} →
+         consCh c ∘ toCh ≡ ⦅ c ⦆
 eqcons = refl
+
+
+transfuse : {F G H : Container}(nat1 : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X) →
+            (nat2 : {X : Set} → I⟦ G ⟧ X → I⟦ H ⟧ X) →
+            transCh nat2 ∘ toCh ∘ fromCh ∘ transCh nat1 ≡ transCh (nat2 ∘ nat1)
+transfuse nat1 nat2 = begin
+            transCh nat2 ∘ toCh ∘ fromCh ∘ transCh nat1
+          ≡⟨ cong (λ f → transCh nat2 ∘ f ∘ transCh nat1) to-from-id' ⟩
+            transCh nat2 ∘ transCh nat1
+          ≡⟨ funext (λ where (Ch g) → refl) ⟩
+            transCh (nat2 ∘ nat1)
+          ∎
+pipfuse : {F G : Container}{X : Set}{g : {Y : Set} → (I⟦ F ⟧ Y → Y) → X → Y}
+          {nat : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X}{c : (I⟦ G ⟧ X → X)} →
+          consCh c ∘ transCh nat ∘ prodCh g ≡ g (c ∘ nat)
+pipfuse = refl
+
+-- Using the generalizations, we now get our encoding proofs and shortcut fusion for free :)
+between3 : ℕ × ℕ → List ℕ
+between3 = fromCh ∘ prodCh b
+map3 : {A B : Set}(f : A → B) → List A → List B
+map3 f = fromCh ∘ transCh (m f) ∘ toCh
+sum3 : List ℕ → ℕ
+sum3 = consCh su ∘ toCh
 
 
 count : (ℕ → Bool) → μ (F ℕ) → ℕ
