@@ -76,10 +76,6 @@ prod-pres {F}{X} f s = begin
     f in' s
   ∎
 
-record nat {F G : Container}(f : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X): Set₁ where
-  field
-    coherence : {A B : Set}(h : A → B) → fmap {G} h ∘ f ≡ f ∘ fmap {F} h
-open nat ⦃ ... ⦄
 -- PAGE 51 - Proof 5
 -- New function constitutes an implementation for the transformation function being replaced
 chTrans : {F G : Container}(f : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X) → Church F → Church G
