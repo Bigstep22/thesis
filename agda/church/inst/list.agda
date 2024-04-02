@@ -98,7 +98,6 @@ b a (x , y) = b' a x (suc (y - x))
 
 between1 : ℕ × ℕ → List ℕ
 between1 xy = b in' xy
-
 betweenCh : ℕ × ℕ → Church (F ℕ)
 betweenCh xy = Ch (λ a → b a xy)
 between2 : ℕ × ℕ → List ℕ
@@ -139,6 +138,28 @@ eq2 {xy}{f} = begin
   ≡⟨⟩
     (sum1 ∘ map1 f) (between1 xy)
   ∎
+
+-- Proofs for each of the above functions
+eqsum : sum1 ≡ sum2
+eqsum = refl
+eqmap : {f : ℕ → ℕ} → map1 f ≡ map2 f
+eqmap = refl
+eqbetween : between1 ≡ between2
+eqbetween = refl
+
+
+-- Generalization of the above proofs for any container
+transCh : {F G : Container}(nat : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X) → Church F → Church G
+transCh n (Ch g) = Ch (λ a → g (a ∘ n))
+eqtrans : {F G : Container}{nat : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X} → fromCh ∘ transCh nat ∘ toCh ≡ ⦅ in' ∘ nat ⦆
+eqtrans = refl
+eqprod : {F : Container}{X : Set}{g : {Y : Set} → (I⟦ F ⟧ Y → Y) → X → Y} → fromCh ∘ (λ x → Ch (λ a → g a x)) ≡ g in'
+eqprod = refl
+consCh : {F : Container}{Y : Set} → (c : (I⟦ F ⟧ Y → Y)) → Church F → Y
+consCh c (Ch g) = g c
+eqcons : {F : Container}{X : Set}{c : (I⟦ F ⟧ X → X)} → consCh c ∘ toCh ≡ ⦅ c ⦆
+eqcons = refl
+
 
 count : (ℕ → Bool) → μ (F ℕ) → ℕ
 count p = ⦅ (λ where
