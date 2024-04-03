@@ -9,6 +9,7 @@ open import Data.Unit
 open import term.termcoalg
 open ν
 open import Data.Product
+open import Data.Sum
 open import Function
 open import Data.Nat
 open import Agda.Builtin.Nat
@@ -31,19 +32,21 @@ List A = ν (F A)
 List' : (A B : Set) → Set
 List' A B = I⟦ F A ⟧ B
 
---[] : {A : Set} → ν (F A)
---out ([]) = (nil , λ())
+[] : {A : Set} → List A
+out ([]) = (nil , λ())
 --
 --
---_::_ : {A : Set} → A → List A → List A
---out (x :: xs) = (cons x , λ tt → xs)
---infixr 20 _::_
+_::_ : {A : Set} → A → List A → List A
+out (x :: xs) = (cons x , λ tt → xs)
+infixr 20 _::_
 
 
---unfold' : {A X : Set}(n : X)(c : A → X → X) → List A → X
---unfold' {A}{X} n c = ⟦ (λ where
---                          (nil , _) → n
---                          (cons n , g) → c n (g tt) ) ⟧
+mapping : {A X : Set} → (f : X → ⊤ ⊎ (A × X)) → (X → List' A X)
+mapping f x with f x
+mapping f x | (inj₁ tt) = (nil , λ())
+mapping f x | (inj₂ (a , x')) = (cons a , λ tt → x')
+unfold' : {F : Container 0ℓ 0ℓ}{A X : Set}(f : X → ⊤ ⊎ (A × X)) → X → List A
+unfold' {A}{X} f = ⟦ mapping f ⟧
 
 m : {A B C : Set}(f : A → B) → List' A C → List' B C
 m f (nil , _) = (nil , λ())
@@ -55,11 +58,11 @@ mapCoCh f (CoCh h s) = CoCh (m f ∘ h) s
 map2 : {A B : Set}(f : A → B) → List A → List B
 map2 f = fromCoCh ∘ mapCoCh f ∘ toCoCh
 
-{-# NON_TERMINATING #-}
+{-# TERMINATING #-}
 su' : {S : Set} → (S → List' ℕ S) → S → ℕ
 su' h s with h s
 su' h s | (nil , f) = 0
-su' h s | (cons x , f) = x + su' h s
+su' h s | (cons x , f) = x + su' h (f tt)
 
 sum1 : List ℕ → ℕ
 sum1 = su' out
@@ -67,7 +70,8 @@ sumCh : CoChurch (F ℕ) → ℕ
 sumCh (CoCh h s) = su' h s
 sum2 : List ℕ → ℕ
 sum2 = sumCh ∘ toCoCh
-
+s2works : sum2 (1 :: 2 :: 3 :: []) ≡ 6
+s2works = refl
 
 b' : ℕ × ℕ → List' ℕ (ℕ × ℕ)
 b' (x , zero)  = (nil , λ())
@@ -98,8 +102,6 @@ prodCoCh g x = CoCh g x
 eqprod : {F : Container 0ℓ 0ℓ}{Y : Set}{g : (Y → I⟦ F ⟧ Y)} →
          fromCoCh ∘ prodCoCh g ≡ ⟦ g ⟧
 eqprod = refl
---mapCoCh : {A B : Set}(f : A → B) → CoChurch (F A) → CoChurch (F B)
---mapCoCh f (CoCh h s) = CoCh (m f ∘ h) s
 transCoCh : {F G : Container 0ℓ 0ℓ}(nat : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X) → CoChurch F → CoChurch G
 transCoCh n (CoCh h s) = CoCh (n ∘ h) s
 eqtrans : {F G : Container 0ℓ 0ℓ}{nat : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X} →
