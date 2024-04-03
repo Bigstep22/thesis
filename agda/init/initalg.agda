@@ -23,8 +23,6 @@ _Alghom[_,_] : {X Y : Set}(F : Container 0ℓ 0ℓ)(x : ⟦ F ⟧ X → X)(Y : �
 F Alghom[ x , y ] = C[ F ]Alg [ to-Algebra x , to-Algebra y ]
 
 
---data μ (F : Container) : Set where -- This F is different to
---  in' : I⟦ F ⟧ (μ F) → μ F -- This F (in μ F) ......
 ⦅_⦆ : {F : Container 0ℓ 0ℓ}{X : Set} → (⟦ F ⟧ X → X) → μ F → X
 ⦅ a ⦆ (in' (op , ar)) = a (op , ⦅ a ⦆ ∘ ar)
 
