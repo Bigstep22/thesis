@@ -4,7 +4,6 @@ module core where
 open import Categories.Category
 
 open import funct.funext
-open import funct.flaws
 open import funct.endo
 
 open import init.initalg

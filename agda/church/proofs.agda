@@ -1,5 +1,5 @@
 module church.proofs where
-open import Data.Container renaming (refl to C-refl; sym to C-sym)
+open import Data.Container renaming (refl to C-refl; sym to C-sym; map to fmap)
 open import Data.W renaming (sup to in')
 open import Level
 open import Relation.Binary.PropositionalEquality as Eq
@@ -7,7 +7,6 @@ open ≡-Reasoning
 open import Function.Base using (id; _∘_)
 open import init.initalg
 open import init.initial
-open import funct.flaws
 open import funct.funext
 open import church.defs
 

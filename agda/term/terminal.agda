@@ -1,11 +1,10 @@
 {-# OPTIONS --guardedness #-}
-open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym)
+open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym; map to fmap)
 open import Level
 module term.terminal {F : Container 0ℓ 0ℓ} where
 open import Function.Base using (id; _∘_)
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
-open import funct.flaws
 open import funct.funext
 open import term.termcoalg
 open ν
@@ -35,7 +34,7 @@ comp-law c = refl
 
 {-# NON_TERMINATING #-}
 reflection : (x : ν F) → ⟦ out ⟧ x ≡ x
-reflection x = νExt (begin
+reflection x = out-injective (begin
     out (⟦ out ⟧ x)
   ≡⟨⟩
     fmap ⟦ out ⟧ (out x) -- (λ (op , ar) -> op , 【 out 】 ∘ ar) (out x)
@@ -46,7 +45,7 @@ reflection x = νExt (begin
     op , id ∘ ar
   ≡⟨⟩
     fmap id (out x)
-  ≡⟨ cong-app  fmap-id (out x) ⟩
+  ≡⟨⟩
     out x
   ∎)
   where op = Σ.proj₁ (out x)

@@ -1,9 +1,8 @@
-open import Data.Container
+open import Data.Container renaming (map to fmap)
 open import Level
 module init.fusion {F : Container 0ℓ 0ℓ} where
 open import Function.Base
 open import Relation.Binary.PropositionalEquality as Eq hiding ([_])
-open import funct.flaws
 open import funct.funext
 open import init.initalg
 open import funct.endo

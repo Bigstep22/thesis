@@ -104,15 +104,11 @@ between2 xy = fromCh (betweenCh xy)
 check : 2 :: 3 :: 4 :: 5 :: 6 :: [] ≡ between1 (2 , 6)
 check = refl
 
-eq1 : {xy : ℕ × ℕ}{f : ℕ → ℕ} → (sum2 ∘ map2 f) (between2 xy) ≡ (sumCh ∘ mapCh f) (betweenCh xy)
+eq1 : {xy : ℕ × ℕ}{f : ℕ → ℕ} → (sum2 ∘ map2 f ∘ between2) ≡ (sumCh ∘ mapCh f ∘ betweenCh)
 eq1 {xy}{f} = begin
-    (sum2 ∘ map2 f) (between2 xy)
-  ≡⟨⟩ -- dfn of all of the functions
-    (sumCh ∘ toCh ∘ fromCh ∘ mapCh f ∘ toCh ∘ fromCh) (betweenCh xy)
-  ≡⟨ cong (λ g → ((sumCh ∘ g ∘ mapCh f ∘ toCh ∘ fromCh) (betweenCh xy))) to-from-id' ⟩
-    (sumCh ∘ mapCh f ∘ toCh ∘ fromCh) (betweenCh xy)
-  ≡⟨ cong (λ g → (sumCh ∘ mapCh f ∘ g) (betweenCh xy)) to-from-id' ⟩
-    (sumCh ∘ mapCh f) (betweenCh xy)
+    sumCh ∘ toCh ∘ fromCh ∘ mapCh f ∘ toCh ∘ fromCh ∘ betweenCh
+  ≡⟨ cong (λ g → sumCh ∘ g ∘ mapCh f ∘ g ∘ betweenCh) to-from-id' ⟩
+    sumCh ∘ mapCh f ∘ betweenCh
   ∎
 
 eq2 : {xy : ℕ × ℕ}{f : ℕ → ℕ} → (sumCh ∘ mapCh f) (betweenCh xy) ≡ (sum1 ∘ map1 f) (between1 xy)

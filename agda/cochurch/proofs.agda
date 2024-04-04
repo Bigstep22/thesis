@@ -1,5 +1,5 @@
 {-# OPTIONS --guardedness #-}
-open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym)
+open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym; map to fmap)
 open import Level
 module cochurch.proofs where
 open import Function.Base using (id; _∘_; flip; _$_)
@@ -10,7 +10,6 @@ open import term.termcoalg
 open ν
 open import term.terminal
 open import term.cofusion
-open import funct.flaws
 open import funct.funext
 open import cochurch.defs
 
@@ -29,10 +28,10 @@ from-to-id {F} = funext (λ (x : ν F) → begin
   ∎)
 
 -- PAGE 52 - Proof 2
-postulate freetheorem-terminal : {ℓ : Level}{F : Container 0ℓ 0ℓ}
-                                 {C D : Set}{Y : Set ℓ}{c : C → I⟦ F ⟧ C}{d : D → I⟦ F ⟧ D}(h : C → D)
-                                 (f : {X : Set} → (X → I⟦ F ⟧ X) → X → Y) →
-                                 ((fmap h ∘ c) ≡ d ∘ h) → f c ≡ f d ∘ h
+postulate freetheorem-terminal : {F : Container 0ℓ 0ℓ}
+                                 {C D : Set}{Y : Set₁}{c : C → I⟦ F ⟧ C}{d : D → I⟦ F ⟧ D}
+                                 (h : C → D)(f : {X : Set} → (X → I⟦ F ⟧ X) → X → Y) →
+                                 fmap h ∘ c ≡ d ∘ h → f c ≡ f d ∘ h
                                  -- TODO: Do D and Y need to be the same thing? This may be a cop-out...
 to-from-id : {F : Container 0ℓ 0ℓ}{X : Set}(c : X → I⟦ F ⟧ X)(x : X) →
              toCoCh (fromCoCh (CoCh c x)) ≡ CoCh c x
@@ -82,7 +81,7 @@ cons-pres f x = begin
 --(nat f)
 record nat {F G : Container 0ℓ 0ℓ}(f : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X): Set₁ where
   field
-    coherence : {A B : Set}(h : A → B) → fmap {G} h ∘ f ≡ f ∘ fmap {F} h
+    coherence : {A B : Set}(h : A → B) → fmap h ∘ f ≡ f ∘ fmap h
 open nat ⦃ ... ⦄
 
 

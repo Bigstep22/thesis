@@ -1,10 +1,9 @@
 {-# OPTIONS --guardedness #-}
-open import Data.Container renaming (⟦_⟧ to I⟦_⟧)
+open import Data.Container renaming (⟦_⟧ to I⟦_⟧; map to fmap)
 open import Level
 module term.cofusion {F : Container 0ℓ 0ℓ} where
 open import Function.Base
 open import Relation.Binary.PropositionalEquality as Eq hiding ([_])
-open import funct.flaws
 open import funct.funext
 open import term.termcoalg
 open import funct.endo

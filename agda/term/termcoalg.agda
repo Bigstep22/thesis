@@ -1,6 +1,6 @@
 {-# OPTIONS --guardedness #-}
 module term.termcoalg where
-open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym)
+open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym; map to fmap)
 open import Level
 open import Data.Product
 open import Level
@@ -8,7 +8,7 @@ open import Categories.Category renaming (Category to Cat)
 open import Categories.Functor.Coalgebra
 open import Relation.Binary.PropositionalEquality as Eq hiding ([_])
 open ≡-Reasoning
-open import funct.flaws
+--open import funct.flaws
 open import funct.funext
 open import Function
 open import funct.endo
@@ -30,11 +30,17 @@ record ν (F : Container 0ℓ 0ℓ) : Set where
 open ν
 ⟦_⟧ : {F : Container 0ℓ 0ℓ}{X : Set} → (X → I⟦ F ⟧ X) → X → ν F
 out (⟦ c ⟧ x) = (λ (op , ar) → op , ⟦ c ⟧ ∘ ar) (c x)
+--{-# INJECTIVE out #-}
+--{-# INJECTIVE ν #-}
 
 --{-# ETA ν #-} -- Seems to cause a hang (or major slowdown) in compilation
               -- in combination with reflection,
               -- have a chat with Casper
-postulate νExt : {F : Container 0ℓ 0ℓ}{x y : ν F} → (out x ≡ out y) → x ≡ y
+postulate out-injective : {F : Container 0ℓ 0ℓ}{x y : ν F} → out x ≡ out y → x ≡ y
+--out-injective eq = funext ?
+--out-injective {F}{x}{y} eq = refl
+--out-injective : ∀ {C : Container 0ℓ 0ℓ}{s t : Shape C} {f : Position C s → ν C} {g} →
+--                 out (s , f) ≡ out (t , g) → s ≡ t
 --νExt refl = refl
 
 open F-Coalgebra-Morphism
@@ -48,7 +54,7 @@ valid-fcoalghom {X} a .commutes = refl
 {-# NON_TERMINATING #-}
 isunique : {F : Container 0ℓ 0ℓ}{X : Set}{c : X → I⟦ F ⟧ X}(fhom : F CoAlghom[ c , out ])(x : X) →
            ⟦ c ⟧ x ≡ fhom .f x
-isunique {_}{_}{c} fhom x = νExt (begin
+isunique {_}{_}{c} fhom x = out-injective (begin
                          (out ∘ ⟦ c ⟧) x
                        ≡⟨⟩ -- Definition of ⟦_⟧
                          fmap ⟦ c ⟧ (c x)

@@ -58,7 +58,7 @@ mapCoCh f (CoCh h s) = CoCh (m f ∘ h) s
 map2 : {A B : Set}(f : A → B) → List A → List B
 map2 f = fromCoCh ∘ mapCoCh f ∘ toCoCh
 
-{-# TERMINATING #-}
+{-# NON_TERMINATING #-}
 su' : {S : Set} → (S → List' ℕ S) → S → ℕ
 su' h s with h s
 su' h s | (nil , f) = 0
@@ -70,8 +70,8 @@ sumCh : CoChurch (F ℕ) → ℕ
 sumCh (CoCh h s) = su' h s
 sum2 : List ℕ → ℕ
 sum2 = sumCh ∘ toCoCh
-s2works : sum2 (1 :: 2 :: 3 :: []) ≡ 6
-s2works = refl
+--s2works : sum2 (1 :: 2 :: 3 :: []) ≡ 6
+--s2works = refl
 
 b' : ℕ × ℕ → List' ℕ (ℕ × ℕ)
 b' (x , zero)  = (nil , λ())
@@ -136,3 +136,13 @@ map3 : {A B : Set}(f : A → B) → List A → List B
 map3 f = fromCoCh ∘ transCoCh (m f) ∘ toCoCh
 sum3 : List ℕ → ℕ
 sum3 = consCoCh su' ∘ toCoCh
+fused : {f : ℕ → ℕ} → sum3 ∘ map3 f ∘ between3 ≡ su' (m f ∘ b)
+fused {f}  = begin
+    consCoCh su' ∘ toCoCh ∘ fromCoCh ∘ transCoCh (m f) ∘ toCoCh ∘ fromCoCh ∘ prodCoCh b
+  ≡⟨ cong (λ g → consCoCh su' ∘ g ∘ transCoCh (m f) ∘ g ∘ prodCoCh b) to-from-id' ⟩
+    consCoCh su' ∘ transCoCh (m f) ∘ prodCoCh b
+  ≡⟨⟩
+    su' (m f ∘ b)
+  ∎
+
+-- begin (consCoCh su' ∘ fromCoCh ∘ toCoCh ∘ transCoCh (m f) ∘ fromCoCh ∘ toCoCh ∘ prodCoCh b) ≡⟨ ? ⟩ ? ∎

@@ -6,11 +6,10 @@ open import Categories.Category renaming (Category to Cat)
 open import Categories.Functor.Algebra
 open import Relation.Binary.PropositionalEquality as Eq hiding ([_])
 open ≡-Reasoning
-open import funct.flaws
 open import funct.funext
 open import Function
 open import funct.endo
-open import Data.Container renaming (refl to C-refl; sym to C-sym)
+open import Data.Container renaming (refl to C-refl; sym to C-sym; map to fmap)
 open import Data.W renaming (sup to in')
 
 open import Categories.Category.Construction.F-Algebras
