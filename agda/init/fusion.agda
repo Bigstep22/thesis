@@ -1,11 +1,11 @@
 open import Data.Container renaming (map to fmap)
 open import Level
-module init.fusion {F : Container 0ℓ 0ℓ} where
+module agda.init.fusion {F : Container 0ℓ 0ℓ} where
 open import Function.Base
 open import Relation.Binary.PropositionalEquality as Eq hiding ([_])
-open import funct.funext
-open import init.initalg
-open import funct.endo
+open import agda.funct.funext
+open import agda.init.initalg
+open import agda.funct.endo
 open import Categories.Functor.Algebra
 open import Categories.Category renaming (Category to Cat)
 open import Categories.Object.Initial

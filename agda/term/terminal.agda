@@ -1,12 +1,12 @@
 {-# OPTIONS --guardedness #-}
 open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym; map to fmap)
 open import Level
-module term.terminal {F : Container 0ℓ 0ℓ} where
+module agda.term.terminal {F : Container 0ℓ 0ℓ} where
 open import Function.Base using (id; _∘_)
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
-open import funct.funext
-open import term.termcoalg
+open import agda.funct.funext
+open import agda.term.termcoalg
 open ν
 open import Function
 open import Data.Product

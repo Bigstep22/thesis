@@ -1,12 +1,12 @@
 {-# OPTIONS --guardedness #-}
-module cochurch.inst.list where
-open import cochurch.defs
-open import cochurch.proofs
+module agda.cochurch.inst.list where
+open import agda.cochurch.defs
+open import agda.cochurch.proofs
 open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym)
 open import Level hiding (suc)
 open import Data.Empty
 open import Data.Unit
-open import term.termcoalg
+open import agda.term.termcoalg
 open ν
 open import Data.Product
 open import Data.Sum
@@ -15,7 +15,7 @@ open import Data.Nat
 open import Agda.Builtin.Nat
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
-open import funct.funext
+open import agda.funct.funext
 
 data ListOp (A : Set) : Set where
   nil : ListOp A
@@ -66,10 +66,10 @@ su' h s | (cons x , f) = x + su' h (f tt)
 
 sum1 : List ℕ → ℕ
 sum1 = su' out
-sumCh : CoChurch (F ℕ) → ℕ
-sumCh (CoCh h s) = su' h s
+sumCoCh : CoChurch (F ℕ) → ℕ
+sumCoCh (CoCh h s) = su' h s
 sum2 : List ℕ → ℕ
-sum2 = sumCh ∘ toCoCh
+sum2 = sumCoCh ∘ toCoCh
 --s2works : sum2 (1 :: 2 :: 3 :: []) ≡ 6
 --s2works = refl
 
@@ -144,5 +144,3 @@ fused {f}  = begin
   ≡⟨⟩
     su' (m f ∘ b)
   ∎
-
--- begin (consCoCh su' ∘ fromCoCh ∘ toCoCh ∘ transCoCh (m f) ∘ fromCoCh ∘ toCoCh ∘ prodCoCh b) ≡⟨ ? ⟩ ? ∎

@@ -1,15 +1,15 @@
 --open import funct.container
-module init.initalg where
-open import Data.Product
-open import Level
+module agda.init.initalg where
+open import Data.Product using (_,_)
+open import Level using (0ℓ; suc)
 open import Categories.Category renaming (Category to Cat)
 open import Categories.Functor.Algebra
 open import Relation.Binary.PropositionalEquality as Eq hiding ([_])
 open ≡-Reasoning
-open import funct.funext
-open import Function
-open import funct.endo
-open import Data.Container renaming (refl to C-refl; sym to C-sym; map to fmap)
+open import agda.funct.funext using (funext)
+open import Function using (_∘_; _$_)
+open import agda.funct.endo
+open import Data.Container using (Container; μ; ⟦_⟧) renaming (map to fmap)
 open import Data.W renaming (sup to in')
 
 open import Categories.Category.Construction.F-Algebras

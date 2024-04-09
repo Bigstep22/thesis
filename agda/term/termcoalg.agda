@@ -1,5 +1,5 @@
 {-# OPTIONS --guardedness #-}
-module term.termcoalg where
+module agda.term.termcoalg where
 open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym; map to fmap)
 open import Level
 open import Data.Product
@@ -9,9 +9,9 @@ open import Categories.Functor.Coalgebra
 open import Relation.Binary.PropositionalEquality as Eq hiding ([_])
 open ≡-Reasoning
 --open import funct.flaws
-open import funct.funext
+open import agda.funct.funext
 open import Function
-open import funct.endo
+open import agda.funct.endo
 
 open import Categories.Category.Construction.F-Coalgebras
 C[_]CoAlg : (F : Container 0ℓ 0ℓ) → Cat (suc 0ℓ) 0ℓ 0ℓ

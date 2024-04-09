@@ -1,14 +1,14 @@
-module church.proofs where
-open import Data.Container renaming (refl to C-refl; sym to C-sym; map to fmap)
-open import Data.W renaming (sup to in')
-open import Level
+module agda.church.proofs where
+open import Data.Container using (Container; μ; ⟦_⟧) renaming (map to fmap)
+open import Data.W using () renaming (sup to in')
+open import Level using (0ℓ)
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
 open import Function.Base using (id; _∘_)
-open import init.initalg
-open import init.initial
-open import funct.funext
-open import church.defs
+open import agda.init.initalg
+open import agda.init.initial
+open import agda.funct.funext
+open import agda.church.defs
 
 -- PAGE 51 - Proof 1
 from-to-id : {F : Container 0ℓ 0ℓ} → fromCh ∘ toCh ≡ id
@@ -46,13 +46,14 @@ to-from-id {F}{g} = begin
 to-from-id' : {F : Container 0ℓ 0ℓ} → toCh ∘ fromCh ≡ id
 to-from-id' {F} = funext (λ where (Ch g) → to-from-id {F}{g})
 
+-- These four proofs could all use a rewrite, now that I've generalized the three different types of functions...
 -- PAGE 51 - Proof 3
 unCh : {F : Container 0ℓ 0ℓ}{X : Set}(b : ⟦ F ⟧ X → X)(c : Church F) → X
 unCh b (Ch g) = g b
 -- New function constitutes an implementation for the consumer function being replaced
-cons-pres : {F : Container 0ℓ 0ℓ}{X : Set}(b : ⟦ F ⟧ X → X)(x : μ F) →
-            (unCh b) (toCh x) ≡ ⦅ b ⦆ x
-cons-pres b x = begin
+cons-pres : {F : Container 0ℓ 0ℓ}{X : Set}(b : ⟦ F ⟧ X → X) →
+            (unCh b) ∘ toCh ≡ ⦅ b ⦆
+cons-pres {F} b = funext λ (x : μ F) → begin
     unCh b (toCh x)
   ≡⟨⟩ -- definition of toCh
     unCh b (Ch (λ a → ⦅ a ⦆ x))

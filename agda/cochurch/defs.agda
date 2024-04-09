@@ -1,6 +1,6 @@
 {-# OPTIONS --guardedness #-}
-module cochurch.defs where
-open import term.termcoalg
+module agda.cochurch.defs where
+open import agda.term.termcoalg
 open ν
 open import Data.Product
 open import Data.Container renaming (⟦_⟧ to I⟦_⟧)

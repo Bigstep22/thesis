@@ -1,4 +1,4 @@
-module church.inst.list where
+module agda.church.inst.list where
 open import Data.Container renaming (refl to C-refl; sym to C-sym)
 open import Data.W renaming (sup to in')
 open import Level hiding (zero; suc)
@@ -10,11 +10,11 @@ open import Data.Unit
 open import Function.Base
 open import Data.Bool
 open import Agda.Builtin.Nat
-open import church.defs
-open import church.proofs
+open import agda.church.defs
+open import agda.church.proofs
 
-open import funct.funext
-open import init.initalg
+open import agda.funct.funext
+open import agda.init.initalg
 
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
@@ -53,7 +53,7 @@ m : {A B C : Set}(f : A → B) → List' A C → List' B C
 m f (nil , _) = (nil , λ())
 m f (cons n , l) = (cons (f n) , l)
 map1 : {A B : Set}(f : A → B) → List A → List B
-map1 f = ⦅ in' ∘ m f ⦆ --fold' [] (λ x xs → (f x) :: xs)
+map1 f = ⦅ in' ∘ m f ⦆
 mapCh : {A B : Set}(f : A → B) → Church (F A) → Church (F B)
 mapCh f (Ch g) = Ch (λ a → g (a ∘ m f))
 map2 : {A B : Set}(f : A → B) → List A → List B
@@ -98,10 +98,10 @@ between1 xy = b in' xy
 betweenCh : ℕ × ℕ → Church (F ℕ)
 betweenCh xy = Ch (λ a → b a xy)
 between2 : ℕ × ℕ → List ℕ
-between2 xy = fromCh (betweenCh xy)
+between2 = fromCh ∘ betweenCh
 
 
-check : 2 :: 3 :: 4 :: 5 :: 6 :: [] ≡ between1 (2 , 6)
+check : 2 :: 3 :: 4 :: 5 :: 6 :: [] ≡ between2 (2 , 6)
 check = refl
 
 eq1 : {xy : ℕ × ℕ}{f : ℕ → ℕ} → (sum2 ∘ map2 f ∘ between2) ≡ (sumCh ∘ mapCh f ∘ betweenCh)
@@ -122,7 +122,7 @@ eq2 {xy}{f} = begin
     unCh su (Ch (λ a → b (a ∘ m f) xy))
   ≡⟨ cong (unCh su) (sym $ cong-app to-from-id' (Ch (λ a → b (a ∘ m f) xy))) ⟩
     unCh su (toCh (fromCh (Ch (λ a → b (a ∘ m f) xy))))
-  ≡⟨ cons-pres su (fromCh (Ch (λ a → b (a ∘ m f) xy))) ⟩
+  ≡⟨ cong-app (cons-pres su) (fromCh (Ch (λ a → b (a ∘ m f) xy))) ⟩
     ⦅ su ⦆ (fromCh (Ch (λ a → b (a ∘ m f) xy)))
   ≡⟨ cong ⦅ su ⦆ (trans-pred (flip b xy) (m f)) ⟩
     ⦅ su ⦆ (⦅ in' ∘ m f ⦆ (fromCh (Ch (λ a → b a xy))))
@@ -181,6 +181,11 @@ map3 : {A B : Set}(f : A → B) → List A → List B
 map3 f = fromCh ∘ transCh (m f) ∘ toCh
 sum3 : List ℕ → ℕ
 sum3 = consCh su ∘ toCh
+
+
+
+
+
 
 
 count : (ℕ → Bool) → μ (F ℕ) → ℕ

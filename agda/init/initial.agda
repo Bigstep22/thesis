@@ -1,14 +1,14 @@
 open import Data.Container renaming (refl to C-refl; sym to C-sym; map to fmap)
 open import Data.W renaming (sup to in')
 open import Level
-module init.initial {F : Container 0ℓ 0ℓ}  where
+module agda.init.initial {F : Container 0ℓ 0ℓ}  where
 open import Function.Base using (id; _∘_)
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
-open import funct.funext
+open import agda.funct.funext
 open import Data.Product
 open import Function.Base
-open import init.initalg
+open import agda.init.initalg
 
 universal-propₗ : {X : Set}(a : ⟦ F ⟧ X → X)(h : μ F → X) →
                   h ≡ ⦅ a ⦆ → h ∘ in' ≡ a ∘ fmap h
@@ -18,7 +18,7 @@ universal-propₗ a h eq = begin
     ⦅ a ⦆ ∘ in'
   ≡⟨⟩
     a ∘ fmap ⦅ a ⦆
-  ≡⟨ cong (_∘_ a) (cong fmap (sym eq)) ⟩
+  ≡⟨ cong (λ x → a ∘ fmap x) (sym eq) ⟩
     a ∘ fmap h
   ∎
 

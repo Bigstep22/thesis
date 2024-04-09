@@ -1,17 +1,17 @@
 {-# OPTIONS --guardedness #-}
 open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym; map to fmap)
 open import Level
-module cochurch.proofs where
+module agda.cochurch.proofs where
 open import Function.Base using (id; _∘_; flip; _$_)
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
 open import Data.Product
-open import term.termcoalg
+open import agda.term.termcoalg
 open ν
-open import term.terminal
-open import term.cofusion
-open import funct.funext
-open import cochurch.defs
+open import agda.term.terminal
+open import agda.term.cofusion
+open import agda.funct.funext
+open import agda.cochurch.defs
 
 -- PAGE 52 - Proof 1
 from-to-id : {F : Container 0ℓ 0ℓ} → fromCoCh ∘ toCoCh ≡ id
@@ -84,7 +84,6 @@ record nat {F G : Container 0ℓ 0ℓ}(f : {X : Set} → I⟦ F ⟧ X → I⟦ G
     coherence : {A B : Set}(h : A → B) → fmap h ∘ f ≡ f ∘ fmap h
 open nat ⦃ ... ⦄
 
-
 valid-hom : {F G : Container 0ℓ 0ℓ}{X : Set}(h : X → I⟦ F ⟧ X)(f : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X)⦃ _ : nat f ⦄ →
             fmap ⟦ h ⟧ ∘ f ∘ h ≡ f ∘ out ∘ ⟦ h ⟧
 valid-hom h f = begin
@@ -94,9 +93,6 @@ valid-hom h f = begin
   ≡⟨⟩
     f ∘ out ∘ ⟦ h ⟧
   ∎
---【_】 : {X : Set} → (X → ⟦ F ⟧ X) → X → ν F
---out (【 c 】 x) = (λ (op , ar) -> op , 【 c 】 ∘ ar) (c x)
--- This will require some work w.r.t. natural transformations, time for some more definitions!
 
 chTrans : {F G : Container 0ℓ 0ℓ}(f : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X) → CoChurch F → CoChurch G
 chTrans f (CoCh c s) = CoCh (f ∘ c) s

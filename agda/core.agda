@@ -1,22 +1,23 @@
 {-# OPTIONS --guardedness #-}
-module core where
+module agda.core where
 
 open import Categories.Category
 
-open import funct.funext
-open import funct.endo
+open import agda.funct.funext
+open import agda.funct.endo
 
-open import init.initalg
-open import init.fusion
-open import init.initial
+open import agda.init.initalg
+open import agda.init.fusion
+open import agda.init.initial
 
-open import term.termcoalg
-open import term.cofusion
-open import term.terminal
+open import agda.term.termcoalg
+open import agda.term.cofusion
+open import agda.term.terminal
 
-open import church.defs
-open import church.proofs
-open import church.inst.list
+open import agda.church.defs
+open import agda.church.proofs
+open import agda.church.inst.list
 
-open import cochurch.defs
-open import cochurch.proofs
+open import agda.cochurch.defs
+open import agda.cochurch.proofs
+open import agda.cochurch.inst.list
