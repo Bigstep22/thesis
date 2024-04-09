@@ -7,8 +7,6 @@ Take, as an example, the following function in the programming language Haskell,
 \end{code}
 The function \tt{map p} traverses across the input list, applying the predicate \tt{p} to each element, resulting in a new list of booleans. Then, the function \tt{and} takes this resulting, intermediate, boolean list and consumes it by `anding' together all the booleans.
 
-
-
 Being able to compose functions in this fashion is part of what makes function programming so attractive, but it comes at the cost of computational overhead. We could instead rewrite all in the following fashion:
 \begin{code}
 all' p xs = h xs

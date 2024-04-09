@@ -27,9 +27,9 @@ Such that:
 \end{code}
 \cite{Gill1993} dubbed this the \tt{foldr/build} rule. For its validity \tt{g} needs to be of type:
 \begin{code}
-    g : forall beta.(A -> beta -> beta) -> beta -> beta
+    g : forall beta : (A -> beta -> beta) -> beta -> beta
 \end{code}
-Proved through the use of of g's free theorem \`a la \cite{Wadler1989}. For more information on free theorems see Section \ref{sec:free}
+Which can be proved to be true through the use of g's free theorem \`a la \cite{Wadler1989}. For more information on free theorems see Section \ref{sec:free}
 
 \subsubsection{An example}
 Take the function from, that takes two numbers and produces a list of all the numbers from the first to the second:
@@ -41,8 +41,8 @@ Take the function from, that takes two numbers and produces a list of all the nu
 To arrive at a suitable \tt{g} we must abstract over the connective datatypes:
 \begin{code}
     from' a b = \ c n  -> if a > b
-                        then n
-                        else c a (from (a + 1) b c n)
+                          then n
+                          else c a (from (a + 1) b c n)
 \end{code}
 This is obviously a different function, we now redefine \tt{from} in terms of \tt{build} \citep{Gill1993}:
 \begin{code}
