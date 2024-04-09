@@ -1,0 +1,114 @@
+%%% Use that to motivate the category theory
+\subsection{The category theory} %TODO: HOW TO CITE ALL OF THIS?
+In order to explain what an initial/terminal (co) algebra is, I'll first need to explain what a functor is and, more pressingly, what a category is. The concept of cata- and anamorphisms will follow suit. If you're familiar with category theory and these concepts, you can skip this section.
+
+%%%% Describe the category theory
+\subsubsection{A Category}
+A \textbf{category} $\mathcal{C}$ is a collection of four pieces of data satisfying three proofs:
+\newcommand{\homm}[2]{\tt{hom}_\mathcal{#1}(#2)}
+\begin{enumerate}
+    \item A collection of objects, denoted by $\mathcal{C}_0$
+    \item For any given objects $X,Y \in \mathcal{C}_0$, a collection of morphisms from $X$ to $Y$, denoted by \tt{hom}$_\mathcal{C}(X,Y)$, which is called a \textit{hom-set}.
+    \item For each object $X\in \mathcal{C}_0$, a morphism \tt{Id}$_X\in\homm{C}{X,X}$, called the \textit{identity morphism} on $X$.
+    \item A binary operation: $(\circ)_{X,Y,Z}: \homm{C}{Y,Z}\to\homm{C}{X,Y}\to\homm{C}{X,Z}$, called the \textit{composition operator}, and written infix without the indices $X,Y,Z$ as in $g \circ f$.
+\end{enumerate}
+These pieces of data should satisfy the following three properties:
+\begin{enumerate}
+    \item (\textbf{Left unit law}) For any morphism $f\in\homm{C}{X,Y}$: \begin{align*} f\circ \tt{Id}_X = f \end{align*}
+    \item (\textbf{Right unit law}) For any morphism $f\in\homm{C}{X,Y}$: \begin{align*} \tt{Id}_Y\circ f = f \end{align*}
+    \item (\textbf{Associative law}) For any morphisms $f\in\homm{C}{X,Y},g\in\homm{C}{Y,Z}$, and $h\in\homm{C}{Z,W}$: \begin{align*} h\circ(g\circ f)=(h\circ g)\circ f \end{align*}
+\end{enumerate}
+
+\subsubsection{Initial/Terminal Objects}
+Categories can contain objects that have certain (useful) properties. Two of these properties are summarized below:
+\begin{itemize}
+    \item[\textbf{initial}]  Let $\mathcal{C}$ be a category. An object $A\in\mathcal{C}_0$ is \textbf{initial} if there is exactly one morphism from $A$ to any object $B\in\mathcal{C}_0$: 
+    \begin{align*}
+        \forall A,B\in\mathcal{C}_0: \exists! \homm{C}{A,B} \Longrightarrow \textbf{initial}(A)
+    \end{align*}
+    \item[\textbf{terminal}]  Let $\mathcal{C}$ be a category. An object $A\in\mathcal{C}_0$ is \textbf{terminal} if there is exactly one morphism from any object $B\in\mathcal{C}_0$ to $A$:
+    \begin{align*}
+        \forall A,B\in\mathcal{C}_0: \exists! \homm{C}{B,A} \Longrightarrow \textbf{terminal}(A)
+    \end{align*}
+\end{itemize}
+The proofs of initality and terminality require a proof that is split into two steps: A proof of existence (The $\exists$ part of $\exists!$) and a proof of uniqueness (The $!$ part of $\exists!$). The former is usually done by construction, giving an example of a function that satisfies the property and the latter is usually done my assuming that another $\homm{C}{A,B}$ (for the initial case) exists and showing that it must be equal to the one constructed.
+
+\subsubsection{Functors}
+For a given category $\mathcal{C}, \mathcal{D}$, a \textbf{functor} from $\mathcal{C}$ to $\mathcal{D}$ consists of two pieces of data and three proofs:
+\begin{enumerate}
+    \item A function mapping objects in $\mathcal{C}$ to $\mathcal{D}$: \begin{align*} \mathcal{C}_0 \to \mathcal{D}_0 \end{align*}
+    \item For each $X,Y\in\mathcal{C}_0$, a function mapping morphisms in $\mathcal{C}$ to morphisms in $\mathcal{D}$: \begin{align*} \homm{C}{X,Y} \to \homm{D}{F(X),F(Y)} \end{align*}
+\end{enumerate}
+These pieces of data should satisfy these two properties:
+\begin{enumerate}
+    \item (\textbf{Composition law}) for any two morphisms $f\in\homm{C}{X,Y},g\in\homm{C}{Y,Z}$: \begin{align*} F(g\circ f) = F g \circ F f \end{align*}
+    \item (\textbf{Identity law}) For any $X\in\mathcal{C}_0$, we have: \begin{align*} F(\tt{Id}_X) = \tt{Id}_{F(X)} \end{align*}
+\end{enumerate}
+An \textbf{endofunctor} is a functor that maps objects back to the category itself, i.e. $F:\mathcal{C}\to\mathcal{C}$
+
+\subsubsection{(Category of) F-(Co)Algebras}
+Given an endofunctor $F:\mathcal{C}\to\mathcal{C}$:
+
+An \textbf{F-Algebra} consists of two pieces of data:
+\begin{enumerate}
+    \item An object $C\in \mathcal{C}_0$
+    \item A morphism $\phi\in\homm{C}{F(C),C}$
+\end{enumerate}
+
+An \textbf{F-Algebra Homomorphism} is, given two F-Algebras $(C,\phi),(D,\psi)$, a morphism $f\in\homm{C}{C,D}$, such that the following diagram commutes (i.e. $f\circ\phi=\psi\circ Ff$):
+\begin{figure}[H]\vspace{-1em}\hfill
+\begin{tikzcd}
+    FC \arrow[r,"\phi"] \arrow[d,"F f",swap] & C \arrow[d, "f"] \\
+    FD \arrow[r,"\psi"] & D
+\end{tikzcd}\hfill\null
+\end{figure}\vspace{-1em}
+
+\newcommand{\alg}[1]{\mathcal{A}lg(#1)}
+\newcommand{\coalg}[1]{\mathcal{C}o\mathcal{A}lg(#1)}
+
+The \textbf{category of F-Algebras} denoted by $\alg{F}$ consists of (the needed) four pieces of data:
+\begin{enumerate}
+    \item The objects are F-Algebras
+    \item The morphisms are F-Algebra homomorphisms
+    \item The identity on $(C,\phi)$ is given by the identity $\tt{Id}_C$ in $\mathcal{C}$
+    \item The composition is given by the composition of morphisms in $\mathcal{C}$
+\end{enumerate}
+These pieces of data should satisfy the usual category laws: left/right unit law and composition law.
+Note how $\alg{F}$ makes use of the underlying category $\mathcal{C}$ of the functor to define its objects. An $\alg{F}$ implicitly contains an underlying category in which its objects are embedded.
+
+An \textbf{F-Coalgebra} consists of two pieces of data:
+\begin{enumerate}
+    \item An object $C\in \mathcal{C}_0$
+    \item A morphism $\phi\in\homm{C}{C,F(C)}$
+\end{enumerate}
+F-Coalgebra homomorphisms and $\coalg{F}$ can be defined analogously as done for F-Algebras.
+
+\subsubsection{Cata- and Anamorphisms}
+Given (if it exists) an initial F-Algebra $(\mu^F,in)$ in $\alg{F}$. We can know that (by definition), that for any other F-Algebra $(C,\phi)$, there exists a \textit{unique} morphism $\catam{\phi}\in\homm{C}{\mu^F,C}$ such that the following diagram commutes:
+\begin{figure}[H]\vspace{-1em}\hfill
+\begin{tikzcd}
+    F\mu^F \arrow[r,"in"] \arrow[d,"F \catam{\phi}",swap] & \mu^F \arrow[d, "\catam{\phi}"] \\
+    FC \arrow[r,"\phi"] & C
+\end{tikzcd}\hfill\null
+\end{figure}\vspace{-1em}
+A morphism of the form $\catam{\phi}$ is called a \textbf{catamorphism}.
+
+An analagous definition of for terminal objects in $\coalg{F}$ exists, called \textbf{anamorphisms}, denoted by $\anam{\phi}$
+
+\subsubsection{Fusion property}
+Now for the definition we've been waiting for, \textbf{fusion}:
+Given an endofunctor $F:\mathcal{C}\to\mathcal{C}$ and an initial algebra $(\mu^F,in)$ in $\alg{F}$. For any two F-Algebras $(C,\phi)$ and $(D,\psi)$ and morphism $f\in\homm{C}{C,D}$ we have a \textbf{fusion property}: \begin{align*} f\circ\phi=\psi\circ F(f) \Longrightarrow f\circ\catam{\phi}=\catam{\psi} \end{align*}
+In English, if $f$ is an F-Algebra homomorphism, we can know that $f\circ\catam{\psi}=\catam{\psi}$. We can fuse two functions into one! This is summarized in the following diagram:
+\begin{figure}[H]\vspace{-1em}\hfill
+\begin{tikzcd}
+    F\mu^F \arrow[r,"in"] \arrow[d,"F \catam{\phi}",swap] \arrow[dd,"F\catam{\psi}",swap, bend right=70] & \mu^F \arrow[d, "\catam{\phi}"] \arrow[dd, "\catam{\psi}", bend left=70] \\
+    FC \arrow[r,"\phi"] \arrow[d,"F f",swap] & C \arrow[d, "f"] \\
+    FD \arrow[r,"\psi"] & D
+\end{tikzcd}\hfill\null
+\end{figure}\vspace{-1em}
+An analogous definitions of fusion can be made for terminal object in $\coalg{F}$
+
+%TODO: HOW  DOES THIS RELATE TO FOLDR/BUILD FUSION!?!?!?!?!?!?!
+
+
+

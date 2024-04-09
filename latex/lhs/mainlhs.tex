@@ -1,0 +1,58 @@
+\documentclass{article}
+\usepackage[a4paper,margin=25mm,
+ left=50mm,right=50mm
+]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{apacite}
+\usepackage{natbib}
+\usepackage{listings}
+\usepackage{tikz-cd}
+\usepackage{float}
+\usepackage{amsmath}
+%include polycode.fmt
+\renewcommand{\tt}[1]{\texttt{#1}}
+
+
+\usepackage{stmaryrd}
+\newcommand{\catam}[1]{\llparenthesis #1 \rrparenthesis}
+\newcommand{\anam}[1]{\llbracket #1 \rrbracket}
+
+
+\title{Master's Thesis}
+\author{Eben Rogers}
+
+\begin{document}
+
+\maketitle
+
+
+%include lhs/sections/10_introduction.tex
+%include lhs/sections/20_background.tex
+\input{sections/30_formalization}
+\input{sections/40_haskell_optimizations}
+\input{sections/50_conclusion}
+
+
+\bibliographystyle{apacite}
+\bibliography{references.bib}
+
+\section{Outline}
+\begin{itemize}
+    \item Introduction
+    \item Background
+    \item Formalization work and structure
+    \item Implementation of Haskell generator code?
+    \item Conclusion
+\end{itemize}
+
+\section{Project plan}
+\begin{itemize}
+    \item \cite{Harper2011}'s guide for implementing shortcut fusion through Church encodings is useful.
+    This paper aims to do the following:
+    \begin{itemize}
+        \item  Formalize the proofs present in \cite{Harper2011}'s work in Agda.
+        \item  Investigate whether it is possible to mechanically generate Church encodings of arbitrary functors (initial algebra datastructures) in Haskell.
+    \end{itemize}
+\end{itemize}
+
+\end{document}

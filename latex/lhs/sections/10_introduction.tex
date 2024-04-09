@@ -1,0 +1,43 @@
+
+\section{Introduction}
+When writing functional code, we often use functions (or other datastructures) to `glue' multiple pieces of data together.
+Take, as an example, the following function in the programming language Haskell, as introduced by \cite{Gill1993}: %TODO: Cite
+>   all :: (a -> Bool) -> [a] -> Bool
+>   all p = and . map p
+The function \tt{map p} traverses across the input list, applying the predicate \tt{p} to each element, resulting in a new list of booleans. Then, the function \tt{and} takes this resulting, intermediate, boolean list and consumes it by `anding' together all of the booleans.
+
+Being able to compose functions in this fashion is part of what makes function programming so attractive, but it comes at the cost of computational overhead. We could instead rewrite all in the following fashion:
+\begin{code}
+all' p xs = h xs
+      where h []     = True
+            h (x:xs) = p x && h xs''
+\end{code}
+This function, instead of traversing the input list, producing a new list, and then subsequently traversing that intermediate list, traverser the input list only once, immediately producing a new answer. Writing code in this fashion is far more performant, at the cost of read- and write-ability.
+Can you write a high-performance, single-traversal, version of the following function \citep{Harper2011}?
+\begin{code}
+    f :: (Int, Int) -> Int
+    f = sum . map (+1) . filter odd . between
+\end{code}
+With some (more) effort, one could arrive at the following solution:
+\begin{code}
+    f' :: (Int, Int) -> Int
+    f' (x, y) = loop x
+      where loop x | x > y     = 0
+                   | otherwise = if odd x
+                                 then (x+1) + loop (x+1)
+                                 else loop (x+1)
+\end{code}
+Doing this by hand every time, to get from the nice, elegant, compositional style of programming to the higher-performance, single-traversal style, gets old very quick. Especially if this needs to be done, by hand, \textbf{every} time you compose any two functions.
+Is there some way to automate this process?
+
+% Mention certain existing solutions, shortcut deforestation, library shortcut fusion, etc. DO RESEARCH
+
+%% Focus down on the Church encodings and that they are rather general, but seemingly not formalized.
+%%% Agda was used to formalize it, done in section X
+%%%% Haskell implementation of the work was also done, work was continued to investigate why sometimes Co(Church) encodings are faster, done in section X.
+%%%%% Mention that new discoveries were made throughout the Haskell implementation process.
+~
+
+Fusion, Category theory, Libfusion paper, church encodings, formalization of it, Haskell's suite of optimizations that enable fusion, (theorems for free?).
+
+
