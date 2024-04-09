@@ -3,7 +3,7 @@
 module agda.cochurch.inst.list where
 open import agda.cochurch.defs
 open import agda.cochurch.proofs
-open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym)
+open import Data.Container using (Container; map; _▷_) renaming (⟦_⟧ to I⟦_⟧)
 open import Level hiding (suc)
 open import Data.Empty
 open import Data.Unit

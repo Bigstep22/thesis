@@ -1,6 +1,6 @@
 \begin{code}
 module agda.church.proofs where
-open import Data.Container using (Container; μ; ⟦_⟧) renaming (map to fmap)
+open import Data.Container using (Container; μ; ⟦_⟧; map)
 open import Data.W using () renaming (sup to in')
 open import Level using (0ℓ)
 open import Relation.Binary.PropositionalEquality as Eq
@@ -28,7 +28,7 @@ from-to-id {F} = funext (λ (x : μ F) → begin
 -- PAGE 51 - Proof 2
 postulate freetheorem-initial : {F : Container 0ℓ 0ℓ}{B C : Set}{b : ⟦ F ⟧ B → B}{c : ⟦ F ⟧ C → C}
                                 (h : B → C)(g : {X : Set} → (⟦ F ⟧ X → X) → X) →
-                                h ∘ b ≡ c ∘ fmap h → h (g b) ≡ g c
+                                h ∘ b ≡ c ∘ map h → h (g b) ≡ g c
 fold-invariance : {F : Container 0ℓ 0ℓ}{Y : Set}
                   (g : {X : Set} → (⟦ F ⟧ X → X) → X)(a : ⟦ F ⟧ Y → Y) →
                   ⦅ a ⦆ (g in') ≡ g a

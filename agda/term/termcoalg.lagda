@@ -1,9 +1,9 @@
 \begin{code}
 {-# OPTIONS --guardedness #-}
 module agda.term.termcoalg where
-open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym; map to fmap)
+open import Data.Container using (Container; map) renaming (⟦_⟧ to I⟦_⟧)
 open import Level
-open import Data.Product
+open import Data.Product using (_,_; Σ)
 open import Level
 open import Categories.Category renaming (Category to Cat)
 open import Categories.Functor.Coalgebra
@@ -58,16 +58,16 @@ isunique : {F : Container 0ℓ 0ℓ}{X : Set}{c : X → I⟦ F ⟧ X}(fhom : F C
 isunique {_}{_}{c} fhom x = out-injective (begin
                          (out ∘ ⟦ c ⟧) x
                        ≡⟨⟩ -- Definition of ⟦_⟧
-                         fmap ⟦ c ⟧ (c x)
+                         map ⟦ c ⟧ (c x)
                        ≡⟨⟩
                          (λ(op , ar) → (op , ⟦ c ⟧ ∘ ar)) (c x)
                        -- Same issue as with the proof of reflection it seems...
                        ≡⟨ cong (λ f → op , f) (funext $ isunique fhom ∘ ar) ⟩ -- induction
                          (op , fhom .f ∘ ar)
                        ≡⟨⟩
-                         fmap (fhom .f) (c x)
+                         map (fhom .f) (c x)
                        ≡⟨⟩ -- Definition of composition
-                         (fmap (fhom .f) ∘ c) x
+                         (map (fhom .f) ∘ c) x
                        ≡⟨ cong-app (sym $ funext (λ x → fhom .commutes {x}))  x ⟩
                          (out ∘ fhom .f) x
                        ∎)

@@ -1,12 +1,12 @@
 \begin{code}
 {-# OPTIONS --guardedness #-}
-open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym; map to fmap)
+open import Data.Container using (Container; map) renaming (⟦_⟧ to I⟦_⟧)
 open import Level
 module agda.cochurch.proofs where
 open import Function.Base using (id; _∘_; flip; _$_)
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
-open import Data.Product
+open import Data.Product using (_,_)
 open import agda.term.termcoalg
 open ν
 open import agda.term.terminal
@@ -32,7 +32,7 @@ from-to-id {F} = funext (λ (x : ν F) → begin
 postulate freetheorem-terminal : {F : Container 0ℓ 0ℓ}
                                  {C D : Set}{Y : Set₁}{c : C → I⟦ F ⟧ C}{d : D → I⟦ F ⟧ D}
                                  (h : C → D)(f : {X : Set} → (X → I⟦ F ⟧ X) → X → Y) →
-                                 fmap h ∘ c ≡ d ∘ h → f c ≡ f d ∘ h
+                                 map h ∘ c ≡ d ∘ h → f c ≡ f d ∘ h
                                  -- TODO: Do D and Y need to be the same thing? This may be a cop-out...
 to-from-id : {F : Container 0ℓ 0ℓ}{X : Set}(c : X → I⟦ F ⟧ X)(x : X) →
              toCoCh (fromCoCh (CoCh c x)) ≡ CoCh c x
@@ -82,15 +82,15 @@ cons-pres f x = begin
 --(nat f)
 record nat {F G : Container 0ℓ 0ℓ}(f : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X): Set₁ where
   field
-    coherence : {A B : Set}(h : A → B) → fmap h ∘ f ≡ f ∘ fmap h
+    coherence : {A B : Set}(h : A → B) → map h ∘ f ≡ f ∘ map h
 open nat ⦃ ... ⦄
 
 valid-hom : {F G : Container 0ℓ 0ℓ}{X : Set}(h : X → I⟦ F ⟧ X)(f : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X)⦃ _ : nat f ⦄ →
-            fmap ⟦ h ⟧ ∘ f ∘ h ≡ f ∘ out ∘ ⟦ h ⟧
+            map ⟦ h ⟧ ∘ f ∘ h ≡ f ∘ out ∘ ⟦ h ⟧
 valid-hom h f = begin
-    (fmap ⟦ h ⟧ ∘ f) ∘ h
+    (map ⟦ h ⟧ ∘ f) ∘ h
   ≡⟨ cong (_∘ h) (coherence ⟦ h ⟧) ⟩
-    (f ∘ fmap ⟦ h ⟧) ∘ h
+    (f ∘ map ⟦ h ⟧) ∘ h
   ≡⟨⟩
     f ∘ out ∘ ⟦ h ⟧
   ∎

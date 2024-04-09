@@ -1,6 +1,6 @@
 \begin{code}
 module agda.church.inst.list where
-open import Data.Container renaming (refl to C-refl; sym to C-sym)
+open import Data.Container using (Container; ⟦_⟧; μ; map; _▷_)
 open import Data.W renaming (sup to in')
 open import Level hiding (zero; suc)
 open import Data.Product hiding (map)

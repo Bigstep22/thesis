@@ -1,6 +1,6 @@
 \begin{code}
 {-# OPTIONS --guardedness #-}
-open import Data.Container renaming (⟦_⟧ to I⟦_⟧; map to fmap)
+open import Data.Container using (Container; map) renaming (⟦_⟧ to I⟦_⟧)
 open import Level
 module agda.term.cofusion {F : Container 0ℓ 0ℓ} where
 open import Function.Base
@@ -20,6 +20,6 @@ fusionprop i f = i .!-unique (C[ F ]CoAlg [ i .! ∘ f ])
 
 
 fusion : {C D : Set}{c : C → I⟦ F ⟧ C}{d : D → I⟦ F ⟧ D}(h : C → D) →
-                   (d ∘ h ≡ fmap h ∘ c) → ⟦ c ⟧ ≡ ⟦ d ⟧ ∘ h
+                   (d ∘ h ≡ map h ∘ c) → ⟦ c ⟧ ≡ ⟦ d ⟧ ∘ h
 fusion h p = funext λ x → fusionprop terminal-out (record { f = h ; commutes = λ {y} → cong-app p y }) {x}
 \end{code}

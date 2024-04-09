@@ -1,6 +1,6 @@
 \begin{code}
 {-# OPTIONS --guardedness #-}
-open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym; map to fmap)
+open import Data.Container using (Container; map) renaming (⟦_⟧ to I⟦_⟧)
 open import Level
 module agda.term.terminal {F : Container 0ℓ 0ℓ} where
 open import Function.Base using (id; _∘_)
@@ -10,26 +10,26 @@ open import agda.funct.funext
 open import agda.term.termcoalg
 open ν
 open import Function
-open import Data.Product
+open import Data.Product using (_,_; Σ)
 
 
 
 universal-propₗ : {C : Set}(c : C → I⟦ F ⟧ C)(h : C → ν F) →
-                 h ≡ ⟦ c ⟧ → out ∘ h ≡ fmap h ∘ c
+                 h ≡ ⟦ c ⟧ → out ∘ h ≡ map h ∘ c
 universal-propₗ c h eq = begin
     out ∘ h
   ≡⟨ cong (_∘_ out) eq ⟩
     out ∘ ⟦ c ⟧
   ≡⟨⟩
-    fmap ⟦ c ⟧ ∘ c
-  ≡⟨ cong (_∘ c) (cong fmap (sym eq)) ⟩
-    fmap h ∘ c
+    map ⟦ c ⟧ ∘ c
+  ≡⟨ cong (_∘ c) (cong map (sym eq)) ⟩
+    map h ∘ c
   ∎
 --universal-propᵣ : {C : Set}(c : C → ⟦ F ⟧ C)(h : C → ν F) →
---                            out ∘ h ≡ fmap h ∘ c → h ≡ ⟦ c ⟧
+--                            out ∘ h ≡ map h ∘ c → h ≡ ⟦ c ⟧
 --universal-propᵣ c h eq = {!!}
 
-comp-law : {C : Set}(c : C → I⟦ F ⟧ C) → out ∘ ⟦ c ⟧ ≡ fmap ⟦ c ⟧ ∘ c
+comp-law : {C : Set}(c : C → I⟦ F ⟧ C) → out ∘ ⟦ c ⟧ ≡ map ⟦ c ⟧ ∘ c
 comp-law c = refl
 
 
@@ -38,13 +38,13 @@ reflection : (x : ν F) → ⟦ out ⟧ x ≡ x
 reflection x = out-injective (begin
     out (⟦ out ⟧ x)
   ≡⟨⟩
-    fmap ⟦ out ⟧ (out x)
+    map ⟦ out ⟧ (out x)
   ≡⟨⟩
     op , ⟦ out ⟧ ∘ ar
   ≡⟨ cong (λ f → op , f) (funext $ reflection ∘ ar) ⟩
     op , id ∘ ar
   ≡⟨⟩
-    fmap id (out x)
+    map id (out x)
   ≡⟨⟩
     out x
   ∎)
