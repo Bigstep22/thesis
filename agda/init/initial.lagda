@@ -1,33 +1,33 @@
 \begin{code}
-open import Data.Container renaming (refl to C-refl; sym to C-sym; map to fmap)
-open import Data.W renaming (sup to in')
+open import Data.Container using (Container; ⟦_⟧; μ; map)
+open import Data.W using () renaming (sup to in')
 open import Level
 module agda.init.initial {F : Container 0ℓ 0ℓ}  where
 open import Function.Base using (id; _∘_)
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
 open import agda.funct.funext
-open import Data.Product
+open import Data.Product using (_,_)
 open import Function.Base
 open import agda.init.initalg
 
 universal-propₗ : {X : Set}(a : ⟦ F ⟧ X → X)(h : μ F → X) →
-                  h ≡ ⦅ a ⦆ → h ∘ in' ≡ a ∘ fmap h
+                  h ≡ ⦅ a ⦆ → h ∘ in' ≡ a ∘ map h
 universal-propₗ a h eq = begin
     h ∘ in'
   ≡⟨ cong (_∘ in') eq ⟩
     ⦅ a ⦆ ∘ in'
   ≡⟨⟩
-    a ∘ fmap ⦅ a ⦆
-  ≡⟨ cong (λ x → a ∘ fmap x) (sym eq) ⟩
-    a ∘ fmap h
+    a ∘ map ⦅ a ⦆
+  ≡⟨ cong (λ x → a ∘ map x) (sym eq) ⟩
+    a ∘ map h
   ∎
 
 --universal-propᵣ : {X : Set}(a : ⟦ F ⟧ X → X)(h : μ F → X) →
---                            h ∘ in' ≡ a ∘ fmap h → ⦅ a ⦆ ≡ h
+--                            h ∘ in' ≡ a ∘ map h → ⦅ a ⦆ ≡ h
 --universal-propᵣ a h eq = {!!}
 
-comp-law : {A : Set}(a : ⟦ F ⟧ A → A) → ⦅ a ⦆ ∘ in' ≡ a ∘ fmap ⦅ a ⦆
+comp-law : {A : Set}(a : ⟦ F ⟧ A → A) → ⦅ a ⦆ ∘ in' ≡ a ∘ map ⦅ a ⦆
 comp-law a = refl
 
 reflection : (y : μ F) → ⦅ in' ⦆ y ≡ y

@@ -1,3 +1,4 @@
+\paragraph{Initial algebras and catamorphisms}
 \begin{code}
 --open import funct.container
 module agda.init.initalg where
@@ -10,29 +11,24 @@ open ≡-Reasoning
 open import agda.funct.funext using (funext)
 open import Function using (_∘_; _$_)
 open import agda.funct.endo
-open import Data.Container using (Container; μ; ⟦_⟧) renaming (map to fmap)
-open import Data.W renaming (sup to in')
-
+open import Data.Container using (Container; μ; ⟦_⟧; map)
+open import Data.W using () renaming (sup to in')
 open import Categories.Category.Construction.F-Algebras
+open import Categories.Object.Initial --C[ F ]Alg
+open F-Algebra-Morphism
+open F-Algebra
+
 C[_]Alg : (F : Container 0ℓ 0ℓ) → Cat (suc 0ℓ) 0ℓ 0ℓ
 C[ F ]Alg = F-Algebras F[ F ]
-
-open import Categories.Object.Initial --C[ F ]Alg
 
 _Alghom[_,_] : {X Y : Set}(F : Container 0ℓ 0ℓ)(x : ⟦ F ⟧ X → X)(Y : ⟦ F ⟧ Y → Y) → Set
 F Alghom[ x , y ] = C[ F ]Alg [ to-Algebra x , to-Algebra y ]
 
-
 ⦅_⦆ : {F : Container 0ℓ 0ℓ}{X : Set} → (⟦ F ⟧ X → X) → μ F → X
 ⦅ a ⦆ (in' (op , ar)) = a (op , ⦅ a ⦆ ∘ ar)
 
-open F-Algebra-Morphism
-open F-Algebra
-
-
 valid-falghom : {F : Container 0ℓ 0ℓ}{X : Set}(a : ⟦ F ⟧ X → X) → F Alghom[ in' , a ]
 valid-falghom {X} a = record { f = ⦅ a ⦆ ; commutes = refl }
-
 
 isunique : {F : Container 0ℓ 0ℓ}{X : Set}{a : ⟦ F ⟧ X → X}(fhom : F Alghom[ in' , a ])(x : μ F) →
            ⦅ a ⦆ x ≡ fhom .f x
@@ -43,16 +39,14 @@ isunique {_}{_}{a} fhom (in' (op , ar)) = begin
                      ≡⟨ cong (λ h → a (op , h)) (funext $ isunique fhom ∘ ar) ⟩ -- induction
                    a (op , (fhom .f) ∘ ar)
                      ≡⟨⟩ -- Dfn of composition
-                   (a ∘ fmap (fhom .f)) (op , ar)
+                   (a ∘ map (fhom .f)) (op , ar)
                      ≡⟨ cong-app (sym $ funext (λ x → fhom .commutes {x})) (op , ar) ⟩
                    (fhom .f ∘ in') (op , ar)
                  ∎
-
 
 initial-in : {F : Container 0ℓ 0ℓ} → IsInitial C[ F ]Alg (to-Algebra in')
 initial-in = record
              { ! = λ {A} → valid-falghom (A .α)
              ; !-unique = λ fhom {x} → isunique fhom x
              }
-
 \end{code}

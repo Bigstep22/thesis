@@ -1,5 +1,5 @@
 \begin{code}
-open import Data.Container renaming (map to fmap)
+open import Data.Container using (Container; ⟦_⟧; map)
 open import Level
 module agda.init.fusion {F : Container 0ℓ 0ℓ} where
 open import Function.Base
@@ -19,6 +19,6 @@ fusionprop i f = i .!-unique (C[ F ]Alg [ f ∘ i .! ])
 
 
 fusion : {A B : Set}{a : ⟦ F ⟧ A → A}{b : ⟦ F ⟧ B → B}(h : A → B) →
-         h ∘ a ≡ b ∘ fmap h →  ⦅ b ⦆ ≡ h ∘ ⦅ a ⦆
+         h ∘ a ≡ b ∘ map h →  ⦅ b ⦆ ≡ h ∘ ⦅ a ⦆
 fusion h p = funext λ x → fusionprop initial-in (record { f = h ; commutes = λ {y} → cong-app p y }) {x}
 \end{code}
