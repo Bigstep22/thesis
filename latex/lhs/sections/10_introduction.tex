@@ -1,16 +1,19 @@
-
 \section{Introduction}
 When writing functional code, we often use functions (or other datastructures) to `glue' multiple pieces of data together.
 Take, as an example, the following function in the programming language Haskell, as introduced by \cite{Gill1993}: %TODO: Cite
->   all :: (a -> Bool) -> [a] -> Bool
->   all p = and . map p
-The function \tt{map p} traverses across the input list, applying the predicate \tt{p} to each element, resulting in a new list of booleans. Then, the function \tt{and} takes this resulting, intermediate, boolean list and consumes it by `anding' together all of the booleans.
+\begin{code}
+    all :: (a -> Bool) -> [a] -> Bool
+    all p = and . map p
+\end{code}
+The function \tt{map p} traverses across the input list, applying the predicate \tt{p} to each element, resulting in a new list of booleans. Then, the function \tt{and} takes this resulting, intermediate, boolean list and consumes it by `anding' together all the booleans.
+
+
 
 Being able to compose functions in this fashion is part of what makes function programming so attractive, but it comes at the cost of computational overhead. We could instead rewrite all in the following fashion:
 \begin{code}
 all' p xs = h xs
       where h []     = True
-            h (x:xs) = p x && h xs''
+            h (x:xs) = p x && h xs
 \end{code}
 This function, instead of traversing the input list, producing a new list, and then subsequently traversing that intermediate list, traverser the input list only once, immediately producing a new answer. Writing code in this fashion is far more performant, at the cost of read- and write-ability.
 Can you write a high-performance, single-traversal, version of the following function \citep{Harper2011}?

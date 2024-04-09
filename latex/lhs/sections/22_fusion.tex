@@ -12,8 +12,8 @@ In functional programming lists are (often) used to store the output of one func
 This generation and immediate consumption of an intermediate datastructure introduces a lot of computation overhead. Allocating resources for each cons datatype instance, storing the data inside of that instance, and then reading back that data, all take time. One could instead write the above function like this:
 \begin{code}
     all' p xs = h xs
-      where h []     = True
-            h (x:xs) = p x && h xs
+       where h []     = True
+             h (x:xs) = p x && h xs
 \end{code}
 Now no intermediate datastructure is generated at the cost of more programmer involvement. We've made a custom, specialized version of \tt{and~.~map~p}. The compositional style of programming that function programming languages enable (such as Haskell) would be made a lot more difficult if, for every composition, the programmer had to write a specialized function. Can this be automated?
 
@@ -49,9 +49,9 @@ This is obviously a different function, we now redefine \tt{from} in terms of \t
     from a b = build (from' a b)
 \end{code}
 With some inlining and $\beta$ reduction, one can see that this definition is identical to the original \tt{from} definition. Now for the killer feature \citep{Gill1993}:
-\begin{code}[escapechar=\%]
+\begin{code}
     sum (from a b)
-      = %\underline{foldr (+) 0 (build}% (from' a b))
+      = foldr (+) 0 (build (from' a b))
       = from' a b (+) 0
 \end{code}
 Notice how we can apply the \tt{foldr/build} rule here to prevent an intermediate list being produced. Any adjacent \tt{foldr/build} pair ``cancel away''.
