@@ -1,3 +1,4 @@
+\begin{code}
 --open import funct.container
 module agda.init.initalg where
 open import Data.Product using (_,_)
@@ -54,3 +55,4 @@ initial-in = record
              ; !-unique = λ fhom {x} → isunique fhom x
              }
 
+\end{code}

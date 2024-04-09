@@ -1,3 +1,4 @@
+\begin{code}
 {-# OPTIONS --guardedness #-}
 module agda.core where
 
@@ -21,3 +22,4 @@ open import agda.church.inst.list
 open import agda.cochurch.defs
 open import agda.cochurch.proofs
 open import agda.cochurch.inst.list
+\end{code}

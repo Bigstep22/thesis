@@ -1,3 +1,4 @@
+\begin{code}
 {-# OPTIONS --guardedness #-}
 module agda.cochurch.defs where
 open import agda.term.termcoalg
@@ -17,3 +18,4 @@ fromCoCh (CoCh h x) = ⟦ h ⟧ x
 
 data CoChurch' (F : Container 0ℓ 0ℓ) : Set₁ where
   cochurch : (∃ λ S → (S → I⟦ F ⟧ S) × S) → CoChurch' F
+\end{code}

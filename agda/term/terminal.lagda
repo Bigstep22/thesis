@@ -1,3 +1,4 @@
+\begin{code}
 {-# OPTIONS --guardedness #-}
 open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym; map to fmap)
 open import Level
@@ -25,7 +26,7 @@ universal-propₗ c h eq = begin
     fmap h ∘ c
   ∎
 --universal-propᵣ : {C : Set}(c : C → ⟦ F ⟧ C)(h : C → ν F) →
---                            out ∘ h ≡ fmap h ∘ c → h ≡ 【 c 】
+--                            out ∘ h ≡ fmap h ∘ c → h ≡ ⟦ c ⟧
 --universal-propᵣ c h eq = {!!}
 
 comp-law : {C : Set}(c : C → I⟦ F ⟧ C) → out ∘ ⟦ c ⟧ ≡ fmap ⟦ c ⟧ ∘ c
@@ -37,11 +38,10 @@ reflection : (x : ν F) → ⟦ out ⟧ x ≡ x
 reflection x = out-injective (begin
     out (⟦ out ⟧ x)
   ≡⟨⟩
-    fmap ⟦ out ⟧ (out x) -- (λ (op , ar) -> op , 【 out 】 ∘ ar) (out x)
+    fmap ⟦ out ⟧ (out x)
   ≡⟨⟩
     op , ⟦ out ⟧ ∘ ar
   ≡⟨ cong (λ f → op , f) (funext $ reflection ∘ ar) ⟩
-    -- cong (λ f -> f (out x)) $ funext (λ (op , ar) → cong (λ x -> op , x) (funext (reflection ∘ ar)))
     op , id ∘ ar
   ≡⟨⟩
     fmap id (out x)
@@ -50,3 +50,4 @@ reflection x = out-injective (begin
   ∎)
   where op = Σ.proj₁ (out x)
         ar = Σ.proj₂ (out x)
+\end{code}

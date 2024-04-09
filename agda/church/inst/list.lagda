@@ -1,3 +1,4 @@
+\begin{code}
 module agda.church.inst.list where
 open import Data.Container renaming (refl to C-refl; sym to C-sym)
 open import Data.W renaming (sup to in')
@@ -23,7 +24,6 @@ data ListOp (A : Set) : Set where
   nil : ListOp A
   cons : A → ListOp A
 
---open import funct.flaws {ℕ ▹ Fin}
 F : (A : Set) → Container 0ℓ 0ℓ
 F A = ListOp A ▷ λ where
                  nil → ⊥
@@ -58,11 +58,8 @@ mapCh : {A B : Set}(f : A → B) → Church (F A) → Church (F B)
 mapCh f (Ch g) = Ch (λ a → g (a ∘ m f))
 map2 : {A B : Set}(f : A → B) → List A → List B
 map2 f = fromCh ∘ mapCh f ∘ toCh
---                                This last bit doesn't quite fit, new base functor needed?
---                                It should be a nonrecursive implementation....
 
---map : {A B : Set} (f : A → B) → μ (F A) → μ (F B)
---map f = ⦅ m f ⦆
+
 l1 : μ (F ℕ)
 l1 = 5 :: 8 :: []
 l2 : μ (F ℕ)
@@ -204,3 +201,4 @@ odd = not ∘ even
 
 countworks : count even (5 :: 6 :: 7 :: 8 :: []) ≡ 2
 countworks = refl
+\end{code}

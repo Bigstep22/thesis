@@ -1,3 +1,4 @@
+\begin{code}
 module agda.church.proofs where
 open import Data.Container using (Container; μ; ⟦_⟧) renaming (map to fmap)
 open import Data.W using () renaming (sup to in')
@@ -96,3 +97,4 @@ trans-pred g f = begin
   ≡⟨⟩ -- Definition of fromCh
     ⦅ in' ∘ f ⦆ (fromCh (Ch g))
   ∎
+\end{code}

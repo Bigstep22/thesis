@@ -1,3 +1,4 @@
+\begin{code}
 {-# OPTIONS --guardedness #-}
 open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym; map to fmap)
 open import Level
@@ -107,3 +108,4 @@ trans-pred h f x = begin
   ≡⟨ flip cong-app x $ fusion ⟦ h ⟧ (sym (valid-hom h f)) ⟩
     (⟦ f ∘ out ⟧ ∘ ⟦ h ⟧) x
   ∎
+\end{code}

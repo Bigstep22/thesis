@@ -1,3 +1,4 @@
+\begin{code}
 {-# OPTIONS --guardedness #-}
 module agda.term.termcoalg where
 open import Data.Container renaming (⟦_⟧ to I⟦_⟧; refl to C-refl; sym to C-sym; map to fmap)
@@ -79,3 +80,4 @@ terminal-out = record
              { ! = λ {A} → valid-fcoalghom (A .α)
              ; !-unique = λ fhom {x} → isunique fhom x
              }
+\end{code}

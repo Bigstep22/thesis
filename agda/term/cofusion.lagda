@@ -1,3 +1,4 @@
+\begin{code}
 {-# OPTIONS --guardedness #-}
 open import Data.Container renaming (⟦_⟧ to I⟦_⟧; map to fmap)
 open import Level
@@ -21,3 +22,4 @@ fusionprop i f = i .!-unique (C[ F ]CoAlg [ i .! ∘ f ])
 fusion : {C D : Set}{c : C → I⟦ F ⟧ C}{d : D → I⟦ F ⟧ D}(h : C → D) →
                    (d ∘ h ≡ fmap h ∘ c) → ⟦ c ⟧ ≡ ⟦ d ⟧ ∘ h
 fusion h p = funext λ x → fusionprop terminal-out (record { f = h ; commutes = λ {y} → cong-app p y }) {x}
+\end{code}

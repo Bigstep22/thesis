@@ -1,3 +1,4 @@
+\begin{code}
 module agda.funct.endo where
 open import Data.Container using (Container; ⟦_⟧) renaming (map to fmap)
 open import Level using (0ℓ)
@@ -15,8 +16,4 @@ F[ F ] = record { F₀ = ⟦ F ⟧
                 ; homomorphism = refl
                 ; F-resp-≈ = λ p → cong₂ fmap (funext (λ x → p {x})) refl
                 }
-
-
---natcohere : {F G : Container 0ℓ 0ℓ}{A B : Set}{f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X}{h : A → B} →
---            fmap h ∘ f ≡ f ∘ fmap h
---natcohere = refl
+\end{code}

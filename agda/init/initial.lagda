@@ -1,3 +1,4 @@
+\begin{code}
 open import Data.Container renaming (refl to C-refl; sym to C-sym; map to fmap)
 open import Data.W renaming (sup to in')
 open import Level
@@ -42,3 +43,4 @@ reflection-law : ⦅ in' ⦆ ≡ id
 reflection-law = funext reflection
 
 
+\end{code}

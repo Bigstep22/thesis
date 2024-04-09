@@ -1,3 +1,4 @@
+\begin{code}
 {-# OPTIONS --guardedness #-}
 module agda.cochurch.inst.list where
 open import agda.cochurch.defs
@@ -144,3 +145,4 @@ fused {f}  = begin
   ≡⟨⟩
     su' (m f ∘ b)
   ∎
+\end{code}
