@@ -9,6 +9,8 @@ The code can be neatly presented in roughly 2 parts:
   \item The proofs about the (Co)Church encodings, again as described by \cite{Harper2011}.
 \end{itemize}
 
+A note on imports: Imports are omitted in the agda code except when an import renames a construct it is importing, this is most prevalent for \tt{Category}, \tt{Data.W}, and \tt{Container}.
+
 \input{sections/32_category_theory.tex}
 \input{sections/34_shortcut_fusion.tex}
 
@@ -43,13 +45,6 @@ For \textbf{initalg} and \textbf{fusion} there also exist complimentary proofs f
 \fi
 
 
-\input{sections/agda/church/defs.tex}
-\input{sections/agda/church/proofs.tex}
-\input{sections/agda/church/inst/list.tex}
-
-\input{sections/agda/cochurch/defs.tex}
-\input{sections/agda/cochurch/proofs.tex}
-\input{sections/agda/cochurch/inst/list.tex}
 
 \iffalse
 Outline:

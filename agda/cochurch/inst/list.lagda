@@ -98,21 +98,7 @@ eqbetween = refl
 
 
 -- Generalization of the above proofs for any container
-prodCoCh : {F : Container 0ℓ 0ℓ}{Y : Set} → (g : Y → I⟦ F ⟧ Y) → Y → CoChurch F
-prodCoCh g x = CoCh g x
-eqprod : {F : Container 0ℓ 0ℓ}{Y : Set}{g : (Y → I⟦ F ⟧ Y)} →
-         fromCoCh ∘ prodCoCh g ≡ ⟦ g ⟧
-eqprod = refl
-transCoCh : {F G : Container 0ℓ 0ℓ}(nat : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X) → CoChurch F → CoChurch G
-transCoCh n (CoCh h s) = CoCh (n ∘ h) s
-eqtrans : {F G : Container 0ℓ 0ℓ}{nat : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X} →
-          fromCoCh ∘ transCoCh nat ∘ toCoCh ≡ ⟦ nat ∘ out ⟧
-eqtrans = refl
-consCoCh : {F : Container 0ℓ 0ℓ}{Y : Set} → (c : {S : Set} → (S → I⟦ F ⟧ S) → S → Y) → CoChurch F → Y
-consCoCh c (CoCh h s) = c h s
-eqcons : {F : Container 0ℓ 0ℓ}{X : Set}{c : {S : Set} → (S → I⟦ F ⟧ S) → S → X} →
-         consCoCh c ∘ toCoCh ≡ c out
-eqcons = refl
+-- MOVED TO DEFS
 
 
 transfuse : {F G H : Container 0ℓ 0ℓ}(nat1 : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X) →

@@ -95,7 +95,7 @@ A morphism of the form $\catam{\phi}$ is called a \textbf{catamorphism}.
 
 An analagous definition of for terminal objects in $\coalg{F}$ exists, called \textbf{anamorphisms}, denoted by $\anam{\phi}$
 
-\subsubsection{Fusion property}
+\subsubsection{Fusion property}\label{sec:fusion_prop}
 Now for the definition we've been waiting for, \textbf{fusion}:
 Given an endofunctor $F:\mathcal{C}\to\mathcal{C}$ and an initial algebra $(\mu^F,in)$ in $\alg{F}$. For any two F-Algebras $(C,\phi)$ and $(D,\psi)$ and morphism $f\in\homm{C}{C,D}$ we have a \textbf{fusion property}: \begin{align*} f\circ\phi=\psi\circ F(f) \Longrightarrow f\circ\catam{\phi}=\catam{\psi} \end{align*}
 In English, if $f$ is an F-Algebra homomorphism, we can know that $f\circ\catam{\psi}=\catam{\psi}$. We can fuse two functions into one! This is summarized in the following diagram:

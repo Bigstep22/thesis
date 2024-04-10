@@ -1,7 +1,5 @@
-\begin{code}
-module agda.church.proofs where
+\begin{code}[hide]
 open import Data.Container using (Container; μ; ⟦_⟧; map)
-open import Data.W using () renaming (sup to in')
 open import Level using (0ℓ)
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
@@ -10,6 +8,10 @@ open import agda.init.initalg
 open import agda.init.initial
 open import agda.funct.funext
 open import agda.church.defs
+\end{code}
+\begin{code}
+module agda.church.proofs where
+open import Data.W using () renaming (sup to in')
 
 -- PAGE 51 - Proof 1
 from-to-id : {F : Container 0ℓ 0ℓ} → fromCh ∘ toCh ≡ id
@@ -82,14 +84,15 @@ prod-pres {F}{X} f s = begin
 -- New function constitutes an implementation for the transformation function being replaced
 chTrans : {F G : Container 0ℓ 0ℓ}(f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) → Church F → Church G
 chTrans f (Ch g) = Ch (λ a → g (a ∘ f))
-trans-pred : {F G : Container 0ℓ 0ℓ}( g : {X : Set} → (⟦ F ⟧ X → X) → X ) → (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
+trans-pred : {F G : Container 0ℓ 0ℓ}(g : {X : Set} → (⟦ F ⟧ X → X) → X )
+             (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
              fromCh (chTrans f (Ch g)) ≡ ⦅ in' ∘ f ⦆ (fromCh (Ch g))
 trans-pred g f = begin
     fromCh (chTrans f (Ch g))
   ≡⟨⟩ -- Function application
-    fromCh (Ch (λ a → g ( a ∘ f )))
+    fromCh (Ch (λ a → g (a ∘ f)))
   ≡⟨⟩ -- Definition of fromCh
-    (λ a → g ( a ∘ f )) in'
+    (λ a → g (a ∘ f)) in'
   ≡⟨⟩ -- Function application
     g (in' ∘ f)
   ≡⟨ sym (fold-invariance g (in' ∘ f)) ⟩

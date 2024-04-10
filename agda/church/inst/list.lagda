@@ -139,21 +139,7 @@ eqbetween = refl
 
 
 -- Generalization of the above proofs for any container
-prodCh : {F : Container 0ℓ 0ℓ}{X : Set}(g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y)(x : X) → Church F
-prodCh g x = Ch (λ a → g a x)
-eqprod : {F : Container 0ℓ 0ℓ}{X : Set}{g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y} →
-         fromCh ∘ prodCh g ≡ g in'
-eqprod = refl
-transCh : {F G : Container 0ℓ 0ℓ}(nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) → Church F → Church G
-transCh n (Ch g) = Ch (λ a → g (a ∘ n))
-eqtrans : {F G : Container 0ℓ 0ℓ}{nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X} →
-          fromCh ∘ transCh nat ∘ toCh ≡ ⦅ in' ∘ nat ⦆
-eqtrans = refl
-consCh : {F : Container 0ℓ 0ℓ}{Y : Set} → (c : (⟦ F ⟧ Y → Y)) → Church F → Y
-consCh c (Ch g) = g c
-eqcons : {F : Container 0ℓ 0ℓ}{X : Set}{c : (⟦ F ⟧ X → X)} →
-         consCh c ∘ toCh ≡ ⦅ c ⦆
-eqcons = refl
+-- MOVED TO DEFS.
 
 
 transfuse : {F G H : Container 0ℓ 0ℓ}(nat1 : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
