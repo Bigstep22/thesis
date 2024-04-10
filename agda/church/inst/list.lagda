@@ -58,6 +58,8 @@ mapCh : {A B : Set}(f : A → B) → Church (F A) → Church (F B)
 mapCh f (Ch g) = Ch (λ a → g (a ∘ m f))
 map2 : {A B : Set}(f : A → B) → List A → List B
 map2 f = fromCh ∘ mapCh f ∘ toCh
+map3 : {A B : Set}(f : A → B) → List A → List B
+map3 f = fromCh ∘ transCh (m f) ∘ toCh
 
 
 l1 : μ (F ℕ)
@@ -71,13 +73,14 @@ proof = refl
 su : List' ℕ ℕ → ℕ
 su (nil , _) = 0
 su (cons n , f) = n + f tt
-
 sum1 : List ℕ → ℕ
 sum1 = ⦅ su ⦆
 sumCh : Church (F ℕ) → ℕ
 sumCh (Ch g) = g su
 sum2 : List ℕ → ℕ
 sum2 = sumCh ∘ toCh
+sum3 : List ℕ → ℕ
+sum3 = consCh su ∘ toCh
 
 sumworks : sum1 (5 :: 6 :: 7 :: []) ≡ 18
 sumworks = refl
@@ -96,6 +99,8 @@ betweenCh : ℕ × ℕ → Church (F ℕ)
 betweenCh xy = Ch (λ a → b a xy)
 between2 : ℕ × ℕ → List ℕ
 between2 = fromCh ∘ betweenCh
+between3 : ℕ × ℕ → List ℕ
+between3 = fromCh ∘ prodCh b
 
 
 check : 2 :: 3 :: 4 :: 5 :: 6 :: [] ≡ between2 (2 , 6)
@@ -116,14 +121,14 @@ eq2 {xy}{f} = begin
   ≡⟨⟩
     b (su ∘ m f) xy
   ≡⟨⟩
-    unCh su (Ch (λ a → b (a ∘ m f) xy))
-  ≡⟨ cong (unCh su) (sym $ cong-app to-from-id' (Ch (λ a → b (a ∘ m f) xy))) ⟩
-    unCh su (toCh (fromCh (Ch (λ a → b (a ∘ m f) xy))))
+    consCh su (Ch (λ a → b (a ∘ m f) xy))
+  ≡⟨ cong (consCh su) (sym $ cong-app to-from-id' (Ch (λ a → b (a ∘ m f) xy))) ⟩
+    consCh su (toCh (fromCh (Ch (λ a → b (a ∘ m f) xy))))
   ≡⟨ cong-app (cons-pres su) (fromCh (Ch (λ a → b (a ∘ m f) xy))) ⟩
     ⦅ su ⦆ (fromCh (Ch (λ a → b (a ∘ m f) xy)))
   ≡⟨ cong ⦅ su ⦆ (trans-pred (flip b xy) (m f)) ⟩
     ⦅ su ⦆ (⦅ in' ∘ m f ⦆ (fromCh (Ch (λ a → b a xy))))
-  ≡⟨ cong (⦅ su ⦆ ∘ ⦅ in' ∘ m f ⦆) (prod-pres b xy) ⟩
+  ≡⟨ cong (⦅ su ⦆ ∘ ⦅ in' ∘ m f ⦆) (cong-app (prod-pres b) xy) ⟩
     (⦅ su ⦆ ∘ ⦅ in' ∘ m f ⦆) (b in' xy)
   ≡⟨⟩
     (sum1 ∘ map1 f) (between1 xy)
@@ -158,12 +163,6 @@ pipfuse : {F G : Container 0ℓ 0ℓ}{X : Set}{g : {Y : Set} → (⟦ F ⟧ Y �
 pipfuse = refl
 
 -- Using the generalizations, we now get our encoding proofs and shortcut fusion for free :)
-between3 : ℕ × ℕ → List ℕ
-between3 = fromCh ∘ prodCh b
-map3 : {A B : Set}(f : A → B) → List A → List B
-map3 f = fromCh ∘ transCh (m f) ∘ toCh
-sum3 : List ℕ → ℕ
-sum3 = consCh su ∘ toCh
 
 
 
