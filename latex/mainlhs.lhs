@@ -1,6 +1,6 @@
 \documentclass{article}
 \usepackage[a4paper,margin=25mm,
-% left=40mm,right=40mm
+ left=35mm,right=35mm
 ]{geometry}
 \usepackage{apacite}
 \usepackage{natbib}

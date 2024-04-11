@@ -126,7 +126,7 @@ eq2 {xy}{f} = begin
     consCh su (toCh (fromCh (Ch (λ a → b (a ∘ m f) xy))))
   ≡⟨ cong-app (cons-pres su) (fromCh (Ch (λ a → b (a ∘ m f) xy))) ⟩
     ⦅ su ⦆ (fromCh (Ch (λ a → b (a ∘ m f) xy)))
-  ≡⟨ cong ⦅ su ⦆ (trans-pred (flip b xy) (m f)) ⟩
+  ≡⟨ cong ⦅ su ⦆ (cong-app (trans-pred (m f)) (Ch (λ a → b a xy))) ⟩
     ⦅ su ⦆ (⦅ in' ∘ m f ⦆ (fromCh (Ch (λ a → b a xy))))
   ≡⟨ cong (⦅ su ⦆ ∘ ⦅ in' ∘ m f ⦆) (cong-app (prod-pres b) xy) ⟩
     (⦅ su ⦆ ∘ ⦅ in' ∘ m f ⦆) (b in' xy)

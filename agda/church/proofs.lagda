@@ -88,22 +88,20 @@ prod-pres {F}{X} f = funext λ (s : X) → begin
 The fifth, and final proof proof shows that conversion functions constitute an implementation for the conversion functions being replaced:
 \begin{code}
 -- This last proofs could all use a rewrite, now that I've generalized the three different types of functions...
-chTrans : {F G : Container 0ℓ 0ℓ}(f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) → Church F → Church G
-chTrans f (Ch g) = Ch (λ a → g (a ∘ f))
-trans-pred : {F G : Container 0ℓ 0ℓ}(g : {X : Set} → (⟦ F ⟧ X → X) → X )
-             (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
-             fromCh (chTrans f (Ch g)) ≡ ⦅ in' ∘ f ⦆ (fromCh (Ch g))
-trans-pred g f = begin
-    fromCh (chTrans f (Ch g))
-  ≡⟨⟩ -- Function application
-    fromCh (Ch (λ a → g (a ∘ f)))
-  ≡⟨⟩ -- Definition of fromCh
-    (λ a → g (a ∘ f)) in'
-  ≡⟨⟩ -- Function application
-    g (in' ∘ f)
-  ≡⟨ sym (fold-invariance g (in' ∘ f)) ⟩
-    ⦅ in' ∘ f ⦆ (g in')
-  ≡⟨⟩ -- Definition of fromCh
-    ⦅ in' ∘ f ⦆ (fromCh (Ch g))
-  ∎
+trans-pred : {F G : Container 0ℓ 0ℓ} (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
+             fromCh ∘ transCh f ≡ ⦅ in' ∘ f ⦆ ∘ fromCh
+trans-pred f = funext (λ where
+  (Ch g) → (begin
+      fromCh (transCh f (Ch g))
+    ≡⟨⟩ -- Function application
+      fromCh (Ch (λ a → g (a ∘ f)))
+    ≡⟨⟩ -- Definition of fromCh
+      (λ a → g (a ∘ f)) in'
+    ≡⟨⟩ -- Function application
+      g (in' ∘ f)
+    ≡⟨ sym (fold-invariance g (in' ∘ f)) ⟩
+      ⦅ in' ∘ f ⦆ (g in')
+    ≡⟨⟩ -- Definition of fromCh
+      ⦅ in' ∘ f ⦆ (fromCh (Ch g))
+    ∎))
 \end{code}

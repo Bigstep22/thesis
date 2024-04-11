@@ -7,19 +7,22 @@ Take, as an example, the following function in the programming language Haskell,
 \end{code}
 The function \tt{map p} traverses across the input list, applying the predicate \tt{p} to each element, resulting in a new list of booleans. Then, the function \tt{and} takes this resulting, intermediate, boolean list and consumes it by `anding' together all the booleans.
 
-Being able to compose functions in this fashion is part of what makes function programming so attractive, but it comes at the cost of computational overhead. We could instead rewrite all in the following fashion:
+Being able to compose functions in this fashion is part of what makes functional programming so attractive, but it comes at the cost of computational overhead:
+Each time allocating a list cell, only to subsequently deallocate it once the value has been read.
+We could instead rewrite \tt{all} in the following fashion:
 \begin{code}
 all' p xs = h xs
       where h []     = True
             h (x:xs) = p x && h xs
 \end{code}
-This function, instead of traversing the input list, producing a new list, and then subsequently traversing that intermediate list, traverser the input list only once, immediately producing a new answer. Writing code in this fashion is far more performant, at the cost of read- and write-ability.
+This function, instead of traversing the input list, producing a new list, and then subsequently traversing that intermediate list, traverses the input list only once; immediately producing a new answer.
+Writing code in this fashion is far more performant, at the cost of read- and write-ability.
 Can you write a high-performance, single-traversal, version of the following function \citep{Harper2011}?
 \begin{code}
     f :: (Int, Int) -> Int
     f = sum . map (+1) . filter odd . between
 \end{code}
-With some (more) effort, one could arrive at the following solution:
+With some (more) effort and optimization, one could arrive at the following solution:
 \begin{code}
     f' :: (Int, Int) -> Int
     f' (x, y) = loop x
@@ -28,8 +31,36 @@ With some (more) effort, one could arrive at the following solution:
                                  then (x+1) + loop (x+1)
                                  else loop (x+1)
 \end{code}
-Doing this by hand every time, to get from the nice, elegant, compositional style of programming to the higher-performance, single-traversal style, gets old very quick. Especially if this needs to be done, by hand, \textbf{every} time you compose any two functions.
+Doing this by hand every time, to get from the nice, elegant, compositional style of programming to the higher-performance, single-traversal style, gets old very quick.
+Especially if this needs to be done, by hand, \textbf{every} time you compose any two functions.
 Is there some way to automate this process?
+
+\paragraph{Fusion}
+The answer is yes{\Large*}, but it comes with \textit{an} asterisk attached.
+The form of optimization that we are looking for is called fusion:
+The process of taking multiple list producing/consuming functions and turning (or fusing) them into just one.
+
+Initial work on this was done my \cite{Wadler1984,Wadler1986,Wadler1990}, and was dubbed `deforestation', referring to the removal of intermediate trees (or lists).
+The details of the original deforestation work are not relevant to this thesis, but, the weaknesses of the work are described and a different technique are proposed by \cite{Gill1993}.
+\cite{Gill1993} describe a technique nowadays called \tt{foldr/build} fusion, which, when employed, can eliminate most intermediate lists.
+This technique is described further in Section \ref{sec:foldr/build}.
+
+A converse approach, aptly named the \tt{destroy/unfoldr} rule, is described by \cite{Svenningsson2002}, which describes the converse technique to \cite{Gill1993}'s.
+A further generalization of this technique, leveraging the coinductive list datatype, streams. This technique ended up being called \textit{stream fusion}.
+
+\paragraph{(Co)Church encodings}
+Finally, \cite{Harper2011} combined all of these concepts into one paper, called ``The Library Writer's Guide to Shortcut Fusion''. In it the concept of (Co)Church encodings are described and, pragmatically, how to implement them in Haskell.
+My thesis is centered on \cite{Harper2011}'s work and makes two crucial contributions:
+\begin{enumerate}
+    \item The Church and Cochurch encodings described are formalized, including the relevant category theory, in Agda, in as a general fashion as possible, leveraging containers \citep{Abbott2005} to represent strictly positive functors.
+    Furthremore, the functions that are described (producing, transforming, and consuming) are also implemented in a general fashion and shown to be equal to regular folds (i.e. catamorphisms and anamorphisms).
+    This is discussed in detail in Section \ref{sec:formalization}.
+    \item The Church and Cochurch encodings' implementation in Haskell, as described by \cite{Harper2011} are replicated and investigated further as to their performance characteristics.
+    In this process, a bug was found in Haskell's optimizer, and further practical insights were gleaned as to how to get these encodings to properly fuse as well as what optimizations enable shortcut fusion to do its work.
+    This is discussed in detail in Section \ref{sec:haskell}.
+\end{enumerate}
+
+
 
 % Mention certain existing solutions, shortcut deforestation, library shortcut fusion, etc. DO RESEARCH
 
