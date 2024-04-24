@@ -7,7 +7,7 @@ open import Function
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
 \end{code}
-This module defines church encodings and the two conversions \tt{con} and \tt{abs}, called \tt{toCh} and \tt{fromCh} here, respectively.
+This module defines Church encodings and the two conversions \tt{con} and \tt{abs}, called \tt{toCh} and \tt{fromCh} here, respectively.
 It also defines the generalized producing, transformation, and consuming functions, as described by \cite{Harper2011}.
 \begin{code}
 module agda.church.defs where
@@ -25,20 +25,22 @@ toCh {F} x = Ch (λ {X : Set} → λ (a : ⟦ F ⟧ X → X) → ⦅ a ⦆ x)
 fromCh : {F : Container 0ℓ 0ℓ} → Church F → μ F
 fromCh (Ch g) = g in'
 \end{code}
-The generalized encoded producing, transformation, and consuming function,
-alongside proofs that they are equal to the functions they are encoding:
+The generalized and encoded producing, transformation, and consuming functions,
+alongside proofs that they are equal to the functions they are encoding.
+First the producing function, this is a generalized version of \cite{Gill1993}'s \tt{build} function:
 \begin{code}
--- Generalized producer and consuming functions.
 prodCh : {F : Container _ _}{X : Set}(g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y)(x : X) → Church F
 prodCh g x = Ch (λ a → g a x)
 eqprod : {F : Container _ _}{X : Set}{g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y} →
          fromCh ∘ prodCh g ≡ g in'
 eqprod = refl
+-- This is something cool and extra and intermediate
 transCh : {F G : Container _ _}(nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) → Church F → Church G
 transCh n (Ch g) = Ch (λ a → g (a ∘ n))
 eqtrans : {F G : Container _ _}{nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X} →
           fromCh ∘ transCh nat ∘ toCh ≡ ⦅ in' ∘ nat ⦆
 eqtrans = refl
+-- This is foldr!
 consCh : {F : Container _ _}{X : Set} → (c : (⟦ F ⟧ X → X)) → Church F → X
 consCh c (Ch g) = g c
 eqcons : {F : Container _ _}{X : Set}{c : (⟦ F ⟧ X → X)} →

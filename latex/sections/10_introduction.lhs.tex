@@ -34,7 +34,6 @@ With some (more) effort and optimization, one could arrive at the following solu
 Doing this by hand every time, to get from the nice, elegant, compositional style of programming to the higher-performance, single-traversal style, gets old very quick.
 Especially if this needs to be done, by hand, \textbf{every} time you compose any two functions.
 Is there some way to automate this process?
-
 \paragraph{Fusion}
 The answer is yes{\Large*}, but it comes with \textit{an} asterisk attached.
 The form of optimization that we are looking for is called fusion:
@@ -56,7 +55,7 @@ My thesis is centered on \cite{Harper2011}'s work and makes two crucial contribu
     Furthremore, the functions that are described (producing, transforming, and consuming) are also implemented in a general fashion and shown to be equal to regular folds (i.e. catamorphisms and anamorphisms).
     This is discussed in detail in Section \ref{sec:formalization}.
     \item The Church and Cochurch encodings' implementation in Haskell, as described by \cite{Harper2011} are replicated and investigated further as to their performance characteristics.
-    In this process, a bug was found in Haskell's optimizer, and further practical insights were gleaned as to how to get these encodings to properly fuse as well as what optimizations enable shortcut fusion to do its work.
+    In this process, a bug was found in Haskell's optimizer, and further practical insights were gleaned as to how to get these encodings to properly fuse as well (especially for Cochurch encodings) and what optimizations enable shortcut fusion to do its work.
     This is discussed in detail in Section \ref{sec:haskell}.
 \end{enumerate}
 

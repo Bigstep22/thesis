@@ -7,7 +7,6 @@
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
 import Prelude hiding (sum, foldr, filter, map)
 import Test.Tasty.Bench
--- import Data.List hiding (sum, foldr, filter)
 import GHC.List hiding (filter, map, sum)
 
 

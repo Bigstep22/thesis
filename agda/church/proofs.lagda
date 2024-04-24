@@ -36,13 +36,18 @@ This proofs leverages parametricity as described by \cite{Wadler1989}.
 It postulates the free theorem of the function \tt{g}, to prove that ``applying \tt{g} to \tt{b} and then passing
 the result to \tt{h} is the same as just folding \tt{c} over the datatype'' \citep{Harper2011}:
 \begin{code}
-postulate freetheorem-initial : {F : Container 0ℓ 0ℓ}{B C : Set}{b : ⟦ F ⟧ B → B}{c : ⟦ F ⟧ C → C}
-                                (h : B → C)(g : {X : Set} → (⟦ F ⟧ X → X) → X) →
+postulate freetheorem-initial : {F : Container 0ℓ 0ℓ}{B C : Set}{b : ⟦ F ⟧ B → B} {c : ⟦ F ⟧ C → C}
+                                (h : B → C) (g : {X : Set} → (⟦ F ⟧ X → X) → X) →
                                 h ∘ b ≡ c ∘ map h → h (g b) ≡ g c
 fold-invariance : {F : Container 0ℓ 0ℓ}{Y : Set}
                   (g : {X : Set} → (⟦ F ⟧ X → X) → X)(a : ⟦ F ⟧ Y → Y) →
                   ⦅ a ⦆ (g in') ≡ g a
 fold-invariance g a = freetheorem-initial ⦅ a ⦆ g refl
+--fold-invariance g a = begin
+--    ⦅ a ⦆ (g in')
+--  ≡⟨ {!!} ⟩
+--    g a
+--  ∎
 to-from-id : {F : Container 0ℓ 0ℓ}{g : {X : Set} → (⟦ F ⟧ X → X) → X} →
              toCh (fromCh (Ch g)) ≡ Ch g
 to-from-id {F}{g} = begin
