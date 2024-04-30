@@ -1,7 +1,7 @@
 \paragraph{Definition of Church encodings}
 \begin{code}[hide]
 open import Data.Container using (Container; μ; ⟦_⟧)
-open import Level using (0ℓ)
+open import Level using (0ℓ; Level)
 open import agda.init.initalg
 open import Function
 open import Relation.Binary.PropositionalEquality as Eq
@@ -29,21 +29,38 @@ The generalized and encoded producing, transformation, and consuming functions,
 alongside proofs that they are equal to the functions they are encoding.
 First the producing function, this is a generalized version of \cite{Gill1993}'s \tt{build} function:
 \begin{code}
-prodCh : {F : Container _ _}{X : Set}(g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y)(x : X) → Church F
+prodCh : {ℓ : Level}{F : Container _ _}{Y : Set ℓ}
+         (g : {X : Set} → (⟦ F ⟧ X → X) → Y → X)(y : Y) → Church F
 prodCh g x = Ch (λ a → g a x)
-eqprod : {F : Container _ _}{X : Set}{g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y} →
-         fromCh ∘ prodCh g ≡ g in'
-eqprod = refl
+prod   : {ℓ : Level}{F : Container _ _}{Y : Set ℓ}
+         (g : {X : Set} → (⟦ F ⟧ X → X) → Y → X)(y : Y) → μ F
+prod g = fromCh ∘ prodCh g
+eqProd : {F : Container _ _}{Y : Set}
+         {g : {X : Set} → (⟦ F ⟧ X → X) → Y → X} → prod g ≡ g in'
+eqProd = refl
+
 -- This is something cool and extra and intermediate
-transCh : {F G : Container _ _}(nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) → Church F → Church G
-transCh n (Ch g) = Ch (λ a → g (a ∘ n))
-eqtrans : {F G : Container _ _}{nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X} →
-          fromCh ∘ transCh nat ∘ toCh ≡ ⦅ in' ∘ nat ⦆
-eqtrans = refl
+natTransCh : {F G : Container _ _}
+             (nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) → Church F → Church G
+natTransCh nat (Ch g) = Ch (λ a → g (a ∘ nat))
+natTrans   : {F G : Container _ _}
+             (nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) → μ F → μ G
+natTrans nat = fromCh ∘ natTransCh nat ∘ toCh
+eqNatTrans : {F G : Container _ _}
+             {nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X} →
+             natTrans nat ≡ ⦅ in' ∘ nat ⦆
+eqNatTrans = refl
+
 -- This is foldr!
-consCh : {F : Container _ _}{X : Set} → (c : (⟦ F ⟧ X → X)) → Church F → X
+consCh : {F : Container _ _}{X : Set}
+         (c : ⟦ F ⟧ X → X) → Church F → X
 consCh c (Ch g) = g c
-eqcons : {F : Container _ _}{X : Set}{c : (⟦ F ⟧ X → X)} →
-         consCh c ∘ toCh ≡ ⦅ c ⦆
-eqcons = refl
+cons   : {F : Container _ _}{X : Set}
+         (c : ⟦ F ⟧ X → X) → μ F → X
+cons c = consCh c ∘ toCh
+eqCons : {F : Container _ _}{X : Set}
+         {c : ⟦ F ⟧ X → X} → cons c ≡ ⦅ c ⦆
+eqCons = refl
+
+
 \end{code}

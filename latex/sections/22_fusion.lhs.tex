@@ -25,6 +25,8 @@ Such that:
 \begin{code}
     foldr k z (build g) = g k z
 \end{code}
+\cite{Gill1993}.''
+
 \cite{Gill1993} dubbed this the \tt{foldr/build} rule. For its validity \tt{g} needs to be of type:
 \begin{code}
     g : forall beta : (A -> beta -> beta) -> beta -> beta

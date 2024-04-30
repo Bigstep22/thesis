@@ -9,7 +9,7 @@ open import Data.Unit
 open import Function.Base
 open import Data.Bool
 open import Agda.Builtin.Nat
-open import agda.church.defs
+open import agda.church.defs renaming (cons to consu)
 open import agda.church.proofs
 open import agda.funct.funext
 open import agda.init.initalg
@@ -33,6 +33,20 @@ List : (A : Set) → Set
 List A = μ (F A)
 List' : (A B : Set) → Set
 List' A B = ⟦ F A ⟧ B
+
+
+
+-- Investigation related to filter, the following lines are tangentially related to list
+build : {F : Container _ _}{X : Set} → ({Y : Set} → (⟦ F ⟧ Y → Y) → X → Y) → (x : X) → μ F
+build g = fromCh ∘ prodCh g
+foldr' : {F : Container _ _}{X : Set} → (⟦ F ⟧ X → X) → μ F → X
+foldr' c = consCh c ∘ toCh
+filter : {A : Set} → (A → Bool) → List A → List A
+filter p = fromCh ∘ prodCh (λ f → consCh (λ where
+   (nil , l) → f (nil , l)
+   (cons a , l) → if (p a) then f (cons a , l) else l tt)) ∘ toCh
+
+
 
 [] : {A : Set} → μ (F A)
 [] = in' (nil , λ())
@@ -58,17 +72,13 @@ b a (x , y) = b' a x (suc (y - x))
 
 between1 : ℕ × ℕ → List ℕ
 between1 xy = b in' xy
-betweenCh : ℕ × ℕ → Church (F ℕ)
-betweenCh xy = Ch (λ a → b a xy)
+--betweenCh : ℕ × ℕ → Church (F ℕ)
+--betweenCh xy = Ch (λ a → b a xy)
 between2 : ℕ × ℕ → List ℕ
-between2 = fromCh ∘ betweenCh
-between3 : ℕ × ℕ → List ℕ
-between3 = fromCh ∘ prodCh b
+between2 = prod b
 
 eqbetween : between1 ≡ between2
 eqbetween = refl
-eqbetween' : between2 ≡ between3
-eqbetween' = refl
 
 check : 2 :: 3 :: 4 :: 5 :: 6 :: [] ≡ between2 (2 , 6)
 check = refl
@@ -79,17 +89,13 @@ m f (nil , _) = (nil , λ())
 m f (cons n , l) = (cons (f n) , l)
 map1 : {A B : Set}(f : A → B) → List A → List B
 map1 f = ⦅ in' ∘ m f ⦆
-mapCh : {A B : Set}(f : A → B) → Church (F A) → Church (F B)
-mapCh f (Ch g) = Ch (λ a → g (a ∘ m f))
+--mapCh : {A B : Set}(f : A → B) → Church (F A) → Church (F B)
+--mapCh f (Ch g) = Ch (λ a → g (a ∘ m f))
 map2 : {A B : Set}(f : A → B) → List A → List B
-map2 f = fromCh ∘ mapCh f ∘ toCh
-map3 : {A B : Set}(f : A → B) → List A → List B
-map3 f = fromCh ∘ transCh (m f) ∘ toCh
+map2 f = natTrans (m f)
 
 eqmap : {f : ℕ → ℕ} → map1 f ≡ map2 f
 eqmap = refl
-eqmap' : {f : ℕ → ℕ} → map2 f ≡ map3 f
-eqmap' = refl
 
 l1 : μ (F ℕ)
 l1 = 5 :: 8 :: []
@@ -104,75 +110,35 @@ su (nil , _) = 0
 su (cons n , f) = n + f tt
 sum1 : List ℕ → ℕ
 sum1 = ⦅ su ⦆
-sumCh : Church (F ℕ) → ℕ
-sumCh (Ch g) = g su
+--sumCh : Church (F ℕ) → ℕ
+--sumCh (Ch g) = g su
 sum2 : List ℕ → ℕ
-sum2 = sumCh ∘ toCh
-sum3 : List ℕ → ℕ
-sum3 = consCh su ∘ toCh
+sum2 = consu su
 
 eqsum : sum1 ≡ sum2
 eqsum = refl
-eqsum' : sum2 ≡ sum3
-eqsum' = refl
 
 sumworks : sum1 (5 :: 6 :: 7 :: []) ≡ 18
 sumworks = refl
 
 
-eq1 : {f : ℕ → ℕ} → (sum2 ∘ map2 f ∘ between2) ≡ (sumCh ∘ mapCh f ∘ betweenCh)
-eq1 {f} = begin
-    sumCh ∘ toCh ∘ fromCh ∘ mapCh f ∘ toCh ∘ fromCh ∘ betweenCh
-  ≡⟨ cong (λ g → sumCh ∘ g ∘ mapCh f ∘ g ∘ betweenCh) to-from-id' ⟩
-    sumCh ∘ mapCh f ∘ betweenCh
+
+eq : {f : ℕ → ℕ} → sum1 ∘ map1 f ∘ between1 ≡ sum2 ∘ map2 f ∘ between2
+eq {f} = begin
+    ⦅ su ⦆ ∘ ⦅ in' ∘ m f ⦆ ∘ b in'
+  ≡⟨⟩
+    ⦅ su ⦆ ∘ ⦅ in' ∘ m f ⦆ ∘ fromCh ∘ prodCh b
+  ≡⟨ cong (λ f → ⦅ su ⦆ ∘ f ∘ prodCh b) (sym $ trans-pres (m f)) ⟩
+    ⦅ su ⦆ ∘ fromCh ∘ natTransCh (m f) ∘ prodCh b
+  ≡⟨ cong (λ g → g ∘ fromCh ∘ natTransCh (m f) ∘ prodCh b) (sym $ cons-pres su) ⟩
+    consCh su ∘ toCh ∘ fromCh ∘ natTransCh (m f) ∘ prodCh b
+  ≡⟨ cong (λ g → consCh su ∘ g ∘ natTransCh (m f) ∘ prodCh b) to-from-id ⟩
+    consCh su ∘ natTransCh (m f) ∘ prodCh b
+  ≡⟨ cong (λ g → consCh su ∘ g ∘ natTransCh (m f) ∘ g ∘ prodCh b) (sym to-from-id) ⟩
+    consCh su ∘ toCh ∘ fromCh ∘ natTransCh (m f) ∘ toCh ∘ fromCh ∘ prodCh b
+  ≡⟨⟩
+    consu su ∘ natTrans (m f) ∘ prod b
   ∎
-
-eq2 : {f : ℕ → ℕ} → sumCh ∘ mapCh f ∘ betweenCh ≡ sum1 ∘ map1 f ∘ between1
-eq2 {f} = funext λ xy → begin
-    (sumCh ∘ mapCh f ∘ betweenCh) xy
-  ≡⟨⟩
-    (sumCh (Ch (λ a → b (a ∘ m f) xy)))
-  ≡⟨⟩
-    b (su ∘ m f) xy
-  ≡⟨⟩
-    consCh su (Ch (λ a → b (a ∘ m f) xy))
-  ≡⟨ cong (consCh su) (sym $ cong-app to-from-id' (Ch (λ a → b (a ∘ m f) xy))) ⟩
-    consCh su (toCh (fromCh (Ch (λ a → b (a ∘ m f) xy))))
-  ≡⟨ cong-app (cons-pres su) (fromCh (Ch (λ a → b (a ∘ m f) xy))) ⟩
-    ⦅ su ⦆ (fromCh (Ch (λ a → b (a ∘ m f) xy)))
-  ≡⟨ cong ⦅ su ⦆ (cong-app (trans-pred (m f)) (Ch (λ a → b a xy))) ⟩
-    (⦅ su ⦆ ∘ ⦅ in' ∘ m f ⦆) (fromCh (Ch (λ a → b a xy)))
-  ≡⟨ refl ⟩
---  ≡⟨ cong (⦅ su ⦆ ∘ ⦅ in' ∘ m f ⦆) (cong-app (prod-pres b) xy) ⟩
-    (⦅ su ⦆ ∘ ⦅ in' ∘ m f ⦆) (b in' xy)
-  ≡⟨⟩
-    (sum1 ∘ map1 f) (between1 xy)
-  ∎
-
-
-
--- Generalization of the above proofs for any container
--- MOVED TO DEFS.
--- More proofs of that natural transformations can fuse:
-transfuse : {F G H : Container 0ℓ 0ℓ}(nat1 : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
-            (nat2 : {X : Set} → ⟦ G ⟧ X → ⟦ H ⟧ X) →
-            transCh nat2 ∘ toCh ∘ fromCh ∘ transCh nat1 ≡ transCh (nat2 ∘ nat1)
-transfuse nat1 nat2 = begin
-            transCh nat2 ∘ toCh ∘ fromCh ∘ transCh nat1
-          ≡⟨ cong (λ f → transCh nat2 ∘ f ∘ transCh nat1) to-from-id' ⟩
-            transCh nat2 ∘ transCh nat1
-          ≡⟨ funext (λ where (Ch g) → refl) ⟩
-            transCh (nat2 ∘ nat1)
-          ∎
-pipfuse : {F G : Container 0ℓ 0ℓ}{X : Set}{g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y}
-          {nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X}{c : (⟦ G ⟧ X → X)} →
-          consCh c ∘ transCh nat ∘ prodCh g ≡ g (c ∘ nat)
-pipfuse = refl
-
-
-
-
-
 
 
 

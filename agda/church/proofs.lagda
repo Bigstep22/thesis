@@ -11,6 +11,7 @@ open import agda.init.initalg
 open import agda.init.initial
 open import agda.funct.funext
 open import agda.church.defs
+open import Data.Product using (_,_)
 \end{code}
 \begin{code}
 module agda.church.proofs where
@@ -43,24 +44,18 @@ fold-invariance : {F : Container 0ℓ 0ℓ}{Y : Set}
                   (g : {X : Set} → (⟦ F ⟧ X → X) → X)(a : ⟦ F ⟧ Y → Y) →
                   ⦅ a ⦆ (g in') ≡ g a
 fold-invariance g a = freetheorem-initial ⦅ a ⦆ g refl
---fold-invariance g a = begin
---    ⦅ a ⦆ (g in')
---  ≡⟨ {!!} ⟩
---    g a
---  ∎
-to-from-id : {F : Container 0ℓ 0ℓ}{g : {X : Set} → (⟦ F ⟧ X → X) → X} →
-             toCh (fromCh (Ch g)) ≡ Ch g
-to-from-id {F}{g} = begin
-    toCh (fromCh (Ch g))
-  ≡⟨⟩ -- definition of fromCh
-    toCh (g in')
-  ≡⟨⟩ -- definition of toCh
-    Ch (λ{X}a → ⦅ a ⦆ (g in'))
-  ≡⟨ cong Ch (funexti λ{Y} → funext (fold-invariance g)) ⟩
-    Ch g
-  ∎
-to-from-id' : {F : Container 0ℓ 0ℓ} → toCh ∘ fromCh ≡ id
-to-from-id' {F} = funext (λ where (Ch g) → to-from-id {F}{g})
+
+to-from-id : {F : Container 0ℓ 0ℓ} → toCh ∘ fromCh {F} ≡ id
+to-from-id {F} = funext (λ where
+  (Ch g) → begin
+      toCh (fromCh (Ch g))
+    ≡⟨⟩ -- definition of fromCh
+      toCh (g in')
+    ≡⟨⟩ -- definition of toCh
+      Ch (λ{X}a → ⦅ a ⦆ (g in'))
+    ≡⟨ cong Ch (funexti λ{Y} → funext (fold-invariance g)) ⟩
+      Ch g
+    ∎)
 \end{code}
 The third proof shows that encoding functions constitute an implementation for the consumer functions being replaced:
 \begin{code}
@@ -93,11 +88,11 @@ prod-pres {F}{X} f = funext λ (s : X) → begin
 The fifth, and final proof proof shows that conversion functions constitute an implementation for the conversion functions being replaced:
 \begin{code}
 -- This last proofs could all use a rewrite, now that I've generalized the three different types of functions...
-trans-pred : {F G : Container 0ℓ 0ℓ} (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
-             fromCh ∘ transCh f ≡ ⦅ in' ∘ f ⦆ ∘ fromCh
-trans-pred f = funext (λ where
+trans-pres : {F G : Container 0ℓ 0ℓ} (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
+             fromCh ∘ natTransCh f ≡ ⦅ in' ∘ f ⦆ ∘ fromCh
+trans-pres f = funext (λ where
   (Ch g) → (begin
-      fromCh (transCh f (Ch g))
+      fromCh (natTransCh f (Ch g))
     ≡⟨⟩ -- Function application
       fromCh (Ch (λ a → g (a ∘ f)))
     ≡⟨⟩ -- Definition of fromCh
@@ -109,4 +104,40 @@ trans-pred f = funext (λ where
     ≡⟨⟩ -- Definition of fromCh
       ⦅ in' ∘ f ⦆ (fromCh (Ch g))
     ∎))
+
+
+
+natfuse : {F G H : Container 0ℓ 0ℓ}
+          (nat1 : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
+          (nat2 : {X : Set} → ⟦ G ⟧ X → ⟦ H ⟧ X) →
+          natTransCh nat2 ∘ toCh ∘ fromCh ∘ natTransCh nat1 ≡ natTransCh (nat2 ∘ nat1)
+natfuse nat1 nat2 = begin
+            natTransCh nat2 ∘ toCh ∘ fromCh ∘ natTransCh nat1
+          ≡⟨ cong (λ f → natTransCh nat2 ∘ f ∘ natTransCh nat1) to-from-id ⟩
+            natTransCh nat2 ∘ natTransCh nat1
+          ≡⟨ funext (λ where (Ch g) → refl) ⟩
+            natTransCh (nat2 ∘ nat1)
+          ∎
+
+pipefuse : {F G : Container 0ℓ 0ℓ}{X : Set}(g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y)
+          (nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)(c : (⟦ G ⟧ X → X)) →
+          cons c ∘ natTrans nat ∘ prod g ≡ g (c ∘ nat)
+pipefuse g nat c = begin
+    consCh c ∘ toCh ∘ fromCh ∘ natTransCh nat ∘ toCh ∘ fromCh ∘ prodCh g
+  ≡⟨ cong (λ f → consCh c ∘ f ∘ natTransCh nat ∘ toCh ∘ fromCh ∘ prodCh g) to-from-id ⟩
+    consCh c ∘ natTransCh nat ∘ toCh ∘ fromCh ∘ prodCh g
+  ≡⟨ cong (λ f → consCh c ∘ natTransCh nat ∘ f ∘ prodCh g) to-from-id ⟩
+    consCh c ∘ natTransCh nat ∘ prodCh g
+  ≡⟨⟩
+    g (c ∘ nat)
+  ∎
+
+--cons-prod : {F : Container _ _}{X : Set}
+--            {c : (⟦ F ⟧ X → X)}{g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y} →
+--            consCh c ∘ prodCh g ≡ g c
+--cons-prod = refl
+
+
+
+
 \end{code}
