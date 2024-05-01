@@ -1,7 +1,9 @@
+\paragraph{Example: List fusion}
+In order to clearly see how the Cochurch encodings allows functions to fuse, a datatype was selected such
+the abstracted function, which have so far been used to prove the needed properties, can be instantiated
+to demonstrate how the fusion works for functions across a cocrete datatype.
 \begin{code}[hide]
 {-# OPTIONS --guardedness #-}
-module agda.cochurch.inst.list where
-open import agda.cochurch.defs renaming (cons to consu)
 open import agda.cochurch.proofs
 open import Data.Container using (Container; map; _▷_; ⟦_⟧)
 open import Level hiding (suc)
@@ -16,38 +18,64 @@ open import Data.Nat
 open import Agda.Builtin.Nat
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
-\end{code}
-\begin{code}
 open import agda.funct.funext
-
+\end{code}
+In this module is defined: the container, whose interpretation represents the base functor for lists,
+some convenience functions to make type annotations more readable, a producer function \tt{between},
+a transformation function \tt{map}, a consumer function \tt{sum}, and a proof that non-cochurch and cochurch-encoded
+implementations are equal.
+\begin{code}
+module agda.cochurch.inst.list where
+open import agda.cochurch.defs renaming (cons to consu)
+\end{code}
+\subparagraph{Datatypes}
+The index set for the container, as well as the container whose interpretation represents the base funtor for list.
+Note how ListOp is isomorphis to the datatype \tt{1 + A}, I use ListOp instead to make the code more readable:
+\begin{code}
 data ListOp (A : Set) : Set where
   nil : ListOp A
   cons : A → ListOp A
-
 F : (A : Set) → Container 0ℓ 0ℓ
 F A = ListOp A ▷ λ { nil → ⊥ ; (cons n) → ⊤ }
-
+\end{code}
+Functions representing the run-of-the-mill (potentially infinite) list datatype and the base functor for list:
+\begin{code}
 List : (A : Set) → Set
 List A = ν (F A)
 List' : (A B : Set) → Set
 List' A B = ⟦ F A ⟧ B
-
+\end{code}
+Helper functions to assist in cleanly writing out instances of lists:
+\begin{code}
 [] : {A : Set} → List A
 out ([]) = (nil , λ())
-
 _::_ : {A : Set} → A → List A → List A
 out (x :: xs) = (cons x , const xs)
 infixr 20 _::_
-
-
-
+\end{code}
+The unfold funtion as it would normally be encountered for lists, defined in terms of $\anam{\_}$:
+\begin{code}
+mapping : {A X : Set} → (f : X → ⊤ ⊎ (A × X)) → (X → List' A X)
+mapping f x with f x
+mapping f x | (inj₁ tt) = (nil , λ())
+mapping f x | (inj₂ (a , x')) = (cons a , const x')
+unfold' : {F : Container 0ℓ 0ℓ}{A X : Set}(f : X → ⊤ ⊎ (A × X)) → X → List A
+unfold' {A}{X} f = A⟦ mapping f ⟧
+\end{code}
+\subparagraph{between}
+The recursion principle \tt{b}, which when used, represents the between function.
+It uses \tt{b'} to assist termination checking:
+\begin{code}
 b' : ℕ × ℕ → List' ℕ (ℕ × ℕ)
 b' (x , zero)  = (nil , λ())
 b' (x , suc n)  = (cons x , const (suc x , n))
-
 b : ℕ × ℕ → List' ℕ (ℕ × ℕ)
 b (x , y) = b' (x , (suc (y - x)))
-
+\end{code}
+The functions \tt{between1} and \tt{between2}.
+The former is defined without a cochurch-encoding, the latter with.
+A reflexive proof and sanity check (not working currently) is included to show equality:
+\begin{code}
 between1 : ℕ × ℕ → List ℕ
 between1 = A⟦ b ⟧
 between2 : ℕ × ℕ → List ℕ
@@ -56,18 +84,18 @@ eqbetween : between1 ≡ between2
 eqbetween = refl
 --checkbetween : out (2 :: 3 :: 4 :: 5 :: 6 :: []) ≡ out (between2 (2 , 6))
 --checkbetween = refl
-
-mapping : {A X : Set} → (f : X → ⊤ ⊎ (A × X)) → (X → List' A X)
-mapping f x with f x
-mapping f x | (inj₁ tt) = (nil , λ())
-mapping f x | (inj₂ (a , x')) = (cons a , const x')
-unfold' : {F : Container 0ℓ 0ℓ}{A X : Set}(f : X → ⊤ ⊎ (A × X)) → X → List A
-unfold' {A}{X} f = A⟦ mapping f ⟧
-
+\end{code}
+\subparagraph{map}
+The coalgebra \tt{m}, which when used in an algebra, represents the map function:
+\begin{code}
 m : {A B C : Set}(f : A → B) → List' A C → List' B C
 m f (nil , l) = (nil , l)
 m f (cons n , l) = (cons (f n) , l)
-
+\end{code}
+The functions \tt{map1} and \tt{map2}.
+The former is defined without a cochurch-encoding, the latter with.
+A reflexive proof and sanity check (not currently working) is included to show equality:
+\begin{code}
 map1 : {A B : Set}(f : A → B) → List A → List B
 map1 f = A⟦ m f ∘ out ⟧
 map2 : {A B : Set}(f : A → B) → List A → List B
@@ -76,34 +104,50 @@ eqmap : {f : ℕ → ℕ} → map1 f ≡ map2 f
 eqmap = refl
 --checkmap : map1 (_+_ 2) (3 :: 6 :: []) ≡ 5 :: 8 :: []
 --checkmap = refl
-
+\end{code}
+\subparagraph{sum}
+The coalgebra \tt{s}, which when used in an algebra, represents the sum function.
+Note that it is currently set to be non-terminating. A modification to $\nu$ is likely needed to enable
+usage of size type for the termination checker to accept this:
+\begin{code}
 {-# NON_TERMINATING #-}
-su : {S : Set} → (S → List' ℕ S) → S → ℕ
-su h s with h s
-su h s | (nil , f) = 0
-su h s | (cons x , f) = x + su h (f tt)
-
+s : {S : Set} → (S → List' ℕ S) → S → ℕ
+s h s' with h s'
+s h s' | (nil , f) = 0
+s h s' | (cons x , f) = x + s h (f tt)
+\end{code}
+The functions \tt{sum1} and \tt{sum2}.
+The former is defined without a cochurch-encoding, the latter with.
+A reflexive proof and sanity check (currently not working) is included to show equality:
+\begin{code}
 sum1 : List ℕ → ℕ
-sum1 = su out
+sum1 = s out
 sum2 : List ℕ → ℕ
-sum2 = consu su
+sum2 = consu s
 eqsum : sum1 ≡ sum2
 eqsum = refl
 --checksum : sum1 (5 :: 6 :: 7 :: []) ≡ 18
 --checksum = refl
-
+\end{code}
+\subparagraph{equality}
+The below proof shows the equality between the non-cochurch-endcoded pipeline and the cochurch-encoded pipeline.
+Note how it is different from the proof for church-encoded pipelines.
+This is because \cite{Harper2011}'s proof for the proof obligation of natural transformations is different for cochurch
+encodings than for church encodings.
+Because of this the first and second proof step for \tt{eq} in the church-encoded lists is done in one step here:
+\begin{code}
 eq : {f : ℕ → ℕ} → sum1 ∘ map1 f ∘ between1 ≡ sum2 ∘ map2 f ∘ between2
 eq {f} = begin
-    su out ∘ A⟦ m f ∘ out ⟧ ∘ A⟦ b ⟧
-  ≡⟨ cong (λ g → su out ∘ g) (sym (trans-pres b (m f) (λ _ → funext (λ {(nil , l) → refl ; (cons n , l) → refl})))) ⟩
---    su out ∘ A⟦ m f ∘ out ⟧ ∘ fromCoCh ∘ prodCoCh b
+    s out ∘ A⟦ m f ∘ out ⟧ ∘ A⟦ b ⟧
+  ≡⟨ cong (λ g → s out ∘ g) (sym (trans-pres b (m f) (λ _ → funext (λ {(nil , l) → refl ; (cons n , l) → refl})))) ⟩
+--    s out ∘ A⟦ m f ∘ out ⟧ ∘ fromCoCh ∘ prodCoCh b
 --  ≡⟨ cong (λ g → su out ∘ g ∘ prodCoCh b) {!!} ⟩ -- trans-pres is different from church.... this causes this step to be skipped?
-    su out ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b
-  ≡⟨ cong (λ g → g ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b) (cons-pres su) ⟩
-    consCoCh su ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b
-  ≡⟨ cong (λ g → consCoCh su ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ g ∘ prodCoCh b) (sym to-from-id) ⟩
-    consCoCh su ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ toCoCh ∘ fromCoCh ∘ prodCoCh b
+    s out ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b
+  ≡⟨ cong (λ g → g ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b) (cons-pres s) ⟩
+    consCoCh s ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b
+  ≡⟨ cong (λ g → consCoCh s ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ g ∘ prodCoCh b) (sym to-from-id) ⟩
+    consCoCh s ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ toCoCh ∘ fromCoCh ∘ prodCoCh b
   ≡⟨⟩
-    consu su ∘ natTrans (m f) ∘ prod b
+    consu s ∘ natTrans (m f) ∘ prod b
   ∎
 \end{code}
