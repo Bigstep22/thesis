@@ -1,6 +1,6 @@
 \documentclass{article}
 \usepackage[a4paper,margin=25mm,
- left=35mm,right=35mm
+% left=35mm,right=35mm
 ]{geometry}
 \usepackage{apacite}
 \usepackage{natbib}
@@ -8,6 +8,7 @@
 \usepackage{tikz-cd}
 \usepackage{float}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{agda}
 \usepackage[colorlinks=true,allcolors=blue]{hyperref}
 %include lhs2TeX.fmt
