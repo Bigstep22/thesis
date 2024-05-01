@@ -1,7 +1,7 @@
 \begin{code}
 {-# OPTIONS --guardedness #-}
 module agda.cochurch.inst.list where
-open import agda.cochurch.defs
+open import agda.cochurch.defs renaming (cons to consu)
 open import agda.cochurch.proofs
 open import Data.Container using (Container; map; _▷_; ⟦_⟧)
 open import Level hiding (suc)
@@ -97,37 +97,18 @@ eqbetween : between1 ≡ between2
 eqbetween = refl
 
 
--- Generalization of the above proofs for any container
--- MOVED TO DEFS
-
-
-transfuse : {F G H : Container 0ℓ 0ℓ}(nat1 : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
-            (nat2 : {X : Set} → ⟦ G ⟧ X → ⟦ H ⟧ X) →
-            transCoCh nat2 ∘ toCoCh ∘ fromCoCh ∘ transCoCh nat1 ≡ transCoCh (nat2 ∘ nat1)
-transfuse nat1 nat2 = begin
-            transCoCh nat2 ∘ toCoCh ∘ fromCoCh ∘ transCoCh nat1
-          ≡⟨ cong (λ f → transCoCh nat2 ∘ f ∘ transCoCh nat1) to-from-id ⟩
-            transCoCh nat2 ∘ transCoCh nat1
-          ≡⟨ funext (λ where (CoCh h s) → refl) ⟩
-            transCoCh (nat2 ∘ nat1)
-          ∎
-pipfuse : {F G : Container 0ℓ 0ℓ}{Y : Set}{g : Y → ⟦ F ⟧ Y}
-          {nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X}{c : {S : Set} → (S → ⟦ G ⟧ S) → S → Y} →
-          consCoCh c ∘ transCoCh nat ∘ prodCoCh g ≡ c (nat ∘ g)
-pipfuse = refl
-
 ---- Using the generalizations, we now get our encoding proofs and shortcut fusion for free :)
 between3 : ℕ × ℕ → List ℕ
 between3 = fromCoCh ∘ prodCoCh b
 map3 : {A B : Set}(f : A → B) → List A → List B
-map3 f = fromCoCh ∘ transCoCh (m f) ∘ toCoCh
+map3 f = fromCoCh ∘ natTransCoCh (m f) ∘ toCoCh
 sum3 : List ℕ → ℕ
 sum3 = consCoCh su' ∘ toCoCh
 fused : {f : ℕ → ℕ} → sum3 ∘ map3 f ∘ between3 ≡ su' (m f ∘ b)
 fused {f}  = begin
-    consCoCh su' ∘ toCoCh ∘ fromCoCh ∘ transCoCh (m f) ∘ toCoCh ∘ fromCoCh ∘ prodCoCh b
-  ≡⟨ cong (λ g → consCoCh su' ∘ g ∘ transCoCh (m f) ∘ g ∘ prodCoCh b) to-from-id ⟩
-    consCoCh su' ∘ transCoCh (m f) ∘ prodCoCh b
+    consCoCh su' ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ toCoCh ∘ fromCoCh ∘ prodCoCh b
+  ≡⟨ cong (λ g → consCoCh su' ∘ g ∘ natTransCoCh (m f) ∘ g ∘ prodCoCh b) to-from-id ⟩
+    consCoCh su' ∘ natTransCoCh (m f) ∘ prodCoCh b
   ≡⟨⟩
     su' (m f ∘ b)
   ∎

@@ -36,24 +36,30 @@ First, the producing function, note that this is a generalized version of \cite{
 \begin{code}
 prodCoCh : {F : Container 0ℓ 0ℓ}{Y : Set} → (g : Y → ⟦ F ⟧ Y) → Y → CoChurch F
 prodCoCh g x = CoCh g x
+prod : {F : Container 0ℓ 0ℓ}{Y : Set} → (g : Y → ⟦ F ⟧ Y) → Y → ν F
+prod g = fromCoCh ∘ prodCoCh g
 eqprod : {F : Container 0ℓ 0ℓ}{Y : Set}{g : (Y → ⟦ F ⟧ Y)} →
-         fromCoCh ∘ prodCoCh g ≡ A⟦ g ⟧
+         prod g ≡ A⟦ g ⟧
 eqprod = refl
 \end{code}
 Second the transformation function:
 \begin{code}
-transCoCh : {F G : Container 0ℓ 0ℓ}(nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) → CoChurch F → CoChurch G
-transCoCh n (CoCh h s) = CoCh (n ∘ h) s
-eqtrans : {F G : Container 0ℓ 0ℓ}{nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X} →
-          fromCoCh ∘ transCoCh nat ∘ toCoCh ≡ A⟦ nat ∘ out ⟧
-eqtrans = refl
+natTransCoCh : {F G : Container 0ℓ 0ℓ}(nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) → CoChurch F → CoChurch G
+natTransCoCh n (CoCh h s) = CoCh (n ∘ h) s
+natTrans : {F G : Container 0ℓ 0ℓ}(nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) → ν F → ν G
+natTrans nat = fromCoCh ∘ natTransCoCh nat ∘ toCoCh
+eqNatTrans : {F G : Container 0ℓ 0ℓ}{nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X} →
+          natTrans nat ≡ A⟦ nat ∘ out ⟧
+eqNatTrans = refl
 \end{code}
 Third the consuming function, note that this a is a generalized version of \cite{Svenningsson2002}'s \tt{destroy} function:
 \begin{code}
 consCoCh : {F : Container 0ℓ 0ℓ}{Y : Set} → (c : {S : Set} → (S → ⟦ F ⟧ S) → S → Y) → CoChurch F → Y
 consCoCh c (CoCh h s) = c h s
+cons : {F : Container 0ℓ 0ℓ}{Y : Set} → (c : {S : Set} → (S → ⟦ F ⟧ S) → S → Y) → ν F → Y
+cons c = consCoCh c ∘ toCoCh
 eqcons : {F : Container 0ℓ 0ℓ}{X : Set}{c : {S : Set} → (S → ⟦ F ⟧ S) → S → X} →
-         consCoCh c ∘ toCoCh ≡ c out
+         cons c ≡ c out
 eqcons = refl
 \end{code}
 The original CoChurch definition is included here for completeness' sake, but it is note used elsewhere in the code.
@@ -61,7 +67,8 @@ The original CoChurch definition is included here for completeness' sake, but it
 data CoChurch' (F : Container 0ℓ 0ℓ) : Set₁ where
   cochurch : (∃ λ S → (S → ⟦ F ⟧ S) × S) → CoChurch' F
 \end{code}
-A mapping from \tt{CoChurch'} to \tt{CoChurch} and back is provided as well as a proof that their compositions are equal to the identity function, thereby proving isomorphism:
+A mapping from \tt{CoChurch'} to \tt{CoChurch} and back is provided
+as well as a proof that their compositions are equal to the identity function, thereby proving isomorphism:
 \begin{code}
 toConv : {F : Container _ _} → CoChurch' F → CoChurch F
 toConv (cochurch (S , (h , x))) = CoCh {_}{S} h x

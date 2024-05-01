@@ -1,5 +1,5 @@
 \paragraph{Proof obligations}
-In \cite{Harper2011l}'s work, five proofs proofs are given for Church encodings.
+In \cite{Harper2011}'s work, five proofs proofs are given for Church encodings.
 These are formalized in this module.
 \begin{code}[hide]
 open import Data.Container using (Container; μ; ⟦_⟧; map)
@@ -32,7 +32,7 @@ from-to-id {F} = funext (λ (x : μ F) → begin
     x
   ∎)
 \end{code}
-The second proof is similar to the first, but it proves the composition in theo ther direction \tt{toCh $\circ$ fromCh = id}.
+The second proof is similar to the first, but it proves the composition in the other direction \tt{toCh $\circ$ fromCh = id}.
 This proofs leverages parametricity as described by \cite{Wadler1989}.
 It postulates the free theorem of the function \tt{g : $forall$ A . (F A -> A) -> A},
 to prove that ``applying \tt{g} to \tt{b} and then passing the result to \tt{h},
@@ -58,8 +58,8 @@ to-from-id {F} = funext (λ where
       Ch g
     ∎)
 \end{code}
-The third proof shows that encoding functions constitute an implementation for the consumer functions being replaced.
-The proof is proved via refl, but \cite{Harper2011}'s original proof steps are included here for completeness:
+The third proof shows church-encoded functions constitute an implementation for the consumer functions being replaced.
+The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness:
 \begin{code}
 cons-pres : {F : Container 0ℓ 0ℓ}{X : Set}(b : ⟦ F ⟧ X → X) →
             consCh b ∘ toCh ≡ ⦅ b ⦆
@@ -73,8 +73,8 @@ cons-pres {F} b = funext λ (x : μ F) → begin
     ⦅ b ⦆ x
   ∎
 \end{code}
-The fourth proof shows that producing functions constitute an implementation for the producing functions being replaced.
-The proof is proved via refl, but \cite{Harper2011}'s original proof steps are included here for completeness:
+The fourth proof shows that church-encoded functions constitute an implementation for the producing functions being replaced.
+The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness:
 \begin{code}
 prod-pres : {F : Container 0ℓ 0ℓ}{X : Set}(f : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y) →
             fromCh ∘ prodCh f ≡ f in'
@@ -88,7 +88,7 @@ prod-pres {F}{X} f = funext λ (s : X) → begin
     f in' s
   ∎
 \end{code}
-The fifth, and final proof proof shows that conversion functions constitute an implementation for the conversion functions being replaced.
+The fifth, and final proof shows that church-encoded functions constitute an implementation for the conversion functions being replaced.
 The proof again leverages the free theorem defined earlier:
 \begin{code}
 trans-pres : {F G : Container 0ℓ 0ℓ} (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
@@ -113,8 +113,6 @@ encodings will fuse down to a simple function application.
 The first of these two proofs shows that any two composed natural transformation fuse down
 to one single natural transformation:
 \begin{code}
-
-
 natfuse : {F G H : Container 0ℓ 0ℓ}
           (nat1 : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
           (nat2 : {X : Set} → ⟦ G ⟧ X → ⟦ H ⟧ X) →

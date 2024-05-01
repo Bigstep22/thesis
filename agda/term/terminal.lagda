@@ -18,17 +18,9 @@ open import Data.Product using (_,_; Σ)
 \end{code}
 The forward direction of the \textit{universal property of unfolds} \cite{Harper2011}:
 \begin{code}
-universal-propₗ : {F : Container 0ℓ 0ℓ}{C : Set}(c : C → ⟦ F ⟧ C)(h : C → ν F) →
+universal-prop : {F : Container 0ℓ 0ℓ}{C : Set}(c : C → ⟦ F ⟧ C)(h : C → ν F) →
                  h ≡ A⟦ c ⟧ → out ∘ h ≡ map h ∘ c
-universal-propₗ c h eq = begin
-    out ∘ h
-  ≡⟨ cong (_∘_ out) eq ⟩
-    out ∘ A⟦ c ⟧
-  ≡⟨⟩
-    map A⟦ c ⟧ ∘ c
-  ≡⟨ cong (_∘ c) (cong map (sym eq)) ⟩
-    map h ∘ c
-  ∎
+universal-prop c h eq rewrite eq = refl
 \end{code}
 \begin{code}[hide]
 --universal-propᵣ : {C : Set}(c : C → ⟦ F ⟧ C)(h : C → ν F) →

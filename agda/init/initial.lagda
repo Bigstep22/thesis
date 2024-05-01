@@ -17,17 +17,9 @@ open import Data.W using () renaming (sup to in')
 \end{code}
 The forward direction of the \textit{universal property of folds} \citep{Harper2011}:
 \begin{code}
-universal-propₗ : {F : Container 0ℓ 0ℓ}{X : Set}(a : ⟦ F ⟧ X → X)(h : μ F → X) →
+universal-prop : {F : Container 0ℓ 0ℓ}{X : Set}(a : ⟦ F ⟧ X → X)(h : μ F → X) →
                   h ≡ ⦅ a ⦆ → h ∘ in' ≡ a ∘ map h
-universal-propₗ a h eq = begin
-    h ∘ in'
-  ≡⟨ cong (_∘ in') eq ⟩
-    ⦅ a ⦆ ∘ in'
-  ≡⟨⟩
-    a ∘ map ⦅ a ⦆
-  ≡⟨ cong (λ x → a ∘ map x) (sym eq) ⟩
-    a ∘ map h
-  ∎
+universal-prop a h eq rewrite eq = refl
 \end{code}
 \begin{code}[hide]
 --universal-propᵣ : {X : Set}(a : ⟦ F ⟧ X → X)(h : μ F → X) →

@@ -59,7 +59,8 @@ valid-fcoalghom {X} a = record { f = A⟦ a ⟧ ; commutes = refl }
 It is shown that any other valid F-Coalgebra homomorphism from \tt{out} to \tt{a} is equal to the $\anam{\_}$ defined.
 This constitutes a proof of uniqueness.
 This uses \tt{out} injectivity.
-SOMETHING ABOUT TERMINATION CHECKING.
+Currently, Agda's termination checker does not seem to notice that the proof in question terminates, a modification
+ to $\nu$ might be needed in order ensure proper termination checking for this proof:
 \begin{code}
 {-# NON_TERMINATING #-}
 isunique : {F : Container 0ℓ 0ℓ}{X : Set}{c : X → ⟦ F ⟧ X}(fhom : F CoAlghom[ c , out ])
