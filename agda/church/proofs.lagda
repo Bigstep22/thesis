@@ -34,16 +34,17 @@ from-to-id {F} = funext (λ (x : μ F) → begin
 \end{code}
 The second proof is similar to the first, but it proves the composition in theo ther direction \tt{toCh $\circ$ fromCh = id}.
 This proofs leverages parametricity as described by \cite{Wadler1989}.
-It postulates the free theorem of the function \tt{g}, to prove that ``applying \tt{g} to \tt{b} and then passing
-the result to \tt{h} is the same as just folding \tt{c} over the datatype'' \citep{Harper2011}:
+It postulates the free theorem of the function \tt{g : $forall$ A . (F A -> A) -> A},
+to prove that ``applying \tt{g} to \tt{b} and then passing the result to \tt{h},
+is the same as just folding \tt{c} over the datatype'' \citep{Harper2011}:
 \begin{code}
-postulate freetheorem-initial : {F : Container 0ℓ 0ℓ}{B C : Set}{b : ⟦ F ⟧ B → B} {c : ⟦ F ⟧ C → C}
-                                (h : B → C) (g : {X : Set} → (⟦ F ⟧ X → X) → X) →
-                                h ∘ b ≡ c ∘ map h → h (g b) ≡ g c
+postulate free : {F : Container 0ℓ 0ℓ}{B C : Set}{b : ⟦ F ⟧ B → B} {c : ⟦ F ⟧ C → C}
+                 (h : B → C)(g : {X : Set} → (⟦ F ⟧ X → X) → X) →
+                 h ∘ b ≡ c ∘ map h → h (g b) ≡ g c
 fold-invariance : {F : Container 0ℓ 0ℓ}{Y : Set}
                   (g : {X : Set} → (⟦ F ⟧ X → X) → X)(a : ⟦ F ⟧ Y → Y) →
                   ⦅ a ⦆ (g in') ≡ g a
-fold-invariance g a = freetheorem-initial ⦅ a ⦆ g refl
+fold-invariance g a = free ⦅ a ⦆ g refl
 
 to-from-id : {F : Container 0ℓ 0ℓ} → toCh ∘ fromCh {F} ≡ id
 to-from-id {F} = funext (λ where
@@ -57,7 +58,8 @@ to-from-id {F} = funext (λ where
       Ch g
     ∎)
 \end{code}
-The third proof shows that encoding functions constitute an implementation for the consumer functions being replaced:
+The third proof shows that encoding functions constitute an implementation for the consumer functions being replaced.
+The proof is proved via refl, but \cite{Harper2011}'s original proof steps are included here for completeness:
 \begin{code}
 cons-pres : {F : Container 0ℓ 0ℓ}{X : Set}(b : ⟦ F ⟧ X → X) →
             consCh b ∘ toCh ≡ ⦅ b ⦆
@@ -71,7 +73,8 @@ cons-pres {F} b = funext λ (x : μ F) → begin
     ⦅ b ⦆ x
   ∎
 \end{code}
-The fourth proof shows that producing functions constitute an implementation for the producing functions being replaced:
+The fourth proof shows that producing functions constitute an implementation for the producing functions being replaced.
+The proof is proved via refl, but \cite{Harper2011}'s original proof steps are included here for completeness:
 \begin{code}
 prod-pres : {F : Container 0ℓ 0ℓ}{X : Set}(f : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y) →
             fromCh ∘ prodCh f ≡ f in'
@@ -85,9 +88,9 @@ prod-pres {F}{X} f = funext λ (s : X) → begin
     f in' s
   ∎
 \end{code}
-The fifth, and final proof proof shows that conversion functions constitute an implementation for the conversion functions being replaced:
+The fifth, and final proof proof shows that conversion functions constitute an implementation for the conversion functions being replaced.
+The proof again leverages the free theorem defined earlier:
 \begin{code}
--- This last proofs could all use a rewrite, now that I've generalized the three different types of functions...
 trans-pres : {F G : Container 0ℓ 0ℓ} (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
              fromCh ∘ natTransCh f ≡ ⦅ in' ∘ f ⦆ ∘ fromCh
 trans-pres f = funext (λ where
@@ -104,7 +107,12 @@ trans-pres f = funext (λ where
     ≡⟨⟩ -- Definition of fromCh
       ⦅ in' ∘ f ⦆ (fromCh (Ch g))
     ∎))
-
+\end{code}
+Finally two additional proofs were made to clearly show that any pipeline made using church
+encodings will fuse down to a simple function application.
+The first of these two proofs shows that any two composed natural transformation fuse down
+to one single natural transformation:
+\begin{code}
 
 
 natfuse : {F G H : Container 0ℓ 0ℓ}
@@ -118,7 +126,10 @@ natfuse nat1 nat2 = begin
           ≡⟨ funext (λ where (Ch g) → refl) ⟩
             natTransCh (nat2 ∘ nat1)
           ∎
-
+\end{code}
+The second of these two proofs shows that any pipeline, consisting of a producer, transformer,
+and consumer function, fuse down to a single function application:
+\begin{code}
 pipefuse : {F G : Container 0ℓ 0ℓ}{X : Set}(g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y)
           (nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)(c : (⟦ G ⟧ X → X)) →
           cons c ∘ natTrans nat ∘ prod g ≡ g (c ∘ nat)
@@ -131,13 +142,4 @@ pipefuse g nat c = begin
   ≡⟨⟩
     g (c ∘ nat)
   ∎
-
---cons-prod : {F : Container _ _}{X : Set}
---            {c : (⟦ F ⟧ X → X)}{g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y} →
---            consCh c ∘ prodCh g ≡ g c
---cons-prod = refl
-
-
-
-
 \end{code}

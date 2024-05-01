@@ -38,8 +38,9 @@ prod g = fromCh ∘ prodCh g
 eqProd : {F : Container _ _}{Y : Set}
          {g : {X : Set} → (⟦ F ⟧ X → X) → Y → X} → prod g ≡ g in'
 eqProd = refl
-
--- This is something cool and extra and intermediate
+\end{code}
+Second, the natural transformation function:
+\begin{code}
 natTransCh : {F G : Container _ _}
              (nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) → Church F → Church G
 natTransCh nat (Ch g) = Ch (λ a → g (a ∘ nat))
@@ -50,8 +51,9 @@ eqNatTrans : {F G : Container _ _}
              {nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X} →
              natTrans nat ≡ ⦅ in' ∘ nat ⦆
 eqNatTrans = refl
-
--- This is foldr!
+\end{code}
+Third, the consuming function, note that this is a generalized version of \cite{Gill1993}'s \tt{foldr} function.
+\begin{code}
 consCh : {F : Container _ _}{X : Set}
          (c : ⟦ F ⟧ X → X) → Church F → X
 consCh c (Ch g) = g c
@@ -61,6 +63,4 @@ cons c = consCh c ∘ toCh
 eqCons : {F : Container _ _}{X : Set}
          {c : ⟦ F ⟧ X → X} → cons c ≡ ⦅ c ⦆
 eqCons = refl
-
-
 \end{code}

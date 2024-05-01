@@ -72,16 +72,12 @@ b a (x , y) = b' a x (suc (y - x))
 
 between1 : ℕ × ℕ → List ℕ
 between1 xy = b in' xy
---betweenCh : ℕ × ℕ → Church (F ℕ)
---betweenCh xy = Ch (λ a → b a xy)
 between2 : ℕ × ℕ → List ℕ
 between2 = prod b
-
 eqbetween : between1 ≡ between2
 eqbetween = refl
-
-check : 2 :: 3 :: 4 :: 5 :: 6 :: [] ≡ between2 (2 , 6)
-check = refl
+checkbetween : 2 :: 3 :: 4 :: 5 :: 6 :: [] ≡ between2 (2 , 6)
+checkbetween = refl
 
 
 m : {A B C : Set}(f : A → B) → List' A C → List' B C
@@ -89,20 +85,12 @@ m f (nil , _) = (nil , λ())
 m f (cons n , l) = (cons (f n) , l)
 map1 : {A B : Set}(f : A → B) → List A → List B
 map1 f = ⦅ in' ∘ m f ⦆
---mapCh : {A B : Set}(f : A → B) → Church (F A) → Church (F B)
---mapCh f (Ch g) = Ch (λ a → g (a ∘ m f))
 map2 : {A B : Set}(f : A → B) → List A → List B
 map2 f = natTrans (m f)
-
 eqmap : {f : ℕ → ℕ} → map1 f ≡ map2 f
 eqmap = refl
-
-l1 : μ (F ℕ)
-l1 = 5 :: 8 :: []
-l2 : μ (F ℕ)
-l2 = 3 :: 6 :: []
-proof : (map1 (_+_ 2) l2) ≡ l1
-proof = refl
+checkmap : (map1 (_+_ 2) (3 :: 6 :: [])) ≡ 5 :: 8 :: []
+checkmap = refl
 
 
 su : List' ℕ ℕ → ℕ
@@ -110,16 +98,12 @@ su (nil , _) = 0
 su (cons n , f) = n + f tt
 sum1 : List ℕ → ℕ
 sum1 = ⦅ su ⦆
---sumCh : Church (F ℕ) → ℕ
---sumCh (Ch g) = g su
 sum2 : List ℕ → ℕ
 sum2 = consu su
-
 eqsum : sum1 ≡ sum2
 eqsum = refl
-
-sumworks : sum1 (5 :: 6 :: 7 :: []) ≡ 18
-sumworks = refl
+checksum : sum1 (5 :: 6 :: 7 :: []) ≡ 18
+checksum = refl
 
 
 
@@ -142,6 +126,7 @@ eq {f} = begin
 
 
 
+-- Bonus functions
 count : (ℕ → Bool) → μ (F ℕ) → ℕ
 count p = ⦅ (λ where
                (nil , _) → 0
