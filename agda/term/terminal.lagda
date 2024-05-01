@@ -3,9 +3,9 @@ This module proves some property of anamorphisms.
 \begin{code}
 {-# OPTIONS --guardedness #-}
 module agda.term.terminal  where
-open import Data.Container using (Container; map) renaming (⟦_⟧ to I⟦_⟧)
 \end{code}
 \begin{code}[hide]
+open import Data.Container using (Container; map; ⟦_⟧)
 open import Level
 open import Function.Base using (id; _∘_)
 open import Relation.Binary.PropositionalEquality as Eq
@@ -18,7 +18,7 @@ open import Data.Product using (_,_; Σ)
 \end{code}
 The forward direction of the \textit{universal property of unfolds} \cite{Harper2011}:
 \begin{code}
-universal-propₗ : {F : Container 0ℓ 0ℓ}{C : Set}(c : C → I⟦ F ⟧ C)(h : C → ν F) →
+universal-propₗ : {F : Container 0ℓ 0ℓ}{C : Set}(c : C → ⟦ F ⟧ C)(h : C → ν F) →
                  h ≡ A⟦ c ⟧ → out ∘ h ≡ map h ∘ c
 universal-propₗ c h eq = begin
     out ∘ h
@@ -37,7 +37,7 @@ universal-propₗ c h eq = begin
 \end{code}
 The \textit{computation law} \cite{Harper2011}:
 \begin{code}
-comp-law : {F : Container 0ℓ 0ℓ}{C : Set}(c : C → I⟦ F ⟧ C) → out ∘ A⟦ c ⟧ ≡ map A⟦ c ⟧ ∘ c
+comp-law : {F : Container 0ℓ 0ℓ}{C : Set}(c : C → ⟦ F ⟧ C) → out ∘ A⟦ c ⟧ ≡ map A⟦ c ⟧ ∘ c
 comp-law c = refl
 \end{code}
 The \textit{reflection law} \cite{Harper2011}:

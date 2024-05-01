@@ -4,10 +4,10 @@ Specifically, it is shown that \tt{($\nu$, out)} is terminal.
 \begin{code}
 {-# OPTIONS --guardedness #-}
 module agda.term.termcoalg where
-open import Categories.Category renaming (Category to Cat)
-open import Data.Container using (Container; map) renaming (⟦_⟧ to I⟦_⟧)
 \end{code}
 \begin{code}[hide]
+open import Categories.Category renaming (Category to Cat)
+open import Data.Container using (Container; map; ⟦_⟧)
 open import Level
 open import Function
 open import Data.Product using (_,_; Σ)
@@ -28,16 +28,16 @@ C[ F ]CoAlg = F-Coalgebras F[ F ]
 \end{code}
 A shorthand for an F-Coalgebra homomorphism:
 \begin{code}
-_CoAlghom[_,_] : {X Y : Set}(F : Container 0ℓ 0ℓ)(x : X → I⟦ F ⟧ X)(Y : Y → I⟦ F ⟧ Y) → Set
+_CoAlghom[_,_] : {X Y : Set}(F : Container 0ℓ 0ℓ)(x : X → ⟦ F ⟧ X)(Y : Y → ⟦ F ⟧ Y) → Set
 F CoAlghom[ x , y ] = C[ F ]CoAlg [ to-Coalgebra x , to-Coalgebra y ]
 \end{code}
 A candidate terminal datatype and anamorphism function are defined, they will be proved to be so later on this module:
 \begin{code}
 record ν (F : Container 0ℓ 0ℓ) : Set where
   coinductive
-  field out : I⟦ F ⟧ (ν F)
+  field out : ⟦ F ⟧ (ν F)
 open ν
-A⟦_⟧ : {F : Container 0ℓ 0ℓ}{X : Set} → (X → I⟦ F ⟧ X) → X → ν F
+A⟦_⟧ : {F : Container 0ℓ 0ℓ}{X : Set} → (X → ⟦ F ⟧ X) → X → ν F
 out (A⟦ c ⟧ x) = (λ (op , ar) → op , A⟦ c ⟧ ∘ ar) (c x)
 \end{code}
 \begin{code}[hide]
@@ -53,7 +53,7 @@ postulate out-injective : {F : Container 0ℓ 0ℓ}{x y : ν F} → out x ≡ ou
 It is shown that any $\anam{\_}$ is a valid F-Coalgebra homomorphism from \tt{out} to any other object \tt{a}.
 This constitutes a proof of existence:
 \begin{code}
-valid-fcoalghom : {F : Container 0ℓ 0ℓ}{X : Set}(a : X → I⟦ F ⟧ X) → F CoAlghom[ a , out ]
+valid-fcoalghom : {F : Container 0ℓ 0ℓ}{X : Set}(a : X → ⟦ F ⟧ X) → F CoAlghom[ a , out ]
 valid-fcoalghom {X} a = record { f = A⟦ a ⟧ ; commutes = refl }
 \end{code}
 It is shown that any other valid F-Coalgebra homomorphism from \tt{out} to \tt{a} is equal to the $\anam{\_}$ defined.
@@ -62,7 +62,7 @@ This uses \tt{out} injectivity.
 SOMETHING ABOUT TERMINATION CHECKING.
 \begin{code}
 {-# NON_TERMINATING #-}
-isunique : {F : Container 0ℓ 0ℓ}{X : Set}{c : X → I⟦ F ⟧ X}(fhom : F CoAlghom[ c , out ])
+isunique : {F : Container 0ℓ 0ℓ}{X : Set}{c : X → ⟦ F ⟧ X}(fhom : F CoAlghom[ c , out ])
            (x : X) → A⟦ c ⟧ x ≡ fhom .f x
 isunique {_}{_}{c} fhom x = out-injective (begin
         (out ∘ A⟦ c ⟧) x
