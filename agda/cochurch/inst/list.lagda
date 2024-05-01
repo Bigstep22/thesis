@@ -1,4 +1,4 @@
-\begin{code}
+\begin{code}[hide]
 {-# OPTIONS --guardedness #-}
 module agda.cochurch.inst.list where
 open import agda.cochurch.defs renaming (cons to consu)
@@ -16,6 +16,8 @@ open import Data.Nat
 open import Agda.Builtin.Nat
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
+\end{code}
+\begin{code}
 open import agda.funct.funext
 
 data ListOp (A : Set) : Set where
@@ -23,10 +25,7 @@ data ListOp (A : Set) : Set where
   cons : A → ListOp A
 
 F : (A : Set) → Container 0ℓ 0ℓ
-F A = ListOp A ▷ λ where
-                   nil → ⊥
-                   (cons n) → ⊤
-
+F A = ListOp A ▷ λ { nil → ⊥ ; (cons n) → ⊤ }
 
 List : (A : Set) → Set
 List A = ν (F A)
@@ -35,17 +34,16 @@ List' A B = ⟦ F A ⟧ B
 
 [] : {A : Set} → List A
 out ([]) = (nil , λ())
---
---
+
 _::_ : {A : Set} → A → List A → List A
-out (x :: xs) = (cons x , λ tt → xs)
+out (x :: xs) = (cons x , const xs)
 infixr 20 _::_
 
 
 
 b' : ℕ × ℕ → List' ℕ (ℕ × ℕ)
 b' (x , zero)  = (nil , λ())
-b' (x , suc n)  = (cons x , λ tt → (suc x , n))
+b' (x , suc n)  = (cons x , const (suc x , n))
 
 b : ℕ × ℕ → List' ℕ (ℕ × ℕ)
 b (x , y) = b' (x , (suc (y - x)))
@@ -62,7 +60,7 @@ eqbetween = refl
 mapping : {A X : Set} → (f : X → ⊤ ⊎ (A × X)) → (X → List' A X)
 mapping f x with f x
 mapping f x | (inj₁ tt) = (nil , λ())
-mapping f x | (inj₂ (a , x')) = (cons a , λ tt → x')
+mapping f x | (inj₂ (a , x')) = (cons a , const x')
 unfold' : {F : Container 0ℓ 0ℓ}{A X : Set}(f : X → ⊤ ⊎ (A × X)) → X → List A
 unfold' {A}{X} f = A⟦ mapping f ⟧
 

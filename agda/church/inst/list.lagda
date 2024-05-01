@@ -1,9 +1,10 @@
 \paragraph{Example: List fusion}
+In order to clearly see how the Church encodings allows functions to fuse, a datatype was selected such
+the abstracted function, which have so far been used to prove the needed properties, can be instantiated
+to demonstrate how the fusion works for functions across a cocrete datatype.
 \begin{code}[hide]
-open import Level hiding (zero; suc)
 open import Data.Product hiding (map)
 open import Data.Nat
-open import Data.Fin hiding (_+_; _>_; _-_)
 open import Data.Empty
 open import Data.Unit
 open import Function.Base
@@ -15,25 +16,24 @@ open import agda.funct.funext
 open import agda.init.initalg
 open import Relation.Binary.PropositionalEquality as Eq
 open ≡-Reasoning
+open import Data.Container using (Container; ⟦_⟧; μ; map; _▷_)
 \end{code}
 \begin{code}
 module agda.church.inst.list where
-open import Data.Container using (Container; ⟦_⟧; μ; map; _▷_)
 open import Data.W renaming (sup to in')
 
+-- Note how the below datatype is isomorphic to ⊤ ⊎ A
 data ListOp (A : Set) : Set where
   nil : ListOp A
   cons : A → ListOp A
 
-F : (A : Set) → Container 0ℓ 0ℓ
-F A = ListOp A ▷ λ where nil → ⊥
-                         (cons n) → ⊤
+F : (A : Set) → Container _ _
+F A = ListOp A ▷ λ { nil → ⊥ ; (cons n) → ⊤ }
 
 List : (A : Set) → Set
 List A = μ (F A)
 List' : (A B : Set) → Set
 List' A B = ⟦ F A ⟧ B
-
 
 
 -- Investigation related to filter, the following lines are tangentially related to list
@@ -47,12 +47,11 @@ filter p = fromCh ∘ prodCh (λ f → consCh (λ where
    (cons a , l) → if (p a) then f (cons a , l) else l tt)) ∘ toCh
 
 
-
 [] : {A : Set} → μ (F A)
 [] = in' (nil , λ())
 
 _::_ : {A : Set} → A → List A → List A
-_::_ x xs = in' (cons x , λ tt → xs)
+_::_ x xs = in' (cons x , const xs)
 infixr 20 _::_
 
 fold' : {A X : Set}(n : X)(c : A → X → X) → List A → X
@@ -65,7 +64,7 @@ fold' {A}{X} n c = ⦅ (λ where
 
 b' : {B : Set} → (a : List' ℕ B → B) → ℕ → ℕ → B
 b' a x zero = a (nil , λ())
-b' a x (suc n) = a (cons x , λ tt → (b' a (suc x)  n))
+b' a x (suc n) = a (cons x , const (b' a (suc x)  n))
 
 b : {B : Set} → (a : List' ℕ B → B) → ℕ × ℕ → B
 b a (x , y) = b' a x (suc (y - x))
