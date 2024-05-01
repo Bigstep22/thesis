@@ -19,13 +19,13 @@ open import Data.Product using (_,_; Σ)
 The forward direction of the \textit{universal property of unfolds} \cite{Harper2011}:
 \begin{code}
 universal-propₗ : {F : Container 0ℓ 0ℓ}{C : Set}(c : C → I⟦ F ⟧ C)(h : C → ν F) →
-                 h ≡ ⟦ c ⟧ → out ∘ h ≡ map h ∘ c
+                 h ≡ A⟦ c ⟧ → out ∘ h ≡ map h ∘ c
 universal-propₗ c h eq = begin
     out ∘ h
   ≡⟨ cong (_∘_ out) eq ⟩
-    out ∘ ⟦ c ⟧
+    out ∘ A⟦ c ⟧
   ≡⟨⟩
-    map ⟦ c ⟧ ∘ c
+    map A⟦ c ⟧ ∘ c
   ≡⟨ cong (_∘ c) (cong map (sym eq)) ⟩
     map h ∘ c
   ∎
@@ -37,20 +37,20 @@ universal-propₗ c h eq = begin
 \end{code}
 The \textit{computation law} \cite{Harper2011}:
 \begin{code}
-comp-law : {F : Container 0ℓ 0ℓ}{C : Set}(c : C → I⟦ F ⟧ C) → out ∘ ⟦ c ⟧ ≡ map ⟦ c ⟧ ∘ c
+comp-law : {F : Container 0ℓ 0ℓ}{C : Set}(c : C → I⟦ F ⟧ C) → out ∘ A⟦ c ⟧ ≡ map A⟦ c ⟧ ∘ c
 comp-law c = refl
 \end{code}
 The \textit{reflection law} \cite{Harper2011}:
 SOMETHING ABOUT TERMINATION.
 \begin{code}
 {-# NON_TERMINATING #-}
-reflection : {F : Container 0ℓ 0ℓ}(x : ν F) → ⟦ out ⟧ x ≡ x
+reflection : {F : Container 0ℓ 0ℓ}(x : ν F) → A⟦ out ⟧ x ≡ x
 reflection x = out-injective (begin
-    out (⟦ out ⟧ x)
+    out (A⟦ out ⟧ x)
   ≡⟨⟩
-    map ⟦ out ⟧ (out x)
+    map A⟦ out ⟧ (out x)
   ≡⟨⟩
-    op , ⟦ out ⟧ ∘ ar
+    op , A⟦ out ⟧ ∘ ar
   ≡⟨ cong (λ f → op , f) (funext $ reflection ∘ ar) ⟩
     op , id ∘ ar
   ≡⟨⟩

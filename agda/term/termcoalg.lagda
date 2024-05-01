@@ -37,8 +37,8 @@ record ν (F : Container 0ℓ 0ℓ) : Set where
   coinductive
   field out : I⟦ F ⟧ (ν F)
 open ν
-⟦_⟧ : {F : Container 0ℓ 0ℓ}{X : Set} → (X → I⟦ F ⟧ X) → X → ν F
-out (⟦ c ⟧ x) = (λ (op , ar) → op , ⟦ c ⟧ ∘ ar) (c x)
+A⟦_⟧ : {F : Container 0ℓ 0ℓ}{X : Set} → (X → I⟦ F ⟧ X) → X → ν F
+out (A⟦ c ⟧ x) = (λ (op , ar) → op , A⟦ c ⟧ ∘ ar) (c x)
 \end{code}
 \begin{code}[hide]
 --{-# ETA ν #-} -- Seems to cause a hang (or major slowdown) in compilation
@@ -54,7 +54,7 @@ It is shown that any $\anam{\_}$ is a valid F-Coalgebra homomorphism from \tt{ou
 This constitutes a proof of existence:
 \begin{code}
 valid-fcoalghom : {F : Container 0ℓ 0ℓ}{X : Set}(a : X → I⟦ F ⟧ X) → F CoAlghom[ a , out ]
-valid-fcoalghom {X} a = record { f = ⟦ a ⟧ ; commutes = refl }
+valid-fcoalghom {X} a = record { f = A⟦ a ⟧ ; commutes = refl }
 \end{code}
 It is shown that any other valid F-Coalgebra homomorphism from \tt{out} to \tt{a} is equal to the $\anam{\_}$ defined.
 This constitutes a proof of uniqueness.
@@ -63,13 +63,13 @@ SOMETHING ABOUT TERMINATION CHECKING.
 \begin{code}
 {-# NON_TERMINATING #-}
 isunique : {F : Container 0ℓ 0ℓ}{X : Set}{c : X → I⟦ F ⟧ X}(fhom : F CoAlghom[ c , out ])
-           (x : X) → ⟦ c ⟧ x ≡ fhom .f x
+           (x : X) → A⟦ c ⟧ x ≡ fhom .f x
 isunique {_}{_}{c} fhom x = out-injective (begin
-        (out ∘ ⟦ c ⟧) x
+        (out ∘ A⟦ c ⟧) x
     ≡⟨⟩ -- Definition of ⟦_⟧
-        map ⟦ c ⟧ (c x)
+        map A⟦ c ⟧ (c x)
     ≡⟨⟩
-        (λ(op , ar) → (op , ⟦ c ⟧ ∘ ar)) (c x)
+        (λ(op , ar) → (op , A⟦ c ⟧ ∘ ar)) (c x)
     -- Same issue as with the proof of reflection it seems...
     ≡⟨ cong (λ f → op , f) (funext $ isunique fhom ∘ ar) ⟩ -- induction
         (op , fhom .f ∘ ar)

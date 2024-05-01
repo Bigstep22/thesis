@@ -3,7 +3,7 @@
 module agda.cochurch.inst.list where
 open import agda.cochurch.defs
 open import agda.cochurch.proofs
-open import Data.Container using (Container; map; _▷_) renaming (⟦_⟧ to I⟦_⟧)
+open import Data.Container using (Container; map; _▷_; ⟦_⟧)
 open import Level hiding (suc)
 open import Data.Empty
 open import Data.Unit
@@ -31,7 +31,7 @@ F A = ListOp A ▷ λ where
 List : (A : Set) → Set
 List A = ν (F A)
 List' : (A B : Set) → Set
-List' A B = I⟦ F A ⟧ B
+List' A B = ⟦ F A ⟧ B
 
 [] : {A : Set} → List A
 out ([]) = (nil , λ())
@@ -47,13 +47,13 @@ mapping f x with f x
 mapping f x | (inj₁ tt) = (nil , λ())
 mapping f x | (inj₂ (a , x')) = (cons a , λ tt → x')
 unfold' : {F : Container 0ℓ 0ℓ}{A X : Set}(f : X → ⊤ ⊎ (A × X)) → X → List A
-unfold' {A}{X} f = ⟦ mapping f ⟧
+unfold' {A}{X} f = A⟦ mapping f ⟧
 
 m : {A B C : Set}(f : A → B) → List' A C → List' B C
 m f (nil , _) = (nil , λ())
 m f (cons n , l) = (cons (f n) , l)
 map1 : {A B : Set}(f : A → B) → List A → List B
-map1 f = ⟦ m f ∘ out ⟧
+map1 f = A⟦ m f ∘ out ⟧
 mapCoCh : {A B : Set}(f : A → B) → CoChurch (F A) → CoChurch (F B)
 mapCoCh f (CoCh h s) = CoCh (m f ∘ h) s
 map2 : {A B : Set}(f : A → B) → List A → List B
@@ -82,7 +82,7 @@ b : ℕ × ℕ → List' ℕ (ℕ × ℕ)
 b (x , y) = b' (x , (suc (y - x)))
 
 between1 : ℕ × ℕ → List ℕ
-between1 xy = ⟦ b ⟧ xy
+between1 xy = A⟦ b ⟧ xy
 betweenCoCh : (ℕ × ℕ → List' ℕ (ℕ × ℕ)) → (ℕ × ℕ) → CoChurch (F ℕ)
 betweenCoCh b = CoCh b
 between2 : ℕ × ℕ → List ℕ
@@ -101,18 +101,18 @@ eqbetween = refl
 -- MOVED TO DEFS
 
 
-transfuse : {F G H : Container 0ℓ 0ℓ}(nat1 : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X) →
-            (nat2 : {X : Set} → I⟦ G ⟧ X → I⟦ H ⟧ X) →
+transfuse : {F G H : Container 0ℓ 0ℓ}(nat1 : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
+            (nat2 : {X : Set} → ⟦ G ⟧ X → ⟦ H ⟧ X) →
             transCoCh nat2 ∘ toCoCh ∘ fromCoCh ∘ transCoCh nat1 ≡ transCoCh (nat2 ∘ nat1)
 transfuse nat1 nat2 = begin
             transCoCh nat2 ∘ toCoCh ∘ fromCoCh ∘ transCoCh nat1
-          ≡⟨ cong (λ f → transCoCh nat2 ∘ f ∘ transCoCh nat1) to-from-id' ⟩
+          ≡⟨ cong (λ f → transCoCh nat2 ∘ f ∘ transCoCh nat1) to-from-id ⟩
             transCoCh nat2 ∘ transCoCh nat1
           ≡⟨ funext (λ where (CoCh h s) → refl) ⟩
             transCoCh (nat2 ∘ nat1)
           ∎
-pipfuse : {F G : Container 0ℓ 0ℓ}{Y : Set}{g : Y → I⟦ F ⟧ Y}
-          {nat : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X}{c : {S : Set} → (S → I⟦ G ⟧ S) → S → Y} →
+pipfuse : {F G : Container 0ℓ 0ℓ}{Y : Set}{g : Y → ⟦ F ⟧ Y}
+          {nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X}{c : {S : Set} → (S → ⟦ G ⟧ S) → S → Y} →
           consCoCh c ∘ transCoCh nat ∘ prodCoCh g ≡ c (nat ∘ g)
 pipfuse = refl
 
@@ -126,7 +126,7 @@ sum3 = consCoCh su' ∘ toCoCh
 fused : {f : ℕ → ℕ} → sum3 ∘ map3 f ∘ between3 ≡ su' (m f ∘ b)
 fused {f}  = begin
     consCoCh su' ∘ toCoCh ∘ fromCoCh ∘ transCoCh (m f) ∘ toCoCh ∘ fromCoCh ∘ prodCoCh b
-  ≡⟨ cong (λ g → consCoCh su' ∘ g ∘ transCoCh (m f) ∘ g ∘ prodCoCh b) to-from-id' ⟩
+  ≡⟨ cong (λ g → consCoCh su' ∘ g ∘ transCoCh (m f) ∘ g ∘ prodCoCh b) to-from-id ⟩
     consCoCh su' ∘ transCoCh (m f) ∘ prodCoCh b
   ≡⟨⟩
     su' (m f ∘ b)

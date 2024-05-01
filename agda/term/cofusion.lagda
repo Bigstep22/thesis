@@ -29,6 +29,6 @@ fusionprop {F} i f = i .!-unique (C[ F ]CoAlg [ i .! ∘ f ])
 The `fusion law':
 \begin{code}
 fusion : {F : Container 0ℓ 0ℓ}{C D : Set}{c : C → I⟦ F ⟧ C}{d : D → I⟦ F ⟧ D}(h : C → D) →
-                   (d ∘ h ≡ map h ∘ c) → ⟦ c ⟧ ≡ ⟦ d ⟧ ∘ h
+                   (d ∘ h ≡ map h ∘ c) → A⟦ c ⟧ ≡ A⟦ d ⟧ ∘ h
 fusion h p = funext λ x → fusionprop terminal-out (record { f = h ; commutes = λ {y} → cong-app p y }) {x}
 \end{code}

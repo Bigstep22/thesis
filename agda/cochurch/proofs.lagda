@@ -1,6 +1,6 @@
 \begin{code}
 {-# OPTIONS --guardedness #-}
-open import Data.Container using (Container; map) renaming (⟦_⟧ to I⟦_⟧)
+open import Data.Container using (Container; map; ⟦_⟧)
 open import Level
 module agda.cochurch.proofs where
 open import Function.Base using (id; _∘_; flip; _$_)
@@ -21,7 +21,7 @@ from-to-id {F} = funext (λ (x : ν F) → begin
   ≡⟨⟩ -- Definition of toCh
      fromCoCh (CoCh out x)
   ≡⟨⟩ -- Definition of fromCh
-    ⟦ out ⟧ x
+    A⟦ out ⟧ x
   ≡⟨ reflection x ⟩
     x
   ≡⟨⟩
@@ -29,45 +29,47 @@ from-to-id {F} = funext (λ (x : ν F) → begin
   ∎)
 
 -- PAGE 52 - Proof 2
-postulate freetheorem-terminal : {F : Container 0ℓ 0ℓ}
-                                 {C D : Set}{Y : Set₁}{c : C → I⟦ F ⟧ C}{d : D → I⟦ F ⟧ D}
-                                 (h : C → D)(f : {X : Set} → (X → I⟦ F ⟧ X) → X → Y) →
+postulate free : {F : Container 0ℓ 0ℓ}
+                                 {C D : Set}{Y : Set₁}{c : C → ⟦ F ⟧ C}{d : D → ⟦ F ⟧ D}
+                                 (h : C → D)(f : {X : Set} → (X → ⟦ F ⟧ X) → X → Y) →
                                  map h ∘ c ≡ d ∘ h → f c ≡ f d ∘ h
                                  -- TODO: Do D and Y need to be the same thing? This may be a cop-out...
-to-from-id : {F : Container 0ℓ 0ℓ}{X : Set}(c : X → I⟦ F ⟧ X)(x : X) →
-             toCoCh (fromCoCh (CoCh c x)) ≡ CoCh c x
-to-from-id c x = begin
-    toCoCh (fromCoCh (CoCh c x))
-  ≡⟨⟩ -- definition of fromCh
-    toCoCh (⟦ c ⟧ x)
-  ≡⟨⟩ -- definition of toCh
-    CoCh out (⟦ c ⟧ x)
-  ≡⟨⟩ -- composition
-    (CoCh out ∘ ⟦ c ⟧) x
-  ≡⟨ flip cong-app x ∘ sym $ freetheorem-terminal ⟦ c ⟧ CoCh refl ⟩ -- I made some use of this: https://www-ps.informatik.uni-kiel.de/~sad/FreeTheorems/cgi-bin/free-theorems-webui.cgi
-    CoCh c x
-  ∎
+unfold-invariance : {F : Container 0ℓ 0ℓ}{Y : Set}
+                    (c : Y → ⟦ F ⟧ Y) →
+                    CoCh c ≡ (CoCh out) ∘ A⟦ c ⟧
+unfold-invariance c = free A⟦ c ⟧ CoCh refl
 
-to-from-id' : {F : Container 0ℓ 0ℓ} → toCoCh ∘ fromCoCh ≡ id
-to-from-id' {F} = funext (λ where (CoCh c x) → to-from-id {F} c x)
+to-from-id : {F : Container 0ℓ 0ℓ} → toCoCh ∘ fromCoCh {F} ≡ id
+to-from-id = funext λ where
+  (CoCh c x) → (begin
+      toCoCh (fromCoCh (CoCh c x))
+    ≡⟨⟩ -- definition of fromCh
+      toCoCh (A⟦ c ⟧ x)
+    ≡⟨⟩ -- definition of toCh
+      CoCh out (A⟦ c ⟧ x)
+    ≡⟨⟩ -- composition
+      (CoCh out ∘ A⟦ c ⟧) x
+    ≡⟨ cong (λ f → f x) (sym $ unfold-invariance c) ⟩
+      CoCh c x
+    ∎)
 
 -- PAGE 52 - Proof 3
 -- New function constitutes an implementation for the produces function being replaced
-prod-pres : {F : Container 0ℓ 0ℓ}{X : Set} (c : X → I⟦ F ⟧ X) (x : X) →
-            fromCoCh ((λ s → CoCh c s) x) ≡ ⟦ c ⟧ x
+prod-pres : {F : Container 0ℓ 0ℓ}{X : Set} (c : X → ⟦ F ⟧ X) (x : X) →
+            fromCoCh ((λ s → CoCh c s) x) ≡ A⟦ c ⟧ x
 prod-pres c x = begin
     fromCoCh ((λ s → CoCh c s) x)
   ≡⟨⟩ -- function application
     fromCoCh (CoCh c x)
   ≡⟨⟩ -- definition of toCh
-    ⟦ c ⟧ x
+    A⟦ c ⟧ x
   ∎
 
 -- PAGE 52 - Proof 4
 -- New function constitutes an implementation for the produces function being replaced
-unCoCh : {F : Container 0ℓ 0ℓ}(f : {Y : Set} → (Y → I⟦ F ⟧ Y) → Y → ν F) (c : CoChurch F) → ν F
+unCoCh : {F : Container 0ℓ 0ℓ}(f : {Y : Set} → (Y → ⟦ F ⟧ Y) → Y → ν F) (c : CoChurch F) → ν F
 unCoCh f (CoCh c s) = f c s
-cons-pres : {F : Container 0ℓ 0ℓ}{X : Set} → (f : {Y : Set} → (Y → I⟦ F ⟧ Y) → Y → ν F) → (x : ν F) →
+cons-pres : {F : Container 0ℓ 0ℓ}{X : Set} → (f : {Y : Set} → (Y → ⟦ F ⟧ Y) → Y → ν F) → (x : ν F) →
             unCoCh f (toCoCh x) ≡ f out x
 cons-pres f x = begin
     unCoCh f (toCoCh x)
@@ -80,32 +82,32 @@ cons-pres f x = begin
 -- PAGE 52 - Proof 5
 -- New function constitutes an implementation for the transformation function being replaced
 --(nat f)
-record nat {F G : Container 0ℓ 0ℓ}(f : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X): Set₁ where
+record nat {F G : Container 0ℓ 0ℓ}(f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X): Set₁ where
   field
     coherence : {A B : Set}(h : A → B) → map h ∘ f ≡ f ∘ map h
 open nat ⦃ ... ⦄
 
-valid-hom : {F G : Container 0ℓ 0ℓ}{X : Set}(h : X → I⟦ F ⟧ X)(f : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X)⦃ _ : nat f ⦄ →
-            map ⟦ h ⟧ ∘ f ∘ h ≡ f ∘ out ∘ ⟦ h ⟧
+valid-hom : {F G : Container 0ℓ 0ℓ}{X : Set}(h : X → ⟦ F ⟧ X)(f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)⦃ _ : nat f ⦄ →
+            map A⟦ h ⟧ ∘ f ∘ h ≡ f ∘ out ∘ A⟦ h ⟧
 valid-hom h f = begin
-    (map ⟦ h ⟧ ∘ f) ∘ h
-  ≡⟨ cong (_∘ h) (coherence ⟦ h ⟧) ⟩
-    (f ∘ map ⟦ h ⟧) ∘ h
+    (map A⟦ h ⟧ ∘ f) ∘ h
+  ≡⟨ cong (_∘ h) (coherence A⟦ h ⟧) ⟩
+    (f ∘ map A⟦ h ⟧) ∘ h
   ≡⟨⟩
-    f ∘ out ∘ ⟦ h ⟧
+    f ∘ out ∘ A⟦ h ⟧
   ∎
 
-chTrans : {F G : Container 0ℓ 0ℓ}(f : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X) → CoChurch F → CoChurch G
+chTrans : {F G : Container 0ℓ 0ℓ}(f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) → CoChurch F → CoChurch G
 chTrans f (CoCh c s) = CoCh (f ∘ c) s
-trans-pred : {F G : Container 0ℓ 0ℓ}{X : Set} (h : X → I⟦ F ⟧ X) (f : {X : Set} → I⟦ F ⟧ X → I⟦ G ⟧ X)(x : X)⦃ _ : nat f ⦄ →
-             fromCoCh (chTrans f (CoCh h x)) ≡ (⟦ f ∘ out ⟧ ∘ ⟦ h ⟧) x
-trans-pred h f x = begin
+trans-pres : {F G : Container 0ℓ 0ℓ}{X : Set} (h : X → ⟦ F ⟧ X) (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)(x : X)⦃ _ : nat f ⦄ →
+             fromCoCh (chTrans f (CoCh h x)) ≡ (A⟦ f ∘ out ⟧ ∘ A⟦ h ⟧) x
+trans-pres h f x = begin
     fromCoCh (chTrans f (CoCh h x))
   ≡⟨⟩ -- Function application
     fromCoCh (CoCh (f ∘ h) x)
   ≡⟨⟩ -- Definition of fromCh
-    ⟦ f ∘ h ⟧ x
-  ≡⟨ flip cong-app x $ fusion ⟦ h ⟧ (sym (valid-hom h f)) ⟩
-    (⟦ f ∘ out ⟧ ∘ ⟦ h ⟧) x
+    A⟦ f ∘ h ⟧ x
+  ≡⟨ flip cong-app x $ fusion A⟦ h ⟧ (sym (valid-hom h f)) ⟩
+    (A⟦ f ∘ out ⟧ ∘ A⟦ h ⟧) x
   ∎
 \end{code}
