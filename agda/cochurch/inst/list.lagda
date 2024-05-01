@@ -9,8 +9,8 @@ open import Data.Empty
 open import Data.Unit
 open import agda.term.termcoalg
 open ν
-open import Data.Product
-open import Data.Sum
+open import Data.Product hiding (map)
+open import Data.Sum hiding (map)
 open import Function
 open import Data.Nat
 open import Agda.Builtin.Nat
@@ -42,37 +42,6 @@ out (x :: xs) = (cons x , λ tt → xs)
 infixr 20 _::_
 
 
-mapping : {A X : Set} → (f : X → ⊤ ⊎ (A × X)) → (X → List' A X)
-mapping f x with f x
-mapping f x | (inj₁ tt) = (nil , λ())
-mapping f x | (inj₂ (a , x')) = (cons a , λ tt → x')
-unfold' : {F : Container 0ℓ 0ℓ}{A X : Set}(f : X → ⊤ ⊎ (A × X)) → X → List A
-unfold' {A}{X} f = A⟦ mapping f ⟧
-
-m : {A B C : Set}(f : A → B) → List' A C → List' B C
-m f (nil , _) = (nil , λ())
-m f (cons n , l) = (cons (f n) , l)
-map1 : {A B : Set}(f : A → B) → List A → List B
-map1 f = A⟦ m f ∘ out ⟧
-mapCoCh : {A B : Set}(f : A → B) → CoChurch (F A) → CoChurch (F B)
-mapCoCh f (CoCh h s) = CoCh (m f ∘ h) s
-map2 : {A B : Set}(f : A → B) → List A → List B
-map2 f = fromCoCh ∘ mapCoCh f ∘ toCoCh
-
-{-# NON_TERMINATING #-}
-su' : {S : Set} → (S → List' ℕ S) → S → ℕ
-su' h s with h s
-su' h s | (nil , f) = 0
-su' h s | (cons x , f) = x + su' h (f tt)
-
-sum1 : List ℕ → ℕ
-sum1 = su' out
-sumCoCh : CoChurch (F ℕ) → ℕ
-sumCoCh (CoCh h s) = su' h s
-sum2 : List ℕ → ℕ
-sum2 = sumCoCh ∘ toCoCh
---s2works : sum2 (1 :: 2 :: 3 :: []) ≡ 6
---s2works = refl
 
 b' : ℕ × ℕ → List' ℕ (ℕ × ℕ)
 b' (x , zero)  = (nil , λ())
@@ -82,34 +51,61 @@ b : ℕ × ℕ → List' ℕ (ℕ × ℕ)
 b (x , y) = b' (x , (suc (y - x)))
 
 between1 : ℕ × ℕ → List ℕ
-between1 xy = A⟦ b ⟧ xy
-betweenCoCh : (ℕ × ℕ → List' ℕ (ℕ × ℕ)) → (ℕ × ℕ) → CoChurch (F ℕ)
-betweenCoCh b = CoCh b
+between1 = A⟦ b ⟧
 between2 : ℕ × ℕ → List ℕ
-between2 = fromCoCh ∘ CoCh b
-
--- Proofs for each of the above functions
-eqsum : sum1 ≡ sum2
-eqsum = refl
-eqmap : {f : ℕ → ℕ} → map1 f ≡ map2 f
-eqmap = refl
+between2 = prod b
 eqbetween : between1 ≡ between2
 eqbetween = refl
+--checkbetween : out (2 :: 3 :: 4 :: 5 :: 6 :: []) ≡ out (between2 (2 , 6))
+--checkbetween = refl
 
+mapping : {A X : Set} → (f : X → ⊤ ⊎ (A × X)) → (X → List' A X)
+mapping f x with f x
+mapping f x | (inj₁ tt) = (nil , λ())
+mapping f x | (inj₂ (a , x')) = (cons a , λ tt → x')
+unfold' : {F : Container 0ℓ 0ℓ}{A X : Set}(f : X → ⊤ ⊎ (A × X)) → X → List A
+unfold' {A}{X} f = A⟦ mapping f ⟧
 
----- Using the generalizations, we now get our encoding proofs and shortcut fusion for free :)
-between3 : ℕ × ℕ → List ℕ
-between3 = fromCoCh ∘ prodCoCh b
-map3 : {A B : Set}(f : A → B) → List A → List B
-map3 f = fromCoCh ∘ natTransCoCh (m f) ∘ toCoCh
-sum3 : List ℕ → ℕ
-sum3 = consCoCh su' ∘ toCoCh
-fused : {f : ℕ → ℕ} → sum3 ∘ map3 f ∘ between3 ≡ su' (m f ∘ b)
-fused {f}  = begin
-    consCoCh su' ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ toCoCh ∘ fromCoCh ∘ prodCoCh b
-  ≡⟨ cong (λ g → consCoCh su' ∘ g ∘ natTransCoCh (m f) ∘ g ∘ prodCoCh b) to-from-id ⟩
-    consCoCh su' ∘ natTransCoCh (m f) ∘ prodCoCh b
+m : {A B C : Set}(f : A → B) → List' A C → List' B C
+m f (nil , l) = (nil , l)
+m f (cons n , l) = (cons (f n) , l)
+
+map1 : {A B : Set}(f : A → B) → List A → List B
+map1 f = A⟦ m f ∘ out ⟧
+map2 : {A B : Set}(f : A → B) → List A → List B
+map2 f = natTrans (m f)
+eqmap : {f : ℕ → ℕ} → map1 f ≡ map2 f
+eqmap = refl
+--checkmap : map1 (_+_ 2) (3 :: 6 :: []) ≡ 5 :: 8 :: []
+--checkmap = refl
+
+{-# NON_TERMINATING #-}
+su : {S : Set} → (S → List' ℕ S) → S → ℕ
+su h s with h s
+su h s | (nil , f) = 0
+su h s | (cons x , f) = x + su h (f tt)
+
+sum1 : List ℕ → ℕ
+sum1 = su out
+sum2 : List ℕ → ℕ
+sum2 = consu su
+eqsum : sum1 ≡ sum2
+eqsum = refl
+--checksum : sum1 (5 :: 6 :: 7 :: []) ≡ 18
+--checksum = refl
+
+eq : {f : ℕ → ℕ} → sum1 ∘ map1 f ∘ between1 ≡ sum2 ∘ map2 f ∘ between2
+eq {f} = begin
+    su out ∘ A⟦ m f ∘ out ⟧ ∘ A⟦ b ⟧
+  ≡⟨ cong (λ g → su out ∘ g) (sym (trans-pres b (m f) (λ _ → funext (λ {(nil , l) → refl ; (cons n , l) → refl})))) ⟩
+--    su out ∘ A⟦ m f ∘ out ⟧ ∘ fromCoCh ∘ prodCoCh b
+--  ≡⟨ cong (λ g → su out ∘ g ∘ prodCoCh b) {!!} ⟩ -- trans-pres is different from church.... this causes this step to be skipped?
+    su out ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b
+  ≡⟨ cong (λ g → g ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b) (cons-pres su) ⟩
+    consCoCh su ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b
+  ≡⟨ cong (λ g → consCoCh su ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ g ∘ prodCoCh b) (sym to-from-id) ⟩
+    consCoCh su ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ toCoCh ∘ fromCoCh ∘ prodCoCh b
   ≡⟨⟩
-    su' (m f ∘ b)
+    consu su ∘ natTrans (m f) ∘ prod b
   ∎
 \end{code}

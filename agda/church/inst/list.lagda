@@ -110,15 +110,13 @@ checksum = refl
 eq : {f : ℕ → ℕ} → sum1 ∘ map1 f ∘ between1 ≡ sum2 ∘ map2 f ∘ between2
 eq {f} = begin
     ⦅ su ⦆ ∘ ⦅ in' ∘ m f ⦆ ∘ b in'
-  ≡⟨⟩
+  ≡⟨ cong (λ g → ⦅ su ⦆ ∘ ⦅ in' ∘ m f ⦆ ∘ g) (prod-pres b) ⟩
     ⦅ su ⦆ ∘ ⦅ in' ∘ m f ⦆ ∘ fromCh ∘ prodCh b
   ≡⟨ cong (λ f → ⦅ su ⦆ ∘ f ∘ prodCh b) (sym $ trans-pres (m f)) ⟩
     ⦅ su ⦆ ∘ fromCh ∘ natTransCh (m f) ∘ prodCh b
-  ≡⟨ cong (λ g → g ∘ fromCh ∘ natTransCh (m f) ∘ prodCh b) (sym $ cons-pres su) ⟩
+  ≡⟨ cong (λ g → g ∘ fromCh ∘ natTransCh (m f) ∘ prodCh b) (cons-pres su) ⟩
     consCh su ∘ toCh ∘ fromCh ∘ natTransCh (m f) ∘ prodCh b
-  ≡⟨ cong (λ g → consCh su ∘ g ∘ natTransCh (m f) ∘ prodCh b) to-from-id ⟩
-    consCh su ∘ natTransCh (m f) ∘ prodCh b
-  ≡⟨ cong (λ g → consCh su ∘ g ∘ natTransCh (m f) ∘ g ∘ prodCh b) (sym to-from-id) ⟩
+  ≡⟨ cong (λ g → consCh su ∘ toCh ∘ fromCh ∘ natTransCh (m f) ∘ g ∘ prodCh b) (sym to-from-id) ⟩
     consCh su ∘ toCh ∘ fromCh ∘ natTransCh (m f) ∘ toCh ∘ fromCh ∘ prodCh b
   ≡⟨⟩
     consu su ∘ natTrans (m f) ∘ prod b

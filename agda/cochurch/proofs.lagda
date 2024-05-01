@@ -79,7 +79,7 @@ prod-pres c = funext λ x → begin
 The fourth proof shows that cochurch-encoded functions constitute an implementation for the consuming functions being replaced.
 The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness:
 \begin{code}
-cons-pres : {F : Container 0ℓ 0ℓ}{X : Set} → (f : {Y : Set} → (Y → ⟦ F ⟧ Y) → Y → ν F) →
+cons-pres : {F : Container 0ℓ 0ℓ}{X : Set} → (f : {Y : Set} → (Y → ⟦ F ⟧ Y) → Y → X) →
             consCoCh f ∘ toCoCh ≡ f out
 cons-pres f = funext λ x → begin
     consCoCh f (toCoCh x)
