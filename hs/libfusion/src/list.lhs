@@ -15,18 +15,22 @@ import GHC.List
 }
 \subsubsection{Lists}
 In this section further replication of \cite{Harper2011}'s work is described, but instead of implementing Leaf trees, Lists are implemented.
+
+This was done to see how the descriptions in \cite{Harper2011}'s work generalize and to have a simpler datastructure on which to perform analysis; seeing how and when the fusion works and when it doesn't.
+
+We again start with the datatype descriptions. We use \tt{List'} instead of \tt{List} as there is a namespace collision with GHC's \tt{List} datatype:
 \begin{code}
 data List' a = Nil | Cons a (List' a)
 data List_ a b = Nil_ | Cons_ a b
--- data List'_ a b = Nil'_ | Cons'_ (Maybe a) b
-
+\end{code}
+\paragraph{(Co)Church-encodings} The church encoding, proper encoding and decoding functions, and fusion pragmas are defined:
+\begin{code}
 data ListCh a = ListCh (forall b . (List_ a b -> b) -> b)
 toCh :: List' a -> ListCh a
 toCh t = ListCh (\a -> fold a t)
 fold :: (List_ a b -> b) -> List' a -> b
-fold a Nil      = a Nil_
+fold a Nil         = a Nil_
 fold a (Cons x xs) = a (Cons_ x (fold a xs))
-
 fromCh :: ListCh a -> List' a
 fromCh (ListCh fold') = fold' in'
 in' :: List_ a (List' a) -> List' a
@@ -36,15 +40,15 @@ in' (Cons_ x xs) = Cons x xs
    forall x. toCh (fromCh x) = x #-}
 {-# INLINE [0] toCh #-}
 {-# INLINE [0] fromCh #-}
-
-
+\end{code}
+The cochurch encodings are defined similarly:
+\begin{code}
 data ListCoCh a = forall s . ListCoCh (s -> List_ a s) s
 toCoCh :: List' a -> ListCoCh a
 toCoCh = ListCoCh out
 out :: List' a -> List_ a (List' a)
 out Nil = Nil_
 out (Cons x xs) = Cons_ x xs
-
 fromCoCh :: ListCoCh a -> List' a
 fromCoCh (ListCoCh h s) = unfold h s
 unfold :: (b -> List_ a b) -> b -> List' a
@@ -55,26 +59,32 @@ unfold h s = case h s of
    forall x. toCoCh (fromCoCh x) = x #-}
 {-# INLINE [0] toCoCh #-}
 {-# INLINE [0] fromCoCh #-}
-
--- between
+\end{code}
+\paragraph{Between}
+The between function is defined in three different fashions: Normally, with the Church-encoding, and with the Cochurch encoding.
+We leverage \tt{INLINE} pragmas to make sure that the fusion pragmas can effectively work.
+For the non-encoded implementation, we simply leverage recursion:
+\begin{code}
 between1 :: (Int, Int) -> List' Int
-between1 (x, y)
-  | x > y  = Nil
-  | x <= y  = Cons x (between1 (x+1,y))
-  | otherwise = Nil
+between1 (x, y) = case x > y of
+  True  -> Nil
+  False -> Cons x (between1 (x+1,y))
 {-# INLINE between1 #-}
-
+\end{code}
+For the Church-encoded version we define a recursion principle \tt{b} and use that to define the encoded church function:
+\begin{code}
 b :: (List_ Int b -> b) -> (Int, Int) -> b
 b a (x, y) = case x > y of
   True -> a Nil_
   False -> a (Cons_ x (b a (x+1,y)))
 betweenCh :: (Int, Int) -> ListCh Int
 betweenCh (x, y) = ListCh (\a -> b a (x, y))
-
 between2 :: (Int, Int) -> List' Int
 between2 = fromCh . betweenCh
 {-# INLINE between2 #-}
-
+\end{code}
+For the Cochurch-encoded version we define a coalgebra:
+\begin{code}
 betweenCoCh :: (Int, Int) -> List_ Int (Int, Int)
 betweenCoCh (x, y) = case x > y of
   True -> Nil_
@@ -82,14 +92,19 @@ betweenCoCh (x, y) = case x > y of
 between3 :: (Int, Int) -> List' Int
 between3 = fromCoCh . ListCoCh betweenCoCh
 {-# INLINE between3 #-}
-
-
--- filter
+\end{code}
+\paragraph{Filter}
+The filter function is, again, implemented in three different ways:
+In a non-encoded fashion, using a church-encoding, and using a cochurch-encoding.
+The non-encoded function simply uses recursion:
+\begin{code}
 filter1 :: (a -> Bool) -> List' a -> List' a
 filter1 _ Nil = Nil
 filter1 p (Cons x xs) = if p x then Cons x (filter1 p xs) else filter1 p xs
 {-# INLINE filter1 #-}
-
+\end{code}
+The church-encoded version does \textbf{not} leverage an algebra, as is normally done for natural transformations, but instead something else. I.e. the function \tt{a} below is only selectively applied to the resultant subterms (see the \tt{else} case specifically):
+\begin{code}
 filterCh :: (a -> Bool) -> ListCh a -> ListCh a
 filterCh p (ListCh g) = ListCh (\a -> g (\case
     Nil_ -> a Nil_
@@ -98,64 +113,69 @@ filterCh p (ListCh g) = ListCh (\a -> g (\case
 filter2 :: (a -> Bool) -> List' a -> List' a
 filter2 p = fromCh . filterCh p . toCh
 {-# INLINE filter2 #-}
-
+\end{code}
+For the cochurch-encoding, a natural transformation can be defined, but it is not a simple algebra, instead it is a recursive function.
+There is existing work, called joint-point optimization that should enable this function to still fully fuse, but it does not at the moment, there are existing issues in GHC's issue tracker that describe this problem:
+\begin{code}
 filt p h s = go s
   where go s = case h s of
           Nil_ -> Nil_
           Cons_ x xs -> if p x then Cons_ x xs else go xs
-{-# INLINE filt #-}
-
 filterCoCh :: (a -> Bool) -> ListCoCh a -> ListCoCh a
 filterCoCh p (ListCoCh h s) = ListCoCh (filt p h) s
-          -- (h xs) This last piece is wrong!!!
-          -- This is not a corecursive implementation :(
-
 filter3 :: (a -> Bool) -> List' a -> List' a
 filter3 p = fromCoCh . filterCoCh p . toCoCh
 {-# INLINE filter3 #-}
-
--- map
+\end{code}
+It is possible to implement filter using a natural transformation, but this requires us to modify the type of the base functor, so we can communicate `skip' to the datatype, which our corecursion principle can handle accordingly.
+This technique is called \textit{stream fusion} and is described by \cite{Coutts2007}.
+\paragraph{Map}
+Contrary to filter, it is possible to implement the map function as a natural transformation. Again three implementations, the latter two of which leverage the defined natural transformation \tt{m}:
+\begin{code}
 map1 :: (a -> b) -> List' a -> List' b
 map1 _ Nil = Nil
 map1 f (Cons x xs) = Cons (f x) (map1 f xs)
 {-# INLINE map1 #-}
-
 m :: (a -> b) -> List_ a c -> List_ b c
 m f (Cons_ x xs) = Cons_ (f x) xs
 m _ Nil_ = Nil_
-
 mapCh :: (a -> b) -> ListCh a -> ListCh b
 mapCh f (ListCh g) = ListCh (\a -> g (a . m f))
 map2 :: (a -> b) -> List' a -> List' b
 map2 f = fromCh . mapCh f . toCh
 {-# INLINE map2 #-}
-
 m' :: (a -> b) -> List_ a c -> List_ b c
 m' f (Cons_ x xs) = Cons_ (f x) xs
 m' _ (Nil_) = Nil_
-
 mapCoCh :: (a -> b) -> ListCoCh a -> ListCoCh b
 mapCoCh f (ListCoCh h s) = ListCoCh (m' f . h) s
 map3 :: (a -> b) -> List' a -> List' b
 map3 f = fromCoCh . mapCoCh f . toCoCh
 {-# INLINE map3 #-}
-
--- sum
+\end{code}
+\paragraph{Sum}
+We define our sum function in, \textit{again} three different ways:
+non-encoded, church-encoded, and cochurch-encoded.
+The non-encoded leverages simple recursion:
+\begin{code}
 sum1 :: List' Int -> Int
 sum1 Nil = 0
 sum1 (Cons x xs) = x + sum1 xs
 {-# INLINE sum1 #-}
-
+\end{code}
+The church-encoded function leverages an algebra and applies that the existing recursion principle:
+\begin{code}
 su :: List_ Int Int -> Int
 su Nil_ = 0
 su (Cons_ x y) = x + y
-
 sumCh :: ListCh Int -> Int
 sumCh (ListCh g) = g su
 sum2 :: List' Int -> Int
 sum2 = sumCh . toCh
 {-# INLINE sum2 #-}
-
+\begin{code}
+The cochurch-encoded function implements a corecursion principle and applies the existing coalgebra (and input) to it:
+\begin{code}
 {-TAIL RECURSION!!!-}
 su' :: (s -> List_ Int s) -> s -> Int
 su' h s = loopt s 0
@@ -165,14 +185,20 @@ su' h s = loopt s 0
         loopt s' sum = case h s' of
           Nil_ -> sum
           Cons_ x xs -> loopt xs (x + sum)
-
 sumCoCh :: ListCoCh Int -> Int
 sumCoCh (ListCoCh h s) = su' h s
 sum3 :: List' Int -> Int
 sum3 = sumCoCh . toCoCh
 {-# INLINE sum3 #-}
+\end{code}
+Note that two subfunctions are provided to \tt{su'}, the \tt{loop} and the \tt{loopt} function.
+The former function is implement as one would naively expect.
+The latter, interestingly, is implemented using tail-recursion.
+Because this \tt{loopt} function constitutes a corecursion principle, all the algebras (or natural transformations) applied to it, will be inlined in such a way that the resultant function is also tail recursive, in some cases providing a significant speedup!
+For more details, see the discussion in Section \ref{sec:tail}.
 
-
+\paragraph{Pipelines and GHC list fusion}
+\begin{code}
 trodd :: Int -> Bool
 trodd n = n `rem` 2 == 0
 {-# INLINE trodd #-}
@@ -193,8 +219,6 @@ pipeline4 (x, y) = loop x y 0
 
 between5 :: (Int, Int) -> [Int]
 between5 (x, y) = [x..y]
-  -- where construct :: forall b . Int -> (Int -> b -> b) -> b -> b
-        -- construct x' c n = if x' > y then n else c x' (construct (x'+1) c n)
 {-# INLINE between5 #-}
 filter5 :: (Int -> Bool) -> [Int] -> [Int]
 filter5 f xs = build (\c n -> foldr (\a b -> if f a then c a b else b) n xs)
