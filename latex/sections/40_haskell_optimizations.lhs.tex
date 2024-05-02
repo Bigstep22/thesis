@@ -4,8 +4,17 @@ In \cite{Harper2011}'s work there were still multiple open questions left regard
 
 In this section I'll describe my work replicating the fused Haskell code of the \cite{Harper2011}'s work and further optimization opportunities that were discovered along the way.
 
-\subsection{Church encodings}
-\subsection{Cochurch encodings}
+I'll start off with the existing working code, followed by a discussion of the discoveries made throughout the process of writing, replicating, and further optimizing \cite{Harper2011}'s example code.
+
+\subsection{Replicated Code}
+%include haskell/leaf_trees.lhs
+\subsubsection{Lists}
+%include haskell/list.lhs
+
+\subsection{Discussion of code}
+\subsubsection{Limitations of Church-fusion and perks of stream-fusion}\label{sec:tail}
+Lack of explanation on \cite{Harper2011}'s part about choice of leaf trees, how in lists, it is not possible to implement filter as a natural transformation.
+\subsubsection{The strength of cochurch encodings: tail recursion}
 
 
 
