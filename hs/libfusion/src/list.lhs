@@ -1,3 +1,6 @@
+\long\def\ignore#1{}
+\ignore{
+\begin{code}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE LambdaCase #-}
@@ -5,14 +8,17 @@
 {-# OPTIONS_GHC -ddump-simpl -ddump-to-file -dsuppress-all -dno-suppress-type-signatures -dno-typeable-binds -dsuppress-uniques #-}
 {-# OPTIONS_GHC -Wno-missing-signatures #-}
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
-import Prelude hiding (sum, foldr, filter, map)
+import Prelude hiding (foldr)
 import Test.Tasty.Bench
-import GHC.List hiding (filter, map, sum)
-
-
-data List_ a b = Nil_ | Cons_ a b
-data List'_ a b = Nil'_ | Cons'_ (Maybe a) b
+import GHC.List
+\end{code}
+}
+\subsubsection{Lists}
+In this section further replication of \cite{Harper2011}'s work is described, but instead of implementing Leaf trees, Lists are implemented.
+\begin{code}
 data List' a = Nil | Cons a (List' a)
+data List_ a b = Nil_ | Cons_ a b
+-- data List'_ a b = Nil'_ | Cons'_ (Maybe a) b
 
 data ListCh a = ListCh (forall b . (List_ a b -> b) -> b)
 toCh :: List' a -> ListCh a
@@ -32,20 +38,19 @@ in' (Cons_ x xs) = Cons x xs
 {-# INLINE [0] fromCh #-}
 
 
-data ListCoCh a = forall s . ListCoCh (s -> List'_ a s) s
+data ListCoCh a = forall s . ListCoCh (s -> List_ a s) s
 toCoCh :: List' a -> ListCoCh a
 toCoCh = ListCoCh out
-out :: List' a -> List'_ a (List' a)
-out Nil = Nil'_
-out (Cons x xs) = Cons'_ (Just x) xs
+out :: List' a -> List_ a (List' a)
+out Nil = Nil_
+out (Cons x xs) = Cons_ x xs
 
 fromCoCh :: ListCoCh a -> List' a
 fromCoCh (ListCoCh h s) = unfold h s
-unfold :: (b -> List'_ a b) -> b -> List' a
+unfold :: (b -> List_ a b) -> b -> List' a
 unfold h s = case h s of
-  Nil'_ -> Nil
-  Cons'_ Nothing xs -> unfold h xs
-  Cons'_ (Just x) xs -> Cons x (unfold h xs)
+  Nil_ -> Nil
+  Cons_ x xs -> Cons x (unfold h xs)
 {-# RULES "toCh/fromCh fusion"
    forall x. toCoCh (fromCoCh x) = x #-}
 {-# INLINE [0] toCoCh #-}
@@ -70,10 +75,10 @@ between2 :: (Int, Int) -> List' Int
 between2 = fromCh . betweenCh
 {-# INLINE between2 #-}
 
-betweenCoCh :: (Int, Int) -> List'_ Int (Int, Int)
+betweenCoCh :: (Int, Int) -> List_ Int (Int, Int)
 betweenCoCh (x, y) = case x > y of
-  True -> Nil'_
-  False -> Cons'_ (Just x) (x+1, y)
+  True -> Nil_
+  False -> Cons_ x (x+1, y)
 between3 :: (Int, Int) -> List' Int
 between3 = fromCoCh . ListCoCh betweenCoCh
 {-# INLINE between3 #-}
@@ -96,9 +101,8 @@ filter2 p = fromCh . filterCh p . toCh
 
 filt p h s = go s
   where go s = case h s of
-          Nil'_ -> Nil'_
-          Cons'_ Nothing xs -> Cons'_ Nothing xs
-          Cons'_ (Just x) xs -> if p x then Cons'_ (Just x) xs else go xs
+          Nil_ -> Nil_
+          Cons_ x xs -> if p x then Cons_ x xs else go xs
 {-# INLINE filt #-}
 
 filterCoCh :: (a -> Bool) -> ListCoCh a -> ListCoCh a
@@ -126,10 +130,9 @@ map2 :: (a -> b) -> List' a -> List' b
 map2 f = fromCh . mapCh f . toCh
 {-# INLINE map2 #-}
 
-m' :: (a -> b) -> List'_ a c -> List'_ b c
-m' f (Cons'_ (Just x) xs) = Cons'_ (Just (f x)) xs
-m' _ (Cons'_ Nothing xs) = Cons'_ Nothing xs
-m' _ (Nil'_) = Nil'_
+m' :: (a -> b) -> List_ a c -> List_ b c
+m' f (Cons_ x xs) = Cons_ (f x) xs
+m' _ (Nil_) = Nil_
 
 mapCoCh :: (a -> b) -> ListCoCh a -> ListCoCh b
 mapCoCh f (ListCoCh h s) = ListCoCh (m' f . h) s
@@ -154,16 +157,14 @@ sum2 = sumCh . toCh
 {-# INLINE sum2 #-}
 
 {-TAIL RECURSION!!!-}
-su' :: (s -> List'_ Int s) -> s -> Int
+su' :: (s -> List_ Int s) -> s -> Int
 su' h s = loopt s 0
   where loop s' = case h s' of
-          Nil'_ -> 0
-          Cons'_ Nothing xs -> loop xs
-          Cons'_ (Just x) xs -> x + loop xs
+          Nil_ -> 0
+          Cons_ x xs -> x + loop xs
         loopt s' sum = case h s' of
-          Nil'_ -> sum
-          Cons'_ Nothing xs -> loopt xs sum
-          Cons'_ (Just x) xs -> loopt xs (x + sum)
+          Nil_ -> sum
+          Cons_ x xs -> loopt xs (x + sum)
 
 sumCoCh :: ListCoCh Int -> Int
 sumCoCh (ListCoCh h s) = su' h s
@@ -190,22 +191,21 @@ pipeline4 (x, y) = loop x y 0
 -- Time to implement these function use Haskell list for performance comparison
 
 
-between :: (Int, Int) -> [Int]
-between (x, y) = [x..y]
+between5 :: (Int, Int) -> [Int]
+between5 (x, y) = [x..y]
   -- where construct :: forall b . Int -> (Int -> b -> b) -> b -> b
         -- construct x' c n = if x' > y then n else c x' (construct (x'+1) c n)
-{-# INLINE between #-}
-filter :: (Int -> Bool) -> [Int] -> [Int]
-filter f xs = build (\c n -> foldr (\a b -> if f a then c a b else b) n xs)
-{-# INLINE filter #-}
-map :: forall a b . (a -> b) -> [a] -> [b]
-map f xs = build (\c n -> foldr (\a b -> c (f a) b) n xs)
-{-# INLINE map #-}
-sum :: [Int] -> Int
-sum = foldl' (\a b -> a+b) 0
-{-# INLINE sum #-}
-pipeline5 = sum . map (+2) . filter trodd . between
--- No it won't fuse... Lies!
+{-# INLINE between5 #-}
+filter5 :: (Int -> Bool) -> [Int] -> [Int]
+filter5 f xs = build (\c n -> foldr (\a b -> if f a then c a b else b) n xs)
+{-# INLINE filter5 #-}
+map5 :: forall a b . (a -> b) -> [a] -> [b]
+map5 f xs = build (\c n -> foldr (\a b -> c (f a) b) n xs)
+{-# INLINE map5 #-}
+sum5 :: [Int] -> Int
+sum5 = foldl' (\a b -> a+b) 0
+{-# INLINE sum5 #-}
+pipeline5 = sum5 . map5 (+2) . filter5 trodd . between5
 
 -- sumApp1 (x, y)  = sum1 (append1 (between1 (x, y)) (between1 (x, y)))
 -- sumApp2 (x, y)  = sum2 (append2 (between2 (x, y)) (between2 (x, y)))
@@ -213,8 +213,12 @@ pipeline5 = sum . map (+2) . filter trodd . between
 
 input :: (Int, Int)
 input = (1, 10000)
--- main :: IO ()
--- main = print (pipeline5 input)
+main :: IO ()
+main = print (pipeline5 input)
+\end{code}
+\ignore{
+\begin{code}
+{-
 main :: IO ()
 main = defaultMain
   [
@@ -256,7 +260,7 @@ main = defaultMain
     -- ,  bench "sumunfused4" $ nf sumApp1 input
     -- ]
   ]
-
+-}
 {- Report on core representation analysis for List datatypes,
  - In the core fused representation, lists are completely absent
    for both fused and cofused pipeline
@@ -419,3 +423,5 @@ $wloop
       }
 end Rec }
 -}
+\end{code}
+}
