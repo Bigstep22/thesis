@@ -60,6 +60,11 @@ The \tt{INLINE} pragmas are also included, to delay any inlining of the \tt{toCh
 {-# INLINE [0] toCh #-}
 {-# INLINE [0] fromCh #-}
 \end{code}
+A generalized natural transformation function is defined:
+\begin{code}
+natCh :: (forall c . Tree_ a c -> Tree_ b c) -> TreeCh a -> TreeCh b
+natCh f (TreeCh g) = TreeCh (\a -> g (a . f))
+\end{code}
 \paragraph{Cochurch-encoding} Conversely, the cochurch encoding is defined, again using the base functor for \tt{Tree}:
 \begin{code}
 data TreeCoCh a = forall s . TreeCoCh (s -> Tree_ a s) s
@@ -84,6 +89,11 @@ Similar to Church-encodings, the proper pragmas are included to enable fusion:
    forall x. toCoCh (fromCoCh x) = x #-}
 {-# INLINE [0] toCoCh #-}
 {-# INLINE [0] fromCoCh #-}
+\end{code}
+A generalized natural transformation function is defined:
+\begin{code}
+natCoCh :: (forall c . Tree_ a c -> Tree_ b c) -> TreeCoCh a -> TreeCoCh b
+natCoCh f (TreeCoCh h s) = TreeCoCh (f . h) s
 \end{code}
 \paragraph{Between} Three between functions are implemented:
 One regular, one church-encoded, and one cochurch encoded.
@@ -179,16 +189,11 @@ filt :: (a -> Bool) -> Tree_ a c -> Tree_ a c
 filt p Empty_ = Empty_
 filt p (Leaf_ x) = if p x then Leaf_ x else Empty_
 filt p (Fork_ l r) = Fork_ l r
--- Why can't I generalize this function???
-filterCh :: (a -> Bool) -> TreeCh a -> TreeCh a
-filterCh p (TreeCh g) = TreeCh (\a -> g (a . filt p))
 filter2 :: (a -> Bool) -> Tree a -> Tree a
-filter2 p = fromCh . filterCh p . toCh
+filter2 p = fromCh . natCh (filt p) . toCh
 {-# INLINE filter2 #-}
-filterCoCh :: (a -> Bool) -> TreeCoCh a -> TreeCoCh a
-filterCoCh p (TreeCoCh h s) = TreeCoCh (filt p . h) s
 filter3 :: (a -> Bool) -> Tree a -> Tree a
-filter3 p = fromCoCh . filterCoCh p . toCoCh
+filter3 p = fromCoCh . natCoCh (filt p) . toCoCh
 {-# INLINE filter3 #-}
 \end{code}
 \paragraph{Map} The map function is implemented similarly to filter: A simple implementation for the non-encoded version and a single natural transformation that is leveraged in both the church- and cochurch-encoded versions:
@@ -201,15 +206,11 @@ m :: (a -> b) -> Tree_ a c -> Tree_ b c
 m f Empty_ = Empty_
 m f (Leaf_ a) = Leaf_ (f a)
 m f (Fork_ l r) = Fork_ l r
-mapCh :: (a -> b) -> TreeCh a -> TreeCh b
-mapCh f (TreeCh g) = TreeCh (\a -> g (a . m f))
 map2 :: (a -> b) -> Tree a -> Tree b
-map2 f = fromCh . mapCh f . toCh
+map2 f = fromCh . natCh (m f) . toCh
 {-# INLINE map2 #-}
-mapCoCh :: (a -> b) -> TreeCoCh a -> TreeCoCh b
-mapCoCh f (TreeCoCh h s) = TreeCoCh (m f . h) s
 map3 :: (a -> b) -> Tree a -> Tree b
-map3 f = fromCoCh . mapCoCh f . toCoCh
+map3 f = fromCoCh . natCoCh (m f) . toCoCh
 {-# INLINE map3 #-}
 \end{code}
 \paragraph{Sum} The sum function is again more interesting, it is again implemented in three different ways:

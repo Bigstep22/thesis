@@ -41,6 +41,11 @@ in' (Cons_ x xs) = Cons x xs
 {-# INLINE [0] toCh #-}
 {-# INLINE [0] fromCh #-}
 \end{code}
+A generalized natural transformation function is defined:
+\begin{code}
+natCh :: (forall c . List_ a c -> List_ b c) -> ListCh a -> ListCh b
+natCh f (ListCh g) = ListCh (\a -> g (a . f))
+\end{code}
 The cochurch encodings are defined similarly:
 \begin{code}
 data ListCoCh a = forall s . ListCoCh (s -> List_ a s) s
@@ -59,6 +64,11 @@ unfold h s = case h s of
    forall x. toCoCh (fromCoCh x) = x #-}
 {-# INLINE [0] toCoCh #-}
 {-# INLINE [0] fromCoCh #-}
+\end{code}
+A generalized natural transformation function is defined:
+\begin{code}
+natCoCh :: (forall c . List_ a c -> List_ b c) -> ListCoCh a -> ListCoCh b
+natCoCh f (ListCoCh h s) = ListCoCh (f . h) s
 \end{code}
 \paragraph{Between}
 The between function is defined in three different fashions: Normally, with the Church-encoding, and with the Cochurch encoding.
@@ -139,18 +149,11 @@ map1 f (Cons x xs) = Cons (f x) (map1 f xs)
 m :: (a -> b) -> List_ a c -> List_ b c
 m f (Cons_ x xs) = Cons_ (f x) xs
 m _ Nil_ = Nil_
-mapCh :: (a -> b) -> ListCh a -> ListCh b
-mapCh f (ListCh g) = ListCh (\a -> g (a . m f))
 map2 :: (a -> b) -> List' a -> List' b
-map2 f = fromCh . mapCh f . toCh
+map2 f = fromCh . natCh (m f) . toCh
 {-# INLINE map2 #-}
-m' :: (a -> b) -> List_ a c -> List_ b c
-m' f (Cons_ x xs) = Cons_ (f x) xs
-m' _ (Nil_) = Nil_
-mapCoCh :: (a -> b) -> ListCoCh a -> ListCoCh b
-mapCoCh f (ListCoCh h s) = ListCoCh (m' f . h) s
 map3 :: (a -> b) -> List' a -> List' b
-map3 f = fromCoCh . mapCoCh f . toCoCh
+map3 f = fromCoCh . natCoCh (m f) . toCoCh
 {-# INLINE map3 #-}
 \end{code}
 \paragraph{Sum}
@@ -173,7 +176,7 @@ sumCh (ListCh g) = g su
 sum2 :: List' Int -> Int
 sum2 = sumCh . toCh
 {-# INLINE sum2 #-}
-\begin{code}
+\end{code}
 The cochurch-encoded function implements a corecursion principle and applies the existing coalgebra (and input) to it:
 \begin{code}
 {-TAIL RECURSION!!!-}
@@ -213,9 +216,6 @@ pipeline4 (x, y) = loop x y 0
                      False -> if trodd z
                               then loop (z+1) y (sum+z+2)
                               else loop (z+1) y sum
-
--- Time to implement these function use Haskell list for performance comparison
-
 
 between5 :: (Int, Int) -> [Int]
 between5 (x, y) = [x..y]
