@@ -1,17 +1,11 @@
 \paragraph{Definition of Church encodings}
 \begin{code}[hide]
-open import Data.Container using (Container; μ; ⟦_⟧)
-open import Level using (0ℓ; Level)
 open import agda.init.initalg
-open import Function
-open import Relation.Binary.PropositionalEquality as Eq
-open ≡-Reasoning
 \end{code}
 This module defines Church encodings and the two conversions \tt{con} and \tt{abs}, called \tt{toCh} and \tt{fromCh} here, respectively.
 It also defines the generalized producing, transformation, and consuming functions, as described by \cite{Harper2011}.
 \begin{code}
 module agda.church.defs where
-open import Data.W using () renaming (sup to in')
 \end{code}
 The church encoding, leveraging containers:
 \begin{code}
@@ -22,7 +16,7 @@ The conversion functions:
 \begin{code}
 toCh : {F : Container _ _} → μ F → Church F
 toCh {F} x = Ch (λ {X : Set} → λ (a : ⟦ F ⟧ X → X) → ⦅ a ⦆ x)
-fromCh : {F : Container 0ℓ 0ℓ} → Church F → μ F
+fromCh : {F : Container _ _} → Church F → μ F
 fromCh (Ch g) = g in'
 \end{code}
 The generalized and encoded producing, transformation, and consuming functions,

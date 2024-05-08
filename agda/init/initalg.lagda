@@ -1,29 +1,29 @@
 \paragraph{Initial algebras and catamorphisms}
 \begin{code}[hide]
-open import Data.Product using (_,_)
-open import Level using (0ℓ; suc)
+open import Categories.Category renaming (Category to Cat)
 open import Categories.Functor.Algebra
-open import Relation.Binary.PropositionalEquality as Eq hiding ([_])
-open ≡-Reasoning
-open import agda.funct.funext using (funext)
-open import Function using (_∘_; _$_)
-open import agda.funct.endo
-open import Data.Container using (Container; μ; ⟦_⟧; map)
 open import Categories.Category.Construction.F-Algebras
-open import Categories.Object.Initial --C[ F ]Alg
+open import Categories.Object.Initial
 open F-Algebra-Morphism
 open F-Algebra
+open import agda.funct.funext
+open import agda.funct.endo
 \end{code}
 This module defines a function and shows it to be a catamorphism in the category of F-Agebras.
 Specifically, it is shown that \tt{(μ F, in')} is initial.
 \begin{code}
 module agda.init.initalg where
-open import Categories.Category renaming (Category to Cat)
-open import Data.W using () renaming (sup to in')
+open import Level using (0ℓ; Level) renaming (suc to lsuc) public
+open import Data.W using () renaming (sup to in') public
+open import Data.Container using (Container; μ; ⟦_⟧; map; _▷_) public
+open import Function using (_∘_; _$_; id; const) public
+open import Relation.Binary.PropositionalEquality as Eq using (_≡_; refl; sym; cong; cong-app) public
+open Eq.≡-Reasoning public
+open import Agda.Builtin.Sigma public
 \end{code}
 A shorthand for the Category of F-Algebras.
 \begin{code}
-C[_]Alg : (F : Container 0ℓ 0ℓ) → Cat (suc 0ℓ) 0ℓ 0ℓ
+C[_]Alg : (F : Container 0ℓ 0ℓ) → Cat (lsuc 0ℓ) 0ℓ 0ℓ
 C[ F ]Alg = F-Algebras F[ F ]
 \end{code}
 A shorthand for an F-Algebra homomorphism:
@@ -35,6 +35,7 @@ A candidate function is defined, this will be proved to be a catamorphism throug
 \begin{code}
 ⦅_⦆ : {F : Container 0ℓ 0ℓ}{X : Set} → (⟦ F ⟧ X → X) → μ F → X
 ⦅ a ⦆ (in' (op , ar)) = a (op , ⦅ a ⦆ ∘ ar)
+--⦅_⦆ = foldr -- from Data.W
 \end{code}
 It is shown that any $\catam{\_}$ is a valid F-Algebra homomorphism from \tt{in'} to any other object \tt{a}.
 This constitutes a proof of existence:

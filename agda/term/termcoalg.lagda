@@ -4,26 +4,26 @@ Specifically, it is shown that \tt{($\nu$, out)} is terminal.
 \begin{code}
 {-# OPTIONS --guardedness #-}
 module agda.term.termcoalg where
+open import Level using (0ℓ; Level) renaming (suc to lsuc) public
+open import Data.Container using (Container; ⟦_⟧; map; _▷_) public
+open import Function using (_∘_; _$_; id; const) public
+open import Relation.Binary.PropositionalEquality as Eq using (_≡_; refl; sym; cong; cong-app) public
+open Eq.≡-Reasoning public
+open import Agda.Builtin.Sigma public
 \end{code}
 \begin{code}[hide]
 open import Categories.Category renaming (Category to Cat)
-open import Data.Container using (Container; map; ⟦_⟧)
-open import Level
-open import Function
-open import Data.Product using (_,_; Σ)
 open import Categories.Functor.Coalgebra
 open import Categories.Category.Construction.F-Coalgebras
 open F-Coalgebra-Morphism
 open F-Coalgebra
 open import Categories.Object.Terminal
-open import Relation.Binary.PropositionalEquality as Eq hiding ([_])
-open ≡-Reasoning
 open import agda.funct.funext
 open import agda.funct.endo
 \end{code}
 A shorthand for the Category of F-Coalgebras:
 \begin{code}
-C[_]CoAlg : (F : Container 0ℓ 0ℓ) → Cat (suc 0ℓ) 0ℓ 0ℓ
+C[_]CoAlg : (F : Container 0ℓ 0ℓ) → Cat (lsuc 0ℓ) 0ℓ 0ℓ
 C[ F ]CoAlg = F-Coalgebras F[ F ]
 \end{code}
 A shorthand for an F-Coalgebra homomorphism:
@@ -36,9 +36,21 @@ A candidate terminal datatype and anamorphism function are defined, they will be
 record ν (F : Container 0ℓ 0ℓ) : Set where
   coinductive
   field out : ⟦ F ⟧ (ν F)
-open ν
+open ν public
+
+--record _≈_ {F : Container _ _}(a b : ν F) : Set where
+--    coinductive
+--    field
+--      outfst : Σ.proj₁ (out a) ≡ Σ.proj₁ (out b)
+--      outsnd : ∀ (x) → Σ.proj₂ (out a) x ≈ Σ.proj₂ (out b) (subst (Container.Position F) outfst x)
+--open _≈_
+
+--≈-cong : ∀ {F G : Container _ _}{A B : Set}(f : ν F → ν G) {x y : ν F} → x ≈ y → f x ≈ f y
+--≈-cong f x = record { outfst = {!x .outfst!} ; outsnd = {!!} }
+
 A⟦_⟧ : {F : Container 0ℓ 0ℓ}{X : Set} → (X → ⟦ F ⟧ X) → X → ν F
-out (A⟦ c ⟧ x) = (λ (op , ar) → op , A⟦ c ⟧ ∘ ar) (c x)
+out (A⟦ c ⟧ x) = let (op , ar) = c x in
+                     (op , A⟦ c ⟧ ∘ ar)
 \end{code}
 \begin{code}[hide]
 --{-# ETA ν #-} -- Seems to cause a hang (or major slowdown) in compilation
@@ -63,15 +75,15 @@ Currently, Agda's termination checker does not seem to notice that the proof in 
  to $\nu$ might be needed in order ensure proper termination checking for this proof:
 \begin{code}
 {-# NON_TERMINATING #-}
-isunique : {F : Container 0ℓ 0ℓ}{X : Set}{c : X → ⟦ F ⟧ X}(fhom : F CoAlghom[ c , out ])
+isunique : {F : Container 0ℓ 0ℓ}{X : Set}{c : X → ⟦ F ⟧ X}(fhom : F CoAlghom[ c , out ]) →
            (x : X) → A⟦ c ⟧ x ≡ fhom .f x
-isunique {_}{_}{c} fhom x = out-injective (begin
+isunique {F}{X}{c} fhom x = let (op , ar) = c x in
+  out-injective (begin
         (out ∘ A⟦ c ⟧) x
     ≡⟨⟩ -- Definition of ⟦_⟧
         map A⟦ c ⟧ (c x)
     ≡⟨⟩
-        (λ(op , ar) → (op , A⟦ c ⟧ ∘ ar)) (c x)
-    -- Same issue as with the proof of reflection it seems...
+        (op , A⟦ c ⟧ ∘ ar)
     ≡⟨ cong (λ f → op , f) (funext $ isunique fhom ∘ ar) ⟩ -- induction
         (op , fhom .f ∘ ar)
     ≡⟨⟩
@@ -81,8 +93,6 @@ isunique {_}{_}{c} fhom x = out-injective (begin
     ≡⟨ sym $ fhom .commutes ⟩
         (out ∘ fhom .f) x
   ∎)
-  where op = Σ.proj₁ (c x)
-        ar = Σ.proj₂ (c x)
 \end{code}
 The two previous proofs, constituting a proof of existence and uniqueness, are combined to show that \tt{($\nu$ F, out)}
 \begin{code}

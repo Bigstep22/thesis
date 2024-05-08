@@ -4,20 +4,16 @@ the abstracted function, which have so far been used to prove the needed propert
 to demonstrate how the fusion works for functions across a cocrete datatype.
 \begin{code}[hide]
 {-# OPTIONS --guardedness #-}
+module agda.cochurch.inst.list where
+open import agda.cochurch.defs renaming (cons to consu)
 open import agda.cochurch.proofs
-open import Data.Container using (Container; map; _▷_; ⟦_⟧)
-open import Level hiding (suc)
-open import Data.Empty
+open import Data.Fin using (Fin; zero)
 open import Data.Unit
 open import agda.term.termcoalg
-open ν
-open import Data.Product hiding (map)
+open import Data.Product using (_×_)
 open import Data.Sum hiding (map)
-open import Function
 open import Data.Nat
 open import Agda.Builtin.Nat
-open import Relation.Binary.PropositionalEquality as Eq
-open ≡-Reasoning
 open import agda.funct.funext
 \end{code}
 In this module is defined: the container, whose interpretation represents the base functor for lists,
@@ -25,8 +21,6 @@ some convenience functions to make type annotations more readable, a producer fu
 a transformation function \tt{map}, a consumer function \tt{sum}, and a proof that non-cochurch and cochurch-encoded
 implementations are equal.
 \begin{code}
-module agda.cochurch.inst.list where
-open import agda.cochurch.defs renaming (cons to consu)
 \end{code}
 \subparagraph{Datatypes}
 The index set for the container, as well as the container whose interpretation represents the base funtor for list.
@@ -36,7 +30,7 @@ data ListOp (A : Set) : Set where
   nil : ListOp A
   cons : A → ListOp A
 F : (A : Set) → Container 0ℓ 0ℓ
-F A = ListOp A ▷ λ { nil → ⊥ ; (cons n) → ⊤ }
+F A = ListOp A ▷ λ { nil → Fin 0 ; (cons n) → Fin 1 }
 \end{code}
 Functions representing the run-of-the-mill (potentially infinite) list datatype and the base functor for list:
 \begin{code}
@@ -114,7 +108,7 @@ usage of size type for the termination checker to accept this:
 s : {S : Set} → (S → List' ℕ S) → S → ℕ
 s h s' with h s'
 s h s' | (nil , f) = 0
-s h s' | (cons x , f) = x + s h (f tt)
+s h s' | (cons x , f) = x + s h (f zero)
 \end{code}
 The functions \tt{sum1} and \tt{sum2}.
 The former is defined without a cochurch-encoding, the latter with.

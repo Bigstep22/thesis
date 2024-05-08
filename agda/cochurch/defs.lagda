@@ -9,15 +9,9 @@ The original definition is included as \tt{CoChurch'}.
 module agda.cochurch.defs where
 \end{code}
 \begin{code}[hide]
-open import Data.Container using (Container; ⟦_⟧)
 open import agda.term.termcoalg
-open ν
 open import agda.funct.funext
-open import Data.Product
-open import Level
-open import Function
-open import Relation.Binary.PropositionalEquality as Eq
-open ≡-Reasoning
+open import Data.Product using (∃; _×_)
 \end{code}
 The Cochurch encoding, agian leveraging containers:
 \begin{code}

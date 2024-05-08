@@ -2,20 +2,13 @@
 In \cite{Harper2011}'s work, five proofs proofs are given for Church encodings.
 These are formalized in this module.
 \begin{code}[hide]
-open import Data.Container using (Container; μ; ⟦_⟧; map)
-open import Level using (0ℓ)
-open import Relation.Binary.PropositionalEquality as Eq
-open ≡-Reasoning
-open import Function.Base using (id; _∘_)
 open import agda.init.initalg
 open import agda.init.initial
 open import agda.funct.funext
 open import agda.church.defs
-open import Data.Product using (_,_)
 \end{code}
 \begin{code}
 module agda.church.proofs where
-open import Data.W using () renaming (sup to in')
 \end{code}
 The first proof proves that \tt{fromCh $\circ$ toCh = id}, using the reflection law:
 \begin{code}

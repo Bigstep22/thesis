@@ -1,19 +1,11 @@
 \paragraph{Universal properties of catamorphisms}
 \begin{code}[hide]
-open import Data.Container using (Container; ⟦_⟧; μ; map)
-open import Level
-open import Function.Base using (id; _∘_)
-open import Relation.Binary.PropositionalEquality as Eq
-open ≡-Reasoning
 open import agda.funct.funext
-open import Data.Product using (_,_)
-open import Function.Base
 open import agda.init.initalg
 \end{code}
 This module proves some properties of catamorphisms.
 \begin{code}
 module agda.init.initial where
-open import Data.W using () renaming (sup to in')
 \end{code}
 The forward direction of the \textit{universal property of folds} \citep{Harper2011}:
 \begin{code}
@@ -38,7 +30,7 @@ reflection (in' (op , ar)) = begin
      ⦅ in' ⦆ (in' (op , ar))
    ≡⟨⟩ -- Dfn of ⦅_⦆
      in' (op , ⦅ in' ⦆ ∘ ar)
-   ≡⟨ cong (λ x -> in' (op , x)) (funext (reflection ∘ ar)) ⟩
+   ≡⟨ cong (λ x → in' (op , x)) (funext (reflection ∘ ar)) ⟩
      in' (op , ar)
    ∎
 

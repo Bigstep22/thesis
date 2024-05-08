@@ -1,15 +1,11 @@
 \paragraph{Initial F-Algebra fusion}
 \begin{code}[hide]
-open import Data.Container using (Container; ⟦_⟧; map)
-open import Level
-open import Function.Base
-open import Relation.Binary.PropositionalEquality as Eq hiding ([_])
-open import agda.funct.funext
-open import agda.init.initalg
-open import agda.funct.endo
 open import Categories.Functor.Algebra
 open import Categories.Object.Initial
 open IsInitial
+open import agda.funct.funext
+open import agda.init.initalg
+open import agda.funct.endo
 \end{code}
 This module proves the categorical fusion property (see Section \ref{sec:fusion_prop}).
 From it, it extracts the `fusion law' as it was declared by \cite{Harper2011}; which is easier to work with.

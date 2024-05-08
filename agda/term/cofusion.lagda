@@ -7,14 +7,10 @@ This shows that the fusion law does follow from the fusion property.
 module agda.term.cofusion  where
 \end{code}
 \begin{code}[hide]
-open import Data.Container using (Container; map; ⟦_⟧)
-open import Categories.Category renaming (Category to Cat)
-open import Level
-open import Function.Base
-open import Relation.Binary.PropositionalEquality as Eq hiding ([_])
-open import agda.funct.funext
 open import agda.term.termcoalg
+open import agda.funct.funext
 open import agda.funct.endo
+open import Categories.Category renaming (Category to Cat)
 open import Categories.Functor.Coalgebra
 open import Categories.Object.Terminal
 open IsTerminal

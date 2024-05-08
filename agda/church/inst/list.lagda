@@ -3,20 +3,15 @@ In order to clearly see how the Church encodings allows functions to fuse, a dat
 the abstracted function, which have so far been used to prove the needed properties, can be instantiated
 to demonstrate how the fusion works for functions across a cocrete datatype.
 \begin{code}[hide]
-open import Data.Product hiding (map)
-open import Data.Nat
-open import Data.Empty
-open import Data.Unit
-open import Function.Base
-open import Data.Bool
+open import Data.Product using (_×_)
+open import Data.Nat.Base
 open import Agda.Builtin.Nat
+open import Data.Fin using (Fin; zero)
+open import Data.Bool
 open import agda.church.defs renaming (cons to consu)
 open import agda.church.proofs
 open import agda.funct.funext
 open import agda.init.initalg
-open import Relation.Binary.PropositionalEquality as Eq
-open ≡-Reasoning
-open import Data.Container using (Container; ⟦_⟧; μ; map; _▷_)
 \end{code}
 In this module is defined: the container, whose interpretation represents the base functor for lists,
 some convenience functions to make type annotations more readable, a producer function \tt{between},
@@ -24,7 +19,6 @@ a transformation function \tt{map}, a consumer function \tt{sum}, and a proof th
 implementations are equal.
 \begin{code}
 module agda.church.inst.list where
-open import Data.W renaming (sup to in')
 \end{code}
 \subparagraph{Datatypes}
 The index set for the container, as well as the container whose interpretation represents the base funtor for list.
@@ -34,7 +28,7 @@ data ListOp (A : Set) : Set where
   nil : ListOp A
   cons : A → ListOp A
 F : (A : Set) → Container _ _
-F A = ListOp A ▷ λ { nil → ⊥ ; (cons n) → ⊤ }
+F A = ListOp A ▷ λ { nil → Fin 0 ; (cons n) → Fin 1 }
 \end{code}
 Functions representing the run-of-the-mill list datatype and the base functor for list:
 \begin{code}
@@ -54,7 +48,7 @@ infixr 20 _::_
 The fold funtion as it would normally be encountered for lists, defined in terms of $\catam{\_}$:
 \begin{code}
 fold' : {A X : Set}(n : X)(c : A → X → X) → List A → X
-fold' {A}{X} n c = ⦅ (λ{(nil , _) → n; (cons n , g) → c n (g tt)}) ⦆
+fold' {A}{X} n c = ⦅ (λ{(nil , _) → n; (cons n , g) → c n (g zero)}) ⦆
 \end{code}
 \subparagraph{between}
 The recursion principle \tt{b}, which when used, represents the between function.
@@ -104,7 +98,7 @@ The algebra \tt{s}, which when used in an algebra, represents the sum function:
 \begin{code}
 s : List' ℕ ℕ → ℕ
 s (nil , _) = 0
-s (cons n , f) = n + f tt
+s (cons n , f) = n + f zero
 \end{code}
 The functions \tt{sum1} and \tt{sum2}.
 The former is defined without a church-encoding, the latter with.
@@ -144,8 +138,8 @@ eq {f} = begin
 count : (ℕ → Bool) → μ (F ℕ) → ℕ
 count p = ⦅ (λ where
                (nil , _) → 0
-               (cons true , f) → 1 + f tt
-               (cons false , f) → f tt) ⦆ ∘ map1 p
+               (cons true , f) → 1 + f zero
+               (cons false , f) → f zero) ⦆ ∘ map1 p
 
 even : ℕ → Bool
 even 0 = true
@@ -164,5 +158,5 @@ foldr' c = consCh c ∘ toCh
 filter : {A : Set} → (A → Bool) → List A → List A
 filter p = fromCh ∘ prodCh (λ f → consCh (λ where
    (nil , l) → f (nil , l)
-   (cons a , l) → if (p a) then f (cons a , l) else l tt)) ∘ toCh
+   (cons a , l) → if (p a) then f (cons a , l) else l zero)) ∘ toCh
 \end{code}

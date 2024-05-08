@@ -5,16 +5,8 @@ This module proves some property of anamorphisms.
 module agda.term.terminal  where
 \end{code}
 \begin{code}[hide]
-open import Data.Container using (Container; map; ⟦_⟧)
-open import Level
-open import Function.Base using (id; _∘_)
-open import Relation.Binary.PropositionalEquality as Eq
-open ≡-Reasoning
 open import agda.funct.funext
 open import agda.term.termcoalg
-open ν
-open import Function
-open import Data.Product using (_,_; Σ)
 \end{code}
 The forward direction of the \textit{universal property of unfolds} \cite{Harper2011}:
 \begin{code}
@@ -50,6 +42,6 @@ reflection x = out-injective (begin
   ≡⟨⟩
     out x
   ∎)
-  where op = Σ.proj₁ (out x)
-        ar = Σ.proj₂ (out x)
+  where op = fst (out x)
+        ar = snd (out x)
 \end{code}

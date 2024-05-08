@@ -2,14 +2,7 @@
 be satisfied. These are formalized in this module.
 \begin{code}[hide]
 {-# OPTIONS --guardedness #-}
-open import Data.Container using (Container; map; ⟦_⟧)
-open import Level
-open import Function.Base using (id; _∘_; flip; _$_)
-open import Relation.Binary.PropositionalEquality as Eq
-open ≡-Reasoning
-open import Data.Product using (_,_)
 open import agda.term.termcoalg
-open ν
 open import agda.term.terminal
 open import agda.term.cofusion
 open import agda.funct.funext
