@@ -1,22 +1,38 @@
 \paragraph{Universal properties of catamorphisms}
-\begin{code}[hide]
-open import agda.funct.funext
-open import agda.init.initalg
-\end{code}
 This module proves some properties of catamorphisms.
 \begin{code}
 module agda.init.initial where
 \end{code}
+\begin{code}[hide]
+open import agda.funct.funext
+open import agda.init.initalg
+open import Data.Product hiding (map)
+\end{code}
 The forward direction of the \textit{universal property of folds} \citep{Harper2011}:
 \begin{code}
-universal-prop : {F : Container 0ℓ 0ℓ}{X : Set}(a : ⟦ F ⟧ X → X)(h : μ F → X) →
+universal-prop : {F : Container 0ℓ 0ℓ}{X : Set}{a : ⟦ F ⟧ X → X}{h : μ F → X} →
                   h ≡ ⦅ a ⦆ → h ∘ in' ≡ a ∘ map h
-universal-prop a h eq rewrite eq = refl
+universal-prop refl = refl
 \end{code}
 \begin{code}[hide]
---universal-propᵣ : {X : Set}(a : ⟦ F ⟧ X → X)(h : μ F → X) →
---                            h ∘ in' ≡ a ∘ map h → ⦅ a ⦆ ≡ h
---universal-propᵣ a h eq = {!!}
+universal-propᵣ' : {F : Container _ _}{X : Set}(a : ⟦ F ⟧ X → X)(h : μ F → X) →
+                            h ∘ in' ≡ a ∘ map h → (x : μ F) → h x ≡ ⦅ a ⦆ x
+universal-propᵣ' {F}{X} a h eq (in' (i , f)) = begin
+      (h ∘ in') (i , f)
+    ≡⟨ cong-app eq (i , f) ⟩
+      (a ∘ map h) (i , f)
+    ≡⟨⟩
+      a (i , h ∘ f)
+    ≡⟨ cong (λ g → a (i , g)) (funext $ universal-propᵣ' a h eq ∘ f) ⟩
+      a (i , ⦅ a ⦆ ∘ f)
+    ≡⟨⟩
+      (a ∘ map ⦅ a ⦆) (i , f)
+    ≡⟨⟩
+      (⦅ a ⦆ ∘ in') (i , f)
+    ∎
+universal-propᵣ : {F : Container _ _}{X : Set}(a : ⟦ F ⟧ X → X)(h : μ F → X)(x : (μ F)) →
+                    h ∘ in' ≡ a ∘ map h → h x ≡ ⦅ a ⦆ x
+universal-propᵣ {F}{X} a h x eq rewrite eq = universal-propᵣ' a h eq x
 \end{code}
 The \textit{computation law} \citep{Harper2011} (this is exactly how $\catam{\_}$ is defined in the first place):
 \begin{code}

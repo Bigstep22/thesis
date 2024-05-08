@@ -1,4 +1,10 @@
 \paragraph{Initial F-Algebra fusion}
+This module proves the categorical fusion property (see Section \ref{sec:fusion_prop}).
+From it, it extracts the `fusion law' as it was declared by \cite{Harper2011}; which is easier to work with.
+This shows that the fusion law does follow from the fusion property.
+\begin{code}
+module agda.init.fusion where
+\end{code}
 \begin{code}[hide]
 open import Categories.Functor.Algebra
 open import Categories.Object.Initial
@@ -6,12 +12,6 @@ open IsInitial
 open import agda.funct.funext
 open import agda.init.initalg
 open import agda.funct.endo
-\end{code}
-This module proves the categorical fusion property (see Section \ref{sec:fusion_prop}).
-From it, it extracts the `fusion law' as it was declared by \cite{Harper2011}; which is easier to work with.
-This shows that the fusion law does follow from the fusion property.
-\begin{code}
-module agda.init.fusion where
 open import Categories.Category renaming (Category to Cat)
 \end{code}
 The categorical fusion property:

@@ -1,5 +1,17 @@
 \paragraph{Initial algebras and catamorphisms}
+This module defines a function and shows it to be a catamorphism in the category of F-Agebras.
+Specifically, it is shown that \tt{(μ F, in')} is initial.
+\begin{code}
+module agda.init.initalg where
+open import Data.W using () renaming (sup to in') public
+\end{code}
 \begin{code}[hide]
+open import Level using (0ℓ; Level) renaming (suc to lsuc) public
+open import Function using (_∘_; _$_; id; const) public
+open import Data.Product using (_,_) public
+open import Data.Container using (Container; μ; ⟦_⟧; map; _▷_) public
+open import Relation.Binary.PropositionalEquality as Eq using (_≡_; refl; sym; cong; cong-app; subst; trans) public
+open Eq.≡-Reasoning public
 open import Categories.Category renaming (Category to Cat)
 open import Categories.Functor.Algebra
 open import Categories.Category.Construction.F-Algebras
@@ -8,18 +20,6 @@ open F-Algebra-Morphism
 open F-Algebra
 open import agda.funct.funext
 open import agda.funct.endo
-\end{code}
-This module defines a function and shows it to be a catamorphism in the category of F-Agebras.
-Specifically, it is shown that \tt{(μ F, in')} is initial.
-\begin{code}
-module agda.init.initalg where
-open import Level using (0ℓ; Level) renaming (suc to lsuc) public
-open import Data.W using () renaming (sup to in') public
-open import Data.Container using (Container; μ; ⟦_⟧; map; _▷_) public
-open import Function using (_∘_; _$_; id; const) public
-open import Relation.Binary.PropositionalEquality as Eq using (_≡_; refl; sym; cong; cong-app) public
-open Eq.≡-Reasoning public
-open import Agda.Builtin.Sigma public
 \end{code}
 A shorthand for the Category of F-Algebras.
 \begin{code}

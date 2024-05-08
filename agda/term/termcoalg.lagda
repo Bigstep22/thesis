@@ -4,12 +4,12 @@ Specifically, it is shown that \tt{($\nu$, out)} is terminal.
 \begin{code}
 {-# OPTIONS --guardedness #-}
 module agda.term.termcoalg where
+open import Agda.Builtin.Sigma public
 open import Level using (0ℓ; Level) renaming (suc to lsuc) public
 open import Data.Container using (Container; ⟦_⟧; map; _▷_) public
 open import Function using (_∘_; _$_; id; const) public
-open import Relation.Binary.PropositionalEquality as Eq using (_≡_; refl; sym; cong; cong-app) public
+open import Relation.Binary.PropositionalEquality as Eq using (_≡_; refl; sym; cong; cong-app; subst) public
 open Eq.≡-Reasoning public
-open import Agda.Builtin.Sigma public
 \end{code}
 \begin{code}[hide]
 open import Categories.Category renaming (Category to Cat)
@@ -41,8 +41,8 @@ open ν public
 --record _≈_ {F : Container _ _}(a b : ν F) : Set where
 --    coinductive
 --    field
---      outfst : Σ.proj₁ (out a) ≡ Σ.proj₁ (out b)
---      outsnd : ∀ (x) → Σ.proj₂ (out a) x ≈ Σ.proj₂ (out b) (subst (Container.Position F) outfst x)
+--      outfst : fst (out a) ≡ fst (out b)
+--      outsnd : ∀ (x) → snd (out a) x ≈ snd (out b) (subst (Container.Position F) outfst x)
 --open _≈_
 
 --≈-cong : ∀ {F G : Container _ _}{A B : Set}(f : ν F → ν G) {x y : ν F} → x ≈ y → f x ≈ f y
