@@ -20,6 +20,7 @@ open F-Coalgebra
 open import Categories.Object.Terminal
 open import agda.funct.funext
 open import agda.funct.endo
+open import Codata.Guarded.M using (head; tail) renaming (M to ν; unfold to A⟦_⟧) public
 \end{code}
 A shorthand for the Category of F-Coalgebras:
 \begin{code}
@@ -28,11 +29,13 @@ C[ F ]CoAlg = F-Coalgebras F[ F ]
 \end{code}
 A candidate terminal datatype and anamorphism function are defined, they will be proved to be so later on this module:
 \begin{code}
-record ν (F : Container 0ℓ 0ℓ) : Set where
-  coinductive
-  field out : ⟦ F ⟧ (ν F)
-open ν public
-
+out : {F : Container 0ℓ 0ℓ} → ν F → ⟦ F ⟧ (ν F)
+out nu = head nu , tail nu
+--A⟦_⟧ : {F : Container 0ℓ 0ℓ}{X : Set} → (X → ⟦ F ⟧ X) → X → ν F
+--out (A⟦ c ⟧ x) = let (op , ar) = c x in
+--                     (op , A⟦ c ⟧ ∘ ar)
+\end{code}
+\begin{code}[hide]
 --record _≈_ {F : Container _ _}(a b : ν F) : Set where
 --    coinductive
 --    field
@@ -40,14 +43,6 @@ open ν public
 --      outsnd : ∀ (x) → snd (out a) x ≈ snd (out b) (subst (Container.Position F) outfst x)
 --open _≈_
 
---≈-cong : ∀ {F G : Container _ _}{A B : Set}(f : ν F → ν G) {x y : ν F} → x ≈ y → f x ≈ f y
---≈-cong f x = record { outfst = {!x .outfst!} ; outsnd = {!!} }
-
-A⟦_⟧ : {F : Container 0ℓ 0ℓ}{X : Set} → (X → ⟦ F ⟧ X) → X → ν F
-out (A⟦ c ⟧ x) = let (op , ar) = c x in
-                     (op , A⟦ c ⟧ ∘ ar)
-\end{code}
-\begin{code}[hide]
 --{-# ETA ν #-} -- Seems to cause a hang (or major slowdown) in compilation
               -- in combination with reflection,
               -- have a chat with Casper
@@ -56,9 +51,9 @@ It is shown that any $\anam{\_}$ is a valid F-Coalgebra homomorphism from \tt{ou
 i.e. the forward direction of the \textit{universal property of unfolds} \cite{Harper2011}.
 This constitutes a proof of existence:
 \begin{code}
-univ-to : {F : Container 0ℓ 0ℓ}{C : Set}{c : C → ⟦ F ⟧ C}{h : C → ν F} →
+univ-to : {F : Container 0ℓ 0ℓ}{C : Set}(h : C → ν F){c : C → ⟦ F ⟧ C} →
                  h ≡ A⟦ c ⟧ → out ∘ h ≡ map h ∘ c
-univ-to refl = refl
+univ-to _ refl = refl
 \end{code}
 Injectivity of the \tt{out} constructor is postulated, I have not found a way to prove this, yet.
 \begin{code}
@@ -72,29 +67,30 @@ This uses \tt{out} injectivity.
 Currently, Agda's termination checker does not seem to notice that the proof in question terminates:
 \begin{code}
 {-# NON_TERMINATING #-}
-univ-from : {F : Container _ _}{C : Set}(c : C → ⟦ F ⟧ C)(h : C → ν F) →
-                            out ∘ h ≡ map h ∘ c → (x : C) → h x ≡ A⟦ c ⟧ x
-univ-from c h eq x = let (op , ar) = c x in
+univ-from : {F : Container _ _}{C : Set}(h : C → ν F){c : C → ⟦ F ⟧ C} →
+                            out ∘ h ≡ map h ∘ c → (x : C) →  h x ≡ A⟦ c ⟧ x
+univ-from h {c} eq x = let (op , ar) = c x in
   out-injective (begin
-        (out ∘ h) x
+      (out ∘ h) x
     ≡⟨ cong (λ f → f x) eq ⟩
-        (map h ∘ c) x
+      (map h ∘ c) x
     ≡⟨⟩
-        (op , h ∘ ar)
-    ≡⟨ cong (λ f → op , f) (funext $ univ-from c h eq ∘ ar) ⟩ -- induction
-        (op , A⟦ c ⟧ ∘ ar)
+      map h (op , ar)
+    ≡⟨⟩
+      (op , h ∘ ar)
+    ≡⟨ cong (λ f → op , f) (funext $ univ-from h eq ∘ ar) ⟩ -- induction
+      (op , A⟦ c ⟧ ∘ ar)
     ≡⟨⟩ -- Definition of ⟦_⟧
-        (out ∘ A⟦ c ⟧) x
+      (out ∘ A⟦ c ⟧) x
     ∎)
 \end{code}
 The two previous proofs, constituting a proof of existence and uniqueness, are combined to show that \tt{($\nu$ F, out)} is terminal:
 \begin{code}
 terminal-out : {F : Container 0ℓ 0ℓ} → IsTerminal C[ F ]CoAlg (to-Coalgebra out)
-terminal-out = record { ! = λ {A} →
-                                  record {
-                                         f = A⟦ α A ⟧
-                                         ; commutes = λ {x} → cong-app (univ-to {_}{_}{α A} refl) x }
-                      ; !-unique = λ {A} fhom {x} → sym (univ-from (α A) (f fhom) (funext (λ y → commutes fhom {y})) x) }
+terminal-out = record { ! = λ {A} → record {
+                                    f = A⟦ α A ⟧
+                                    ; commutes = λ {x} → cong-app (univ-to A⟦ α A ⟧ {α A} refl) x }
+                      ; !-unique = λ {A} fhom {x} → sym (univ-from (f fhom) {α A} (funext (λ y → commutes fhom {y})) x) }
 \end{code}
 The \textit{computation law} \cite{Harper2011}:
 \begin{code}

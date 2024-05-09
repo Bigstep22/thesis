@@ -42,9 +42,11 @@ List' A B = ⟦ F A ⟧ B
 Helper functions to assist in cleanly writing out instances of lists:
 \begin{code}
 [] : {A : Set} → List A
-out ([]) = (nil , λ())
+head [] = nil
+tail [] = λ()
 _::_ : {A : Set} → A → List A → List A
-out (x :: xs) = (cons x , const xs)
+head (x :: xs) = cons x
+tail (x :: xs) = const xs
 infixr 20 _::_
 \end{code}
 The unfold funtion as it would normally be encountered for lists, defined in terms of $\anam{\_}$:
