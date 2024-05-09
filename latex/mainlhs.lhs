@@ -36,6 +36,7 @@
 %include sections/20_background.lhs.tex
 \input{sections/30_formalization}
 %include sections/40_haskell_optimizations.lhs.tex
+\input{sections/45_related_works}
 \input{sections/50_conclusion}
 
 

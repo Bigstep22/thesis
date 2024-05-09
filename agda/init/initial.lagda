@@ -26,16 +26,10 @@ A shorthand for the Category of F-Algebras.
 C[_]Alg : (F : Container 0ℓ 0ℓ) → Cat (lsuc 0ℓ) 0ℓ 0ℓ
 C[ F ]Alg = F-Algebras F[ F ]
 \end{code}
-A shorthand for an F-Algebra homomorphism:
-\begin{code}
-_Alghom[_,_] : {X Y : Set}(F : Container 0ℓ 0ℓ)(x : ⟦ F ⟧ X → X)(Y : ⟦ F ⟧ Y → Y) → Set
-F Alghom[ x , y ] = C[ F ]Alg [ to-Algebra x , to-Algebra y ]
-\end{code}
 A candidate function is defined, this will be proved to be a catamorphism through the proof of initiality:
 \begin{code}
 --⦅_⦆ : {F : Container 0ℓ 0ℓ}{X : Set} → (⟦ F ⟧ X → X) → μ F → X
 --⦅ a ⦆ (in' (op , ar)) = a (op , ⦅ a ⦆ ∘ ar)
---⦅_⦆ = foldr -- from Data.W
 \end{code}
 It is shown that any $\catam{\_}$ is a valid F-Algebra homomorphism from \tt{in'} to any other object \tt{a};
 i.e. the forward direction of the \textit{universal property of folds} \citep{Harper2011}.

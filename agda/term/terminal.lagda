@@ -26,11 +26,6 @@ A shorthand for the Category of F-Coalgebras:
 C[_]CoAlg : (F : Container 0ℓ 0ℓ) → Cat (lsuc 0ℓ) 0ℓ 0ℓ
 C[ F ]CoAlg = F-Coalgebras F[ F ]
 \end{code}
-A shorthand for an F-Coalgebra homomorphism:
-\begin{code}
-_CoAlghom[_,_] : {X Y : Set}(F : Container 0ℓ 0ℓ)(x : X → ⟦ F ⟧ X)(Y : Y → ⟦ F ⟧ Y) → Set
-F CoAlghom[ x , y ] = C[ F ]CoAlg [ to-Coalgebra x , to-Coalgebra y ]
-\end{code}
 A candidate terminal datatype and anamorphism function are defined, they will be proved to be so later on this module:
 \begin{code}
 record ν (F : Container 0ℓ 0ℓ) : Set where
@@ -83,15 +78,11 @@ univ-from c h eq x = let (op , ar) = c x in
   out-injective (begin
         (out ∘ h) x
     ≡⟨ cong (λ f → f x) eq ⟩
-        (map (h) ∘ c) x
-    ≡⟨⟩ -- Definition of composition
-        map h (c x)
+        (map h ∘ c) x
     ≡⟨⟩
         (op , h ∘ ar)
     ≡⟨ cong (λ f → op , f) (funext $ univ-from c h eq ∘ ar) ⟩ -- induction
         (op , A⟦ c ⟧ ∘ ar)
-    ≡⟨⟩
-        map A⟦ c ⟧ (c x)
     ≡⟨⟩ -- Definition of ⟦_⟧
         (out ∘ A⟦ c ⟧) x
     ∎)
@@ -100,13 +91,15 @@ The two previous proofs, constituting a proof of existence and uniqueness, are c
 \begin{code}
 terminal-out : {F : Container 0ℓ 0ℓ} → IsTerminal C[ F ]CoAlg (to-Coalgebra out)
 terminal-out = record { ! = λ {A} →
-                                  record { f = A⟦ α A ⟧ ; commutes = λ {x} → cong-app (univ-to {_}{_}{α A} refl) x }
+                                  record {
+                                         f = A⟦ α A ⟧
+                                         ; commutes = λ {x} → cong-app (univ-to {_}{_}{α A} refl) x }
                       ; !-unique = λ {A} fhom {x} → sym (univ-from (α A) (f fhom) (funext (λ y → commutes fhom {y})) x) }
 \end{code}
 The \textit{computation law} \cite{Harper2011}:
 \begin{code}
-comp-law : {F : Container 0ℓ 0ℓ}{C : Set}(c : C → ⟦ F ⟧ C) → out ∘ A⟦ c ⟧ ≡ map A⟦ c ⟧ ∘ c
-comp-law c = refl
+computation-law : {F : Container 0ℓ 0ℓ}{C : Set}(c : C → ⟦ F ⟧ C) → out ∘ A⟦ c ⟧ ≡ map A⟦ c ⟧ ∘ c
+computation-law c = refl
 \end{code}
 The \textit{reflection law} \cite{Harper2011}:
 SOMETHING ABOUT TERMINATION.

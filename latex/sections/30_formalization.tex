@@ -10,49 +10,6 @@ The code can be neatly presented in roughly 2 parts:
   \item The proofs about the (Co)Church encodings, again as described by \cite{Harper2011}.
 \end{itemize}
 
-A note on imports: Imports are omitted in the agda code except when an import renames a construct it is importing, this is most prevalent for \tt{Category}, \tt{Data.W}, and \tt{Container}.
-
 \input{sections/32_category_theory.tex}
 \input{sections/34_shortcut_fusion.tex}
-
-\iffalse
-OLD
-\subsection{Proofs from the category theory `truths'.}
-My formalization of \cite{Harper2011}'s work is organized into three main parts:
-\begin{itemize}
-    \item[\textbf{funct}] EXPAND: Definition of Agda endofunctors (through the use of containers) and postulate of functional extensionality.
-    \item[\textbf{init/term}] EXPAND: Definitions of initial/terminal (co)algebras, fusion, and some other category theory proofs
-    \item[\textbf{(co)church}] EXPAND: Definitions of (Co)Church encodings and the formal proofs of \cite{Harper2011}'s work, including postulates for the free theorems used.
-\end{itemize}
-An extensive description of \textbf{init/term} will be discussed in section \ref{sec:cat_truths}.
-
-\subsection{Proofs of the category theory truths.}\label{sec:cat_truths}
-The proof of fusion and needed definitions is split into three parts and uses the agda-categories library: %TODO: CITE 
-\begin{itemize}
-    \item[\textbf{agda-categories}] EXPAND: Definition of Sets, initial/terminal, f-(co)algebra, f-(co)algebra categories
-    \item[\textbf{endo}] EXPAND: Inside of funct, contains the definition of an endofunctor over Agda types, using containers
-    \item[\textbf{initalg}] EXPAND: Definitions of $\alg{F}$, a candidate for an initial object in $\alg{F}$, and proof of initiality for said object.
-    \item[\textbf{fusion}] EXPAND: Proof of the fusion property
-\end{itemize}
-For \textbf{initalg} and \textbf{fusion} there also exist complimentary proofs for terminal F-Coalgebras.
-
-\paragraph{agda-categories}
-\paragraph{Endo}
-\paragraph{initalg/termcoalg}
-\paragraph{(co)fusion}
-
-
-\subsection{Example implementation and demonstration of the correctness of the fusion for that instance.}
-\fi
-
-
-
-\iffalse
-Outline:
-- Harper's work has some mathematics in it, I formalized it.
-- The formalization was done in two parts:
-  - The formalization of the mathematics itself
-  - The formalization of the mathematics, embedded in categories to leverage the fusion property
-- The Formalization also implemented an example datastructure to demonstrate the proof's applicability in practice.
-\fi
 

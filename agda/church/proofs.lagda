@@ -11,18 +11,18 @@ module agda.church.proofs where
 \end{code}
 The first proof proves that \tt{fromCh $\circ$ toCh = id}, using the reflection law:
 \begin{code}
-from-to-id : {F : Container 0ℓ 0ℓ} → fromCh ∘ toCh ≡ id
-from-to-id {F} = funext (λ (x : μ F) → begin
+from-to-id : {F : Container 0ℓ 0ℓ} → fromCh ∘ toCh {F} ≡ id
+from-to-id {F} = funext λ x → begin
     fromCh (toCh x)
   ≡⟨⟩ -- Definition of toCh
-     fromCh (Ch (λ {X : Set} → λ (a : ⟦ F ⟧ X → X) → ⦅ a ⦆ x))
+     fromCh (Ch (λ {X}a → ⦅ a ⦆ x))
   ≡⟨⟩ -- Definition of fromCh
     (λ a → ⦅ a ⦆ x) in'
   ≡⟨⟩ -- function application
     ⦅ in' ⦆ x
   ≡⟨ reflection x ⟩
     x
-  ∎)
+  ∎
 \end{code}
 The second proof is similar to the first, but it proves the composition in the other direction \tt{toCh $\circ$ fromCh = id}.
 This proofs leverages parametricity as described by \cite{Wadler1989}.
@@ -39,7 +39,7 @@ fold-invariance : {F : Container 0ℓ 0ℓ}{Y : Set}
 fold-invariance g a = free ⦅ a ⦆ g refl
 
 to-from-id : {F : Container 0ℓ 0ℓ} → toCh ∘ fromCh {F} ≡ id
-to-from-id {F} = funext (λ where
+to-from-id {F} = funext λ where
   (Ch g) → begin
       toCh (fromCh (Ch g))
     ≡⟨⟩ -- definition of fromCh
@@ -48,7 +48,7 @@ to-from-id {F} = funext (λ where
       Ch (λ{X}a → ⦅ a ⦆ (g in'))
     ≡⟨ cong Ch (funexti λ{Y} → funext (fold-invariance g)) ⟩
       Ch g
-    ∎)
+    ∎
 \end{code}
 The third proof shows church-encoded functions constitute an implementation for the consumer functions being replaced.
 The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness:
@@ -85,8 +85,8 @@ The proof again leverages the free theorem defined earlier:
 \begin{code}
 trans-pres : {F G : Container 0ℓ 0ℓ} (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
              fromCh ∘ natTransCh f ≡ ⦅ in' ∘ f ⦆ ∘ fromCh
-trans-pres f = funext (λ where
-  (Ch g) → (begin
+trans-pres f = funext λ where
+  (Ch g) → begin
       fromCh (natTransCh f (Ch g))
     ≡⟨⟩ -- Function application
       fromCh (Ch (λ a → g (a ∘ f)))
@@ -98,7 +98,7 @@ trans-pres f = funext (λ where
       ⦅ in' ∘ f ⦆ (g in')
     ≡⟨⟩ -- Definition of fromCh
       ⦅ in' ∘ f ⦆ (fromCh (Ch g))
-    ∎))
+    ∎
 \end{code}
 Finally two additional proofs were made to clearly show that any pipeline made using church
 encodings will fuse down to a simple function application.

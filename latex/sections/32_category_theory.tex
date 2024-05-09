@@ -1,19 +1,13 @@
 
 \subsection{Category Theory Formalization}
-\subsubsection{funct}
-This module contains some simple definition, utilized in both complimentary structures (cata-/anamorphisms, church/cochurch).
-\input{sections/agda/funct/funext.tex}
-\input{sections/agda/funct/endo.tex}
-
+This section is about my formalization of \cite{Harper2011}'s work that describes the needed category theory, to be leveraged later on in the fusion part of the formalization.
 \subsubsection{init}
-This module defines F-Algebras, a candidate initial object $\mu$, and catamorphisms, and proves initiality of $\mu$, the fusion properties, and the catamorphism laws.
-\input{sections/agda/init/initalg.tex}
-\input{sections/agda/init/fusion.tex}
+This module defines the category of F-Algebras, initiality of $\mu$, the universal properties of folds, and the fusion properties.
 \input{sections/agda/init/initial.tex}
+\input{sections/agda/init/fusion.tex}
 
 \subsubsection{term}
-This module defines F-CoAlgebras, a candidate terminal object $\nu$, and anamorphisms, and proves terminality of $\nu$, the fusion properties, and the anamorphism laws.
+This module defines the category of F-CoAlgebras, a candidate terminal object $\nu$, anamorphisms, proves terminality of $\nu$, the universal properties of unfolds, and the fusion properties.
 This module is the compliment of \tt{init}.
-\input{sections/agda/term/termcoalg.tex}
-\input{sections/agda/term/cofusion.tex}
 \input{sections/agda/term/terminal.tex}
+\input{sections/agda/term/cofusion.tex}

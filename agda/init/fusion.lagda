@@ -18,7 +18,7 @@ The categorical fusion property:
 \begin{code}
 fusionprop : {F : Container 0ℓ 0ℓ}{A B μ : Set}{ϕ : ⟦ F ⟧ A → A}{ψ : ⟦ F ⟧ B → B}
              {init : ⟦ F ⟧ μ → μ}(i : IsInitial C[ F ]Alg (to-Algebra init)) →
-             (f : F Alghom[ ϕ , ψ ]) → C[ F ]Alg [ i .! ≈ C[ F ]Alg [ f ∘ i .! ] ]
+             (f : C[ F ]Alg [ to-Algebra ϕ , to-Algebra ψ ]) → C[ F ]Alg [ i .! ≈ C[ F ]Alg [ f ∘ i .! ] ]
 fusionprop {F} i f = i .!-unique (C[ F ]Alg [ f ∘ i .! ])
 \end{code}
 The `fusion law':

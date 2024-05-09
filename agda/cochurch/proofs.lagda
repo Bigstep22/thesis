@@ -12,8 +12,8 @@ module agda.cochurch.proofs where
 \end{code}
 The first proof proves that \tt{fromCoCh $\circ$ toCh = id}, using the reflection law:
 \begin{code}
-from-to-id : {F : Container 0ℓ 0ℓ} → fromCoCh ∘ toCoCh ≡ id
-from-to-id {F} = funext (λ (x : ν F) → begin
+from-to-id : {F : Container 0ℓ 0ℓ} → fromCoCh ∘ toCoCh {F} ≡ id
+from-to-id {F} = funext λ x → begin
     fromCoCh (toCoCh x)
   ≡⟨⟩ -- Definition of toCh
      fromCoCh (CoCh out x)
@@ -21,9 +21,9 @@ from-to-id {F} = funext (λ (x : ν F) → begin
     A⟦ out ⟧ x
   ≡⟨ reflection x ⟩
     x
-  ≡⟨⟩
+  ≡⟨⟩ -- Definition of identity
     id x
-  ∎)
+  ∎
 \end{code}
 The second proof proof is similar to the first, but it proves the composition in the other direction
 \tt{toCoCh $\circ$ fromCoCh = id}.
@@ -43,7 +43,7 @@ unfold-invariance c = free A⟦ c ⟧ CoCh refl
 
 to-from-id : {F : Container 0ℓ 0ℓ} → toCoCh ∘ fromCoCh {F} ≡ id
 to-from-id = funext λ where
-  (CoCh c x) → (begin
+  (CoCh c x) → begin
       toCoCh (fromCoCh (CoCh c x))
     ≡⟨⟩ -- definition of fromCh
       toCoCh (A⟦ c ⟧ x)
@@ -53,7 +53,7 @@ to-from-id = funext λ where
       (CoCh out ∘ A⟦ c ⟧) x
     ≡⟨ cong (λ f → f x) (sym $ unfold-invariance c) ⟩
       CoCh c x
-    ∎)
+    ∎
 \end{code}
 The third proof shows that cochurch-encoded functions constitute an implementation for the producing functions being replaced.
 The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness:
@@ -86,28 +86,31 @@ The proof leverages the categorical fusion property and the naturality of \tt{f}
 \begin{code}
 -- PAGE 52 - Proof 5
 valid-hom : {F G : Container 0ℓ 0ℓ}{X : Set}(h : X → ⟦ F ⟧ X)
-            (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)(nat : ∀ h → map h ∘ f ≡ f ∘ map h) →
+            (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)(nat : ∀ {X : Set}(g : X → ν F) → map g ∘ f ≡ f ∘ map g) →
             map A⟦ h ⟧ ∘ f ∘ h ≡ f ∘ out ∘ A⟦ h ⟧
 valid-hom h f nat = begin
     (map A⟦ h ⟧ ∘ f) ∘ h
   ≡⟨ cong (λ f → f ∘ h) (nat A⟦ h ⟧) ⟩
     (f ∘ map A⟦ h ⟧) ∘ h
-  ≡⟨⟩
+  ≡⟨⟩ -- dfn of A⟦_⟧
     f ∘ out ∘ A⟦ h ⟧
   ∎
 
-trans-pres : {F G : Container 0ℓ 0ℓ}{X : Set}(h : X → ⟦ F ⟧ X)
-             (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)(nat : ∀ h → map h ∘ f ≡ f ∘ map h) →
-             fromCoCh ∘ natTransCoCh f ∘ CoCh h ≡ A⟦ f ∘ out ⟧ ∘ A⟦ h ⟧
-trans-pres h f nat = funext λ x → begin
-    fromCoCh (natTransCoCh f (CoCh h x))
-  ≡⟨⟩ -- Function application
-    fromCoCh (CoCh (f ∘ h) x)
-  ≡⟨⟩ -- Definition of fromCh
-    A⟦ f ∘ h ⟧ x
-  ≡⟨ cong (λ f → f x) $ fusion A⟦ h ⟧ (sym (valid-hom h f nat)) ⟩
-    (A⟦ f ∘ out ⟧ ∘ A⟦ h ⟧) x
-  ∎
+trans-pres : {F G : Container 0ℓ 0ℓ}{X : Set}(h : X → ⟦ F ⟧ X) (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)
+             (nat : {X : Set}(g : X → ν F) → map g ∘ f ≡ f ∘ map g) →
+             fromCoCh ∘ natTransCoCh f ≡ A⟦ f ∘ out ⟧ ∘ fromCoCh
+trans-pres h f nat = funext λ where
+  (CoCh h x) → begin
+      fromCoCh (natTransCoCh f (CoCh h x))
+    ≡⟨⟩ -- Function application
+      fromCoCh (CoCh (f ∘ h) x)
+    ≡⟨⟩ -- Definition of fromCh
+      A⟦ f ∘ h ⟧ x
+    ≡⟨ cong-app (fusion A⟦ h ⟧ (sym (valid-hom h f nat))) x ⟩ -- Can I remove the fusion prop?
+      A⟦ f ∘ out ⟧ (A⟦ h ⟧ x)
+    ≡⟨⟩ -- This step is missing from the paper, but mirrors the step taken on the Church-side.
+      A⟦ f ∘ out ⟧ (fromCoCh (CoCh h x))
+    ∎
 \end{code}
 Finally two additional proofs were made to clearly show that any pipeline made using cochurch
 encodings will fuse down to a simple function application.

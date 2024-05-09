@@ -16,6 +16,7 @@ The conversion functions:
 \begin{code}
 toCh : {F : Container _ _} → μ F → Church F
 toCh {F} x = Ch (λ {X : Set} → λ (a : ⟦ F ⟧ X → X) → ⦅ a ⦆ x)
+
 fromCh : {F : Container _ _} → Church F → μ F
 fromCh (Ch g) = g in'
 \end{code}
@@ -26,9 +27,11 @@ First the producing function, this is a generalized version of \cite{Gill1993}'s
 prodCh : {ℓ : Level}{F : Container _ _}{Y : Set ℓ}
          (g : {X : Set} → (⟦ F ⟧ X → X) → Y → X)(y : Y) → Church F
 prodCh g x = Ch (λ a → g a x)
+
 prod   : {ℓ : Level}{F : Container _ _}{Y : Set ℓ}
          (g : {X : Set} → (⟦ F ⟧ X → X) → Y → X)(y : Y) → μ F
 prod g = fromCh ∘ prodCh g
+
 eqProd : {F : Container _ _}{Y : Set}
          {g : {X : Set} → (⟦ F ⟧ X → X) → Y → X} → prod g ≡ g in'
 eqProd = refl
@@ -38,9 +41,11 @@ Second, the natural transformation function:
 natTransCh : {F G : Container _ _}
              (nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) → Church F → Church G
 natTransCh nat (Ch g) = Ch (λ a → g (a ∘ nat))
+
 natTrans   : {F G : Container _ _}
              (nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) → μ F → μ G
 natTrans nat = fromCh ∘ natTransCh nat ∘ toCh
+
 eqNatTrans : {F G : Container _ _}
              {nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X} →
              natTrans nat ≡ ⦅ in' ∘ nat ⦆
@@ -51,9 +56,11 @@ Third, the consuming function, note that this is a generalized version of \cite{
 consCh : {F : Container _ _}{X : Set}
          (c : ⟦ F ⟧ X → X) → Church F → X
 consCh c (Ch g) = g c
+
 cons   : {F : Container _ _}{X : Set}
          (c : ⟦ F ⟧ X → X) → μ F → X
 cons c = consCh c ∘ toCh
+
 eqCons : {F : Container _ _}{X : Set}
          {c : ⟦ F ⟧ X → X} → cons c ≡ ⦅ c ⦆
 eqCons = refl

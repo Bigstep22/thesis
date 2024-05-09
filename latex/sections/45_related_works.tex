@@ -1,0 +1,13 @@
+\section{Related Works}\label{sec:related}
+
+\subsection{Fusion}
+Initial work on fusion was done my \cite{Wadler1984,Wadler1986,Wadler1990}, and was dubbed `deforestation', referring to the removal of intermediate trees (or lists).
+The details of the original deforestation work are not relevant to this thesis, but, the weaknesses of the work are described and different techniques proposed by \cite{Gill1993}.
+\cite{Gill1993} describe a technique nowadays called \tt{foldr/build} fusion, which, when employed, can eliminate most intermediate lists.
+This technique is described further in Section \ref{sec:foldr/build}.
+
+A converse approach, aptly named the \tt{destroy/unfoldr} rule, is described by \cite{Svenningsson2002}, which describes the converse technique to \cite{Gill1993}'s.
+A further generalization of this technique, leverages the coinductive list datatype, stream. This technique is called \textit{stream fusion} introduced by \cite{Coutts2007}.
+
+\paragraph{(Co)Church encodings}
+Finally, \cite{Harper2011} combined all of these concepts into one paper, called ``The Library Writer's Guide to Shortcut Fusion''. In it the concept of (Co)Church encodings are described and, pragmatically, how to implement them in Haskell.

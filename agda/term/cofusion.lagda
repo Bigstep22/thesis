@@ -19,7 +19,7 @@ The categorical fusion property:
 \begin{code}
 fusionprop : {F : Container 0ℓ 0ℓ}{C D ν : Set}
              {ϕ : C → ⟦ F ⟧ C}{ψ : D → ⟦ F ⟧ D}{term : ν → ⟦ F ⟧ ν}
-             (i : IsTerminal C[ F ]CoAlg (to-Coalgebra term))(f : F CoAlghom[ ψ , ϕ ]) →
+             (i : IsTerminal C[ F ]CoAlg (to-Coalgebra term))(f : C[ F ]CoAlg [ to-Coalgebra ψ , to-Coalgebra ϕ ]) →
              C[ F ]CoAlg [ i .! ≈ C[ F ]CoAlg [ i .! ∘ f ] ]
 fusionprop {F} i f = i .!-unique (C[ F ]CoAlg [ i .! ∘ f ])
 \end{code}

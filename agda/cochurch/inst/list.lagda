@@ -133,9 +133,9 @@ Because of this the first and second proof step for \tt{eq} in the church-encode
 eq : {f : ℕ → ℕ} → sum1 ∘ map1 f ∘ between1 ≡ sum2 ∘ map2 f ∘ between2
 eq {f} = begin
     s out ∘ A⟦ m f ∘ out ⟧ ∘ A⟦ b ⟧
-  ≡⟨ cong (λ g → s out ∘ g) (sym (trans-pres b (m f) (λ _ → funext (λ {(nil , l) → refl ; (cons n , l) → refl})))) ⟩
---    s out ∘ A⟦ m f ∘ out ⟧ ∘ fromCoCh ∘ prodCoCh b
---  ≡⟨ cong (λ g → su out ∘ g ∘ prodCoCh b) {!!} ⟩ -- trans-pres is different from church.... this causes this step to be skipped?
+  ≡⟨ cong (λ g → s out ∘ A⟦ m f ∘ out ⟧ ∘ g) (prod-pres b) ⟩
+    s out ∘ A⟦ m f ∘ out ⟧ ∘ fromCoCh ∘ prodCoCh b
+  ≡⟨ cong (λ g → s out ∘ g ∘ prodCoCh b) (sym (trans-pres b (m f) λ _ → funext (λ {(nil , l) → refl; (cons n , l) → refl} ))) ⟩
     s out ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b
   ≡⟨ cong (λ g → g ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b) (cons-pres s) ⟩
     consCoCh s ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b
