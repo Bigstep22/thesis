@@ -9,7 +9,7 @@ The original definition is included as \tt{CoChurch'}.
 module agda.cochurch.defs where
 \end{code}
 \begin{code}[hide]
-open import agda.term.termcoalg
+open import agda.term.terminal
 open import agda.funct.funext
 open import Data.Product using (∃; _×_)
 \end{code}

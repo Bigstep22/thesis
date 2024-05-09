@@ -2,7 +2,6 @@
 be satisfied. These are formalized in this module.
 \begin{code}[hide]
 {-# OPTIONS --guardedness #-}
-open import agda.term.termcoalg
 open import agda.term.terminal
 open import agda.term.cofusion
 open import agda.funct.funext

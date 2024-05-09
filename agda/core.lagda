@@ -10,7 +10,6 @@ open import agda.funct.endo
 open import agda.init.initial
 open import agda.init.fusion
 
-open import agda.term.termcoalg
 open import agda.term.cofusion
 open import agda.term.terminal
 

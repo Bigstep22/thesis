@@ -7,7 +7,7 @@ This shows that the fusion law does follow from the fusion property.
 module agda.term.cofusion  where
 \end{code}
 \begin{code}[hide]
-open import agda.term.termcoalg
+open import agda.term.terminal
 open import agda.funct.funext
 open import agda.funct.endo
 open import Categories.Category renaming (Category to Cat)

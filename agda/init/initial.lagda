@@ -74,7 +74,7 @@ initial-in = record { ! = λ {A} →
                                 record {
                                        f = ⦅ α A ⦆
                                        ; commutes = λ {x} → cong-app (univ-to {_}{_}{α A} refl) x  }
-                    ; !-unique = λ {A} fhom {x} → sym $ univ-from (α A) (f fhom) (funext (λ y → commutes fhom)) x }
+                    ; !-unique = λ {A} fhom {x} → sym $ univ-from (α A) (f fhom) (funext (λ y → commutes fhom {y})) x }
 \end{code}
 The \textit{computation law} \citep{Harper2011}:
 \begin{code}
@@ -84,12 +84,12 @@ comp-law a = refl
 The \textit{reflection law} \citep{Harper2011}:
 \begin{code}
 reflection : {F : Container 0ℓ 0ℓ}(y : μ F) → ⦅ in' ⦆ y ≡ y
-reflection (in' (op , ar)) = begin
-     ⦅ in' ⦆ (in' (op , ar))
+reflection y@(in' (op , ar)) = begin
+     ⦅ in' ⦆ y
    ≡⟨⟩ -- Dfn of ⦅_⦆
      in' (op , ⦅ in' ⦆ ∘ ar)
    ≡⟨ cong (λ x → in' (op , x)) (funext (reflection ∘ ar)) ⟩
-     in' (op , ar)
+     y
    ∎
 
 reflection-law : {F : Container 0ℓ 0ℓ} → ⦅ in' ⦆ ≡ id
