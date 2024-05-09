@@ -7,9 +7,8 @@ open import Categories.Category
 open import agda.funct.funext
 open import agda.funct.endo
 
-open import agda.init.initalg
-open import agda.init.fusion
 open import agda.init.initial
+open import agda.init.fusion
 
 open import agda.term.termcoalg
 open import agda.term.cofusion

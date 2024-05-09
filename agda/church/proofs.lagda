@@ -2,7 +2,6 @@
 In \cite{Harper2011}'s work, five proofs proofs are given for Church encodings.
 These are formalized in this module.
 \begin{code}[hide]
-open import agda.init.initalg
 open import agda.init.initial
 open import agda.funct.funext
 open import agda.church.defs

@@ -1,6 +1,6 @@
 \paragraph{Definition of Church encodings}
 \begin{code}[hide]
-open import agda.init.initalg
+open import agda.init.initial
 \end{code}
 This module defines Church encodings and the two conversions \tt{con} and \tt{abs}, called \tt{toCh} and \tt{fromCh} here, respectively.
 It also defines the generalized producing, transformation, and consuming functions, as described by \cite{Harper2011}.

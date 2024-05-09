@@ -11,7 +11,7 @@ open import Data.Bool
 open import agda.church.defs renaming (cons to consu)
 open import agda.church.proofs
 open import agda.funct.funext
-open import agda.init.initalg
+open import agda.init.initial
 \end{code}
 In this module is defined: the container, whose interpretation represents the base functor for lists,
 some convenience functions to make type annotations more readable, a producer function \tt{between},

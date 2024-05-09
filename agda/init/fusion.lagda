@@ -10,7 +10,7 @@ open import Categories.Functor.Algebra
 open import Categories.Object.Initial
 open IsInitial
 open import agda.funct.funext
-open import agda.init.initalg
+open import agda.init.initial
 open import agda.funct.endo
 open import Categories.Category renaming (Category to Cat)
 \end{code}
