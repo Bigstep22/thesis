@@ -8,7 +8,7 @@ open import Agda.Builtin.Nat
 open import agda.church.defs
 open import agda.church.proofs
 open import agda.funct.funext
-open import agda.init.initalg hiding (const)
+open import agda.init.initial hiding (const)
 \end{code}
 \begin{code}
 module agda.church.inst.free where
