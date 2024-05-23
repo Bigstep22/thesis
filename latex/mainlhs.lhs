@@ -23,6 +23,7 @@
 %include hs_chars.tex
 
 
+
 \title{Master's Thesis}
 \author{Eben Rogers}
 

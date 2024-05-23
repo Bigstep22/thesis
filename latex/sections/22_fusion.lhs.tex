@@ -1,4 +1,3 @@
-% Dive into description of foldr/build fusion, and how this original paper only worked for lists
 \subsection{Foldr/build fusion (on lists)}\label{sec:foldr/build}
 Starting with the basics of fusion. In \cite{Gill1993}'s paper the original 'schortcut deforestation' technique was described. The core idea is described here as follows:
 
@@ -83,11 +82,13 @@ See \cite{Gill1993}'s work, specifically the end of section 3.3 (\tt{unlines}) f
 
 
 
-
-
-%% Then, in a new section, dive into the generalization of it for all datastructures.
 \subsubsection{Generalization to any datastructure}
-This is all well and good, when working with lists, that can be written in terms of \tt{foldr}'s and/or \tt{build}'s (which covers a lot of common functions already), but what if we want to do this for any data structure? Is there a way of generalizing this?
-The answer is yes$^*$. $^*$So long as the datatype we are working with is an initial algebra or terminal coalgebra, and the functions we are working with are instances of cata- or anamorphisms.
+This foldr/build fusion works for lists, but it has several limitations.
+One is that it only works on lists, this is alleviated using Church encodings and is described by \cite{Harper2011}.
+Secondly, the functions that we are writing need to be expressible in terms of compositions of foldrs and builds. What if we want to implement to converse approach?
+This exists and is destroy/unfoldr fusion and is described by \cite{Coutts2007}.
+This work generalized by Cochurch encodings, also described by \cite{Harper2011}.
 
-What does that even mean?
+The generalization by Harper leverages (Co)Church, which uses definitions from category such as F-algebras and initiality.
+Don't know what they are? Read on in the next section, where I give these category theory definitions.
+

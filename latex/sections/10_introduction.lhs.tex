@@ -1,35 +1,36 @@
 \section{Introduction}
-When writing functional code, we often use functions (or other datastructures) to `glue' multiple pieces of data together.
+When writing functional code, we often use functions (or other data structures) to `glue' multiple pieces of data together.
 Take, as an example, the following function in the programming language Haskell, as introduced by \cite{Gill1993}: %TODO: Cite
 \begin{code}
-    all :: (a -> Bool) -> [a] -> Bool
-    all p = and . map p
+all :: (a -> Bool) -> [a] -> Bool
+all p = and . map p
 \end{code}
-The function \tt{map p} traverses across the input list, applying the predicate \tt{p} to each element, resulting in a new list of booleans. Then, the function \tt{and} takes this resulting, intermediate, boolean list and consumes it by `anding' together all the booleans.
+The function \tt{map p} traverses across the input list, applying the predicate \tt{p} to each element, resulting in a new boolean list.
+Then, the function \tt{and} takes this resulting, intermediate, boolean list and consumes it by `and-ing' together all the boolean values.
 
 Being able to compose functions in this fashion is part of what makes functional programming so attractive, but it comes at the cost of computational overhead:
 Each time allocating a list cell, only to subsequently deallocate it once the value has been read.
 We could instead rewrite \tt{all} in the following fashion:
 \begin{code}
 all' p xs = h xs
-      where h []     = True
-            h (x:xs) = p x && h xs
+  where h []     = True
+        h (x:xs) = p x && h xs
 \end{code}
 This function, instead of traversing the input list, producing a new list, and then subsequently traversing that intermediate list, traverses the input list only once; immediately producing a new answer.
 Writing code in this fashion is far more performant, at the cost of read- and write-ability.
 Can you write a high-performance, single-traversal, version of the following function \citep{Harper2011}?
 \begin{code}
-    f :: (Int, Int) -> Int
-    f = sum . map (+1) . filter odd . between
+f :: (Int, Int) -> Int
+f = sum . map (+1) . filter odd . between
 \end{code}
 With some (more) effort and optimization, one could arrive at the following solution:
 \begin{code}
-    f' :: (Int, Int) -> Int
-    f' (x, y) = loop x
-      where loop x | x > y     = 0
-                   | otherwise = if odd x
-                                 then (x+1) + loop (x+1)
-                                 else loop (x+1)
+f' :: (Int, Int) -> Int
+f' (x, y) = loop x
+  where loop x | x > y    = 0
+               |otherwise = if odd x
+                             then (x+1) + loop (x+1)
+                             else loop (x+1)
 \end{code}
 Doing this by hand every time, to get from the nice, elegant, compositional style of programming to the higher-performance, single-traversal style, gets old very quick.
 Especially if this needs to be done, by hand, \textbf{every} time you compose any two functions.
@@ -42,10 +43,10 @@ The process of taking multiple list producing/consuming functions and turning (o
 Much work already exists, which is discussed in detail in Section \ref{sec:related}.
 My thesis will be focusing on a specific form of fusion called shortcut fusion through the use of (Co)Church encodings as described by \cite{Harper2011}.
 
-My thesis is centered on formalizing, replicating, and expanding upon \cite{Harper2011}'s work and makes two crucial contributions:
+My thesis centers on formalizing, replicating, and expanding upon \cite{Harper2011}'s work and makes two crucial contributions:
 \begin{enumerate}
     \item The Church and Cochurch encodings described are formalized, including the relevant category theory, in Agda, in as a general fashion as possible, leveraging containers \citep{Abbott2005} to represent strictly positive functors.
-    Furthremore, the functions that are described (producing, transforming, and consuming) are also implemented in a general fashion and shown to be equal to regular folds (i.e. catamorphisms and anamorphisms).
+    Furthermore, the functions that are described (producing, transforming, and consuming) are also implemented in a general fashion and shown to be equal to regular folds (i.e., catamorphisms and anamorphisms).
 
     This is important because there currently does not seem to exist a formalization of the work.
     Formally verifying the mathematics will strengthen the work done by \cite{Harper2011}, perhaps also aiding in understanding in how the different pieces of mathematics relate.
@@ -58,7 +59,6 @@ My thesis is centered on formalizing, replicating, and expanding upon \cite{Harp
     This is what my research has (partially) set out to look into.
     This is discussed in detail in Section \ref{sec:haskell}.
 \end{enumerate}
-\citep{Muylder2023}
 
 
 
