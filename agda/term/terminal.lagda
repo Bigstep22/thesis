@@ -44,20 +44,23 @@ out : {F : Container 0ℓ 0ℓ} → ν F → ⟦ F ⟧ (ν F)
 out = < head , tail >
 open import Relation.Binary.Core
 
-open Eq using (_≡_; cong)
+open Eq using (_≡_; cong; subst)
 module _ {F : Container _ _} where
   record _≣_ (a b : ν F) : Set where
     coinductive; field
       outfst : head a ≡ head b
       outsnd : {x : Position F (head a)} →
-               tail a x ≣ tail b (Eq.subst (Position F) outfst x)
+               tail a x ≣ tail b (subst (Position F) outfst x)
   open _≣_
-  open import Relation.Binary.Definitions using (Reflexive; Symmetric; Transitive)
+  open import Relation.Binary.Definitions using (Reflexive; Symmetric; Transitive; Substitutive)
+
   refl : Reflexive _≣_
   outfst (refl) = Eq.refl
   outsnd (refl) = refl
---  postulate subst' : {ℓ : Level} →  Substitutive (_≣_ {F}) ℓ
---  subst' P eq p = {!!}
+
+--  subst' : {ℓ : Level} →  Substitutive _≣_ ℓ
+--  subst' P eq p = subst P {!!} p
+
   tailcong : (y : ν F){x z : Position F (head y)}
              (x≡z : x ≡ z) → tail y x ≣ tail y z
   outfst (tailcong y Eq.refl) = Eq.refl
@@ -67,7 +70,7 @@ module _ {F : Container _ _} where
   outfst (trans ij jk) = Eq.trans (outfst ij) (outfst jk)
   outsnd (trans {_}{j}{k} ij jk) {x} =
     trans (outsnd ij) $
-      Eq.subst
+      subst
         (λ f → _ ≣ tail k f)
         (subst-subst (outfst ij))
         (outsnd jk)
@@ -75,15 +78,14 @@ module _ {F : Container _ _} where
   sym : Symmetric _≣_
   outfst (sym eq) = Eq.sym (outfst eq)
   outsnd (sym {x}{y} eq) {z} =
-    sym $ Eq.subst
-      (λ f → tail x (Eq.subst (Position F) (Eq.sym (outfst eq)) z) ≣ tail y f)
+    sym $ subst
+      (λ f → tail x (subst (Position F) (Eq.sym (outfst eq)) z) ≣ tail y f)
       (subst-subst-sym (outfst eq))
       (outsnd eq)
   -- Rewrite this above line like the one in trans'
 open _≣_ public
 invnueq : {F : Container 0ℓ 0ℓ}{a b : ν F}(_ : a ≡ b) → a ≣ b
 invnueq Eq.refl = refl
-
 postulate nueq : {F : Container 0ℓ 0ℓ}{a b : ν F}(eq : a ≣ b) → a ≡ b
 --nueq' : {F : Container 0ℓ 0ℓ}{a b : ν F}
 --        (eq : head a ≡ head b)(eq' : ∀{x} → tail a x ≣ tail b (subst (Position F) eq x)) → a ≡ b
@@ -99,14 +101,14 @@ univ-to : {F : Container 0ℓ 0ℓ}{C : Set}(h : C → ν F)
 univ-to _ eq _ = outfst eq
 univ-to' : {F : Container 0ℓ 0ℓ}{C : Set}{h : C → ν F}
            {c : C → ⟦ F ⟧ C}(eq : ∀ {x} → h x ≣ A⟦ c ⟧ x) → ∀(x : C){y} →
-           tail (h x) y ≣ (h ∘ snd (c x) ∘ Eq.subst (Position F) (univ-to h eq x)) y
+           tail (h x) y ≣ (h ∘ snd (c x) ∘ subst (Position F) (univ-to h eq x)) y
 univ-to' {F}{_}{_}{c} eq x {y} = trans (outsnd eq {y}) (sym $ eq)
 conv : {F : Container _ _}{C : Set}(h : C → ν F){c : C → ⟦ F ⟧ C} →
        (eq : ∀{x} → out (h x) ≡ map h (c x)) → {x : C} → head (h x) ≡ proj₁ (c x)
 conv h eq = ,-injectiveˡ eq
 conv' : {F : Container _ _}{C : Set}(h : C → ν F){c : C → ⟦ F ⟧ C} →
        (eq : ∀{x} → out (h x) ≡ map h (c x)) →
-       ∀{x}{y} → tail (h x) y ≣ h (snd (c x) (Eq.subst (Position F) (,-injectiveˡ eq) y))
+       ∀{x}{y} → tail (h x) y ≣ h (snd (c x) (subst (Position F) (,-injectiveˡ eq) y))
 outfst (conv' {F} h {c} eq {x} {y}) = {!!}
 outsnd (conv' {F} h {c} eq {x} {y}) {z} = {!!}
 \end{code}
@@ -117,21 +119,23 @@ This uses \tt{out} injectivity.
 Currently, Agda's termination checker does not seem to notice that the proof in question terminates:
 \begin{code}
 univ-from : {F : Container _ _}{C : Set}(h : C → ν F)(c : C → ⟦ F ⟧ C) →
-            {x : C} →
-            (eq1 : head (h x) ≡ proj₁ (c x)) →
-            (eq2 : ∀{y} → tail (h x) y ≣ h (snd (c x) (Eq.subst (Position F) eq1 y))) →
-            h x ≣ A⟦ c ⟧ x
+            (eq1 : ∀{x} → head (h x) ≡ proj₁ (c x)) →
+            (eq2 : ∀{x y} → tail (h x) y ≣ h (snd (c x) (subst (Position F) eq1 y))) →
+            {x : C} → h x ≣ A⟦ c ⟧ x
 outfst (univ-from h c eq1 _) = eq1
-outsnd (univ-from {F} h c {x} eq1 eq2) {y} = univ-from
+outsnd (univ-from {F} h c eq1 eq2 {x}) {y} = univ-from
   (const $ tail (h x) y) c
-  (begin
+  (λ {x₁} → begin
     head (tail (h x) y)
     ≡⟨ outfst eq2 ⟩
-    head (h (snd (c x) (Eq.subst (Position F) eq1 y)))
-    ≡⟨ {!!} ⟩
-    proj₁ (c (snd (c x) (Eq.subst (Position F) eq1 y)))
+    head (h (snd (c x) (subst (Position F) eq1 y)))
+    ≡⟨ cong (head ∘ h) {!!} ⟩
+    head (h x₁)
+    ≡⟨ eq1 ⟩
+    proj₁ (c x₁)
     ∎)
-  (λ {y₁} → {!!}) --trans' eq2 $ univ-from h c eq1 eq2
+  (λ {x₁ y₁} → {!!})
+  {snd (c x) (subst (Position F) eq1 y)}
   where open ≡-Reasoning
 \end{code}
 The two previous proofs, constituting a proof of existence and uniqueness, are combined to show that \tt{($\nu$ F, out)} is terminal:
