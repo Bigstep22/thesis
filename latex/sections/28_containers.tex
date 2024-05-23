@@ -1,5 +1,32 @@
 
 \subsection{Containers}
+In my formalization I needed to represent functors somehow.
+While a \tt{RawFunctor} datatype does exist, it does not provide the necessary structure such that proofs can be done over it, such as the functor laws.
+
+Instead, I have opted to use Containers to represent strictly positive functors as described by \cite{Abbott2005}.
+The definition of a container is as follows:
+% Description of container
+These can be given a semantics (or extension) in the following manner:
+% Description of container 'interpretation'
+
+The main benefit of leveraging containers to represent functions is that positivity is maintained as well as that the functor laws are true by definition.
+Deriving the container from a given (polynomial) functor is done in a couple of steps:
+\begin{enumerate}
+    \item Analyze how many constructors your functor has, take as an example 2.
+    \item For the left side of the container take the coproduct of types that store the non-recursive sub-elements (such as const).
+    \item Count the amount of recursive elements in the constructor, the return type should include that many elements.
+\end{enumerate}
+It is clearer for an example:
+\begin{itemize}
+    \item \tt{List}
+    Taking the base functor for \tt{List}: \tt{F$_A$ X := 1 + A $\times$ X}.
+    For the left side we take the coproduct of \tt{$\top$} and \tt{const A}.
+    For the right side, we have one constructor that is non-recursive and one that contains one recursive element so we have:
+    \tt{$\top$ -> Fin 0} and \tt{const n -> Fin 1}.
+    % Clean this up
+    \item Binary tree
+    % Write up the description for binary trees
+\end{itemize}
 \iffalse
 - Strictly positive functors
 \fi
