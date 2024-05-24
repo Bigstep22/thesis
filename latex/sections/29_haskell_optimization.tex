@@ -1,7 +1,18 @@
 \subsection{Haskell's optimization pipeline}
-\iffalse
-- Tail call optimization
-- Beta reduction
-- Case of case
-- Inlining
-\fi
+In order to understand how fusion works, it is important to understand a few other concepts that fusion works in tandem with.
+Namely, beta reduction, inlining, case-of-case, and tail call optimization.
+I will give a brief description of each.
+
+\subsubsection{Beta reduction}
+Beta reduction is simply the rule where an expression of the form \tt{($\lambda$ x . a[x]) y} can get transformed into \tt{a[y]}.
+For example \tt{($\lambda$ x . x + x) y} would become \tt{y + y}.
+\subsubsection{Inlining}
+Inlining is the process of taking a function expression and unfolding it into its definition.
+If we take the function \tt{f = (+2)} and an expression \tt{f 5}, we could inline \tt{f} such that we get \tt{(+2) 5}; which we could inline again to obtain \tt{5 + 2}.
+\subsubsection{Case of case}
+TODODOD
+\subsubsection{Tail call optimization}
+We call a recursive function tail-recursive, if all its recursive calls are returned immediately upon completion i.e., they don't do any additional calculations upon the result of the recursive call before returning a result.
+
+When a function is tail-recursive, it is possible to reuse the stack frame of the current function call, reducing a lot of memory overhead.
+Haskell is able to identify tail-recursive functions and optimize the compiled byte code accordingly.
