@@ -16,16 +16,33 @@ Deriving the container from a given (polynomial) functor is done in a couple of 
     \item For the left side of the container take the coproduct of types that store the non-recursive sub-elements (such as const).
     \item Count the amount of recursive elements in the constructor, the return type should include that many elements.
 \end{enumerate}
-It is clearer for an example:
+Taking an example:
+\begin{table}[h]
+  \begin{tabular}{|r|l|l|}\hline
+     & \tt{List} &  \tt{Binary Tree} \\\hline
+    Base functor         & \tt{F$_A$ X := 1 + (A $\times$ X)}  & \tt{F$_A$ X := 1 + (X $\times$ A $\times$ X)} \\\hline
+    Left container half  & \tt{Fin 1 + const A} & \tt{Fin 1 + const A} \\\hline
+    Right container half & \tt{nil $\to$ Fin 0 and const n $\to$ Fin 1} & \tt{nil $\to$ Fin 0 and const n $\to$ Fin 2} \\\hline
+  \end{tabular}
+\end{table}
 \begin{itemize}
-    \item \tt{List}
+    \item[\tt{List}]
     Taking the base functor for \tt{List}: \tt{F$_A$ X := 1 + A $\times$ X}.
-    For the left side we take the coproduct of \tt{$\top$} and \tt{const A}.
-    For the right side, we have one constructor that is non-recursive and one that contains one recursive element so we have:
-    \tt{$\top$ -> Fin 0} and \tt{const n -> Fin 1}.
+
+    For the left side we take the coproduct of \tt{Fin 1} and \tt{const A}, corresponding to the `\tt{nil}' and `\tt{cons a \_}' part, respectively.
+
+    For the right side, we have one constructor that is non-recursive and one that contains one recursive element, so we have:
+    \tt{0 $\to$ Fin 0} and \tt{const n $\to$ Fin 1}.
+    The Fin 1 refers to the recursive X that is present in the base functor (or the `\tt{cons \_ as}' part of cons).
     % Clean this up
-    \item Binary tree
-    % Write up the description for binary trees
+    \item[\tt{Binary tree}]
+    Taking the base functor for \tt{Tree}: \tt{F$_A$ X := 1 + X $\times$ A $\times$ X}.
+
+    For the left side we take the coproduct of \tt{Fin 1} and \tt{const A}.
+
+    For the right side, we have one constructor that is non-recursive and one that contains two recursive elements, so we have:
+    \tt{0 $\to$ Fin 0} and \tt{const n $\to$ Fin 2}.
+    % Clean this up
 \end{itemize}
 \iffalse
 - Strictly positive functors
