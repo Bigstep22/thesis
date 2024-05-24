@@ -19,14 +19,6 @@ Deriving the container from a given (polynomial) functor is done in a couple of 
     \item Count the amount of recursive elements in the constructor, the return type should include that many elements.
 \end{enumerate}
 Taking an example:
-\begin{table}[h]
-  \begin{tabular}{|r|l|l|}\hline
-     & \tt{List} &  \tt{Binary Tree} \\\hline
-    Base functor         & \tt{F$_A$ X := 1 + (A $\times$ X)}  & \tt{F$_A$ X := 1 + (X $\times$ A $\times$ X)} \\\hline
-    Left container half  & \tt{Fin 1 + const A} & \tt{Fin 1 + const A} \\\hline
-    Right container half & \tt{nil $\to$ Fin 0 and const n $\to$ Fin 1} & \tt{nil $\to$ Fin 0 and const n $\to$ Fin 2} \\\hline
-  \end{tabular}
-\end{table}
 \begin{itemize}
     \item[\tt{List}]
     Taking the base functor for \tt{List}: \tt{F$_A$ X := 1 + A $\times$ X}.
@@ -46,6 +38,15 @@ Taking an example:
     \tt{0 $\to$ Fin 0} and \tt{const n $\to$ Fin 2}.
     % Clean this up
 \end{itemize}
+The above description is summarized below in a table:
+\begin{table}[h]
+  \begin{tabular}{|r|l|l|}\hline
+     & \tt{List} &  \tt{Binary Tree} \\\hline
+    Base functor         & \tt{F$_A$ X := 1 + (A $\times$ X)}  & \tt{F$_A$ X := 1 + (X $\times$ A $\times$ X)} \\\hline
+    Left container half  & \tt{Fin 1 + const A} & \tt{Fin 1 + const A} \\\hline
+    Right container half & \tt{nil $\to$ Fin 0 and const n $\to$ Fin 1} & \tt{nil $\to$ Fin 0 and const n $\to$ Fin 2} \\\hline
+  \end{tabular}
+\end{table}
 \iffalse
 - Strictly positive functors
 \fi
