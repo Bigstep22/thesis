@@ -16,10 +16,39 @@ h &= \catam{a} \iff && h \circ in &&= a \circ F h \\
 \text{The fusion law as:} \\
 h \circ \catam{a} &= \catam{b}~\Longleftarrow && h \circ a &&= b \circ F h \\
 \text{And the reflection law as:} \\
-\catam{in} &= id \\
+\catam{in} &= id
 \end{alignat*}
+I formalized and proved all of these properties in my Agda formalization.
+It is also interesting to note that, for the universal property of unfolds, the forward direction is the proof of existence and the backward direction the proof of uniqueness, for the proof of initiality of an algebra.
+Converse definitions exist for terminal coalgebras, but I will not cover them in this section.
+They do exist in my formalization.
 
+\subsubsection{Encodings}
+The purpose of the encodings is to encode recursive functions, which are not inlined by Haskell's optimizer, into ones that are capable of being inlined and therefore fused:
+``For example, assume that we want to convert values of the recursive datatype \tt{$\mu$F} to values of a type \tt{F}.  The idea is that \tt{C} can faithfully represent values of \tt{$\mu$F}, but composed functions over \tt{C} can be fused automatically'' \citep{Harper2011}.
 
+Now, instead of writing functions over \tt{$\mu$F}, we write functions over \tt{C}, along with two conversion functions \tt{con: $\mu$F $\to$ C} (converst) and \tt{abs : C $\to$ $\mu$F} (abstract).
+In order for the datatype \tt{C} to faithfully represent \tt{$\mu$F}, we need $abs \circ con = id_{\mu F}$. I.e. that \tt{C} can represent all values of \tt{$\mu$F} uniquely.
+
+In total there are four main proof obligations, the one mentioned above, as well as the commutation of the following three diagrams:
+\begin{figure}[H]\hfill
+\begin{tikzcd}
+    \mu F  \arrow[d,"f",swap] & C \arrow[l,"abs"] \arrow[d, "f_C"] \\
+    \mu F & C \arrow[l,"abs"]
+\end{tikzcd}\hfill\null
+\begin{tikzcd}
+    S  \arrow[d,"p",swap] \arrow[dr,"p_C"] \\
+    \mu F & C \arrow[l,"abs"]
+\end{tikzcd}\hfill\null
+\begin{tikzcd}
+    \mu F  \arrow[d,"c",swap] \arrow[r,"con"] & C \arrow[dl, "c_C"] \\
+    T
+\end{tikzcd}\hfill\null
+\end{figure}
+Where, in the second diagram, \tt{p} is a producer function, generating a recursive data structure from a seed of type \tt{S}, and, in the third diagram, \tt{c} is a consumer function, consuming a recursive data structure to produce a value of type \tt{T}.
+
+\subsubsection{(Co)Church Encodings}
+TODODODODODODO
 
 \iffalse
 \begin{itemize}
