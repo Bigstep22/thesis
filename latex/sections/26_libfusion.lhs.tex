@@ -3,8 +3,8 @@
 \subsection{Library Writer's Guide to Shortcut Fusion}
 Now that the sufficient category theory has been explained, it is possible to describe \cite{Harper2011}'s paper, which my thesis centers on called ``A Library Writer's Guide to Shortcut Fusion''.
 
-In the work, \cite{Harper2011} explain the concept of Church and CoChurch encodings in three steps.
-The necessary underlying category theory, the concepts of encodings and the proof obligations necessary for ensuring correctness of the encodings, and finally the concepts of (Co)Church encodings with the proof of correctness followed by an example implementation for leaf trees.
+In the work, \cite{Harper2011} explain the concept of Church and CoChurch encodings in four steps:
+The necessary underlying category theory, the concepts of encodings and the proof obligations necessary for ensuring correctness of the encodings, the concepts of (Co)Church encodings with the proof of correctness, and finally an example implementation for leaf trees.
 I will now go through each step briefly.
 
 \subsubsection{Category Theory}
@@ -48,11 +48,49 @@ In total there are four main proof obligations, the one mentioned above, as well
 Where, in the second diagram, \tt{p} is a producer function, generating a recursive data structure from a seed of type \tt{S}, and, in the third diagram, \tt{c} is a consumer function, consuming a recursive data structure to produce a value of type \tt{T}.
 
 \subsubsection{(Co)Church Encodings}
-TODODODODODODO
+Next, \cite{Harper2011} proposes two encodings, \tt{Church} and \tt{CoChurch}.
+
+\paragraph{Church} \tt{Church} is defined (abstractly) as the following datatype:
+\begin{code}
+data Church F = Ch (forall A => (F A -> A) -> A)
+\end{code}
+\tt{Church} contains a recursion principle (often referred to as \tt{g} throughout this thesis).
+With conversion and abstraction functions \tt{toCh} and \tt{fromCh}:
+\begin{code}
+toCh :: mu F -> Church F
+toCh x = Ch (\ a -> fold a x)
+fromCh :: Church F -> mu F
+fromCh (Ch g) = g in
+\end{code}
+From these definitions, Harper proves the four proof obligations along with a fifth proof, proving the other composition of \tt{con} and \tt{abs} to be equal to \tt{id}, thereby showing isomorphism.
+For the proof of transformers and \tt{con $\circ$ abs = id}, Harper makes use of the free theorem for the polymorphic recursion principle \tt{g}.
+In all the five proofs for Church encodings, Harper does not use the fusion property.
+
+\paragraph{Cochurch} \tt{CoChurch} is defined (abstractly) as the following datatype:
+\begin{code}
+data CoChurch' F = exists S => CoCh (S -> F S) S
+\end{code}
+An isomorphic definition which Harper later uses is the one I end up using in my formalization:
+\begin{code}
+data CoChurch F = forall S => CoCh (S -> F S) S
+\end{code}
+The Cochurch encoding encodes a coalgebra and a seed value together.
+The conversion and abstraction functions, \tt{toCoCh} and \tt{fromCoCh}:
+\begin{code}
+toCoCh :: nu F -> CoChurch F
+toCoCh x = CoCh out x
+fromCoCh :: CoChurch F -> nu F
+fromCoCh (CoCh h x) = unfold h x  
+\end{code}
+In a similar fashion as for Church encodings, Harper proves the four proof obligations as well as the additional fifth one.
+The \tt{con $\circ$ abs = id} proof, leverages the free theorem for the corecursion principle of the type \tt{CoChurch}.
+The proof for natural transformations, however, does not use the free theorem and instead uses the fusion property for unfolds.
+
+\subsubsection{Example implementation}
 
 \iffalse
 \begin{itemize}
-    \item 
+    \Item 
     % https://scholar.google.com/scholar?hl=en&as_sdt=2005&sciodt=0%2C5&cites=9372977837493231928&scipsc=1&q=church&btnG=
 \end{itemize}
 \fi
