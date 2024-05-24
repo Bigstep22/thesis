@@ -1,5 +1,5 @@
 \paragraph{Initial F-Algebra fusion}
-This module proves the categorical fusion property (see Section \ref{sec:fusion_prop}).
+This module proves the categorical fusion property (see \autoref{sec:fusion_prop}).
 From it, it extracts the `fusion law' as it was declared by \cite{Harper2011}; which is easier to work with.
 This shows that the fusion law does follow from the fusion property.
 \begin{code}

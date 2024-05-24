@@ -198,7 +198,7 @@ Note that two subfunctions are provided to \tt{su'}, the \tt{loop} and the \tt{l
 The former function is implement as one would naively expect.
 The latter, interestingly, is implemented using tail-recursion.
 Because this \tt{loopt} function constitutes a corecursion principle, all the algebras (or natural transformations) applied to it, will be inlined in such a way that the resultant function is also tail recursive, in some cases providing a significant speedup!
-For more details, see the discussion in Section \ref{sec:tail}.
+For more details, see the discussion in \autoref{sec:tail}.
 
 \paragraph{Pipelines and GHC list fusion}
 \begin{code}

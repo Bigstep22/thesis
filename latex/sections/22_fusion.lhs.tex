@@ -30,7 +30,7 @@ Such that:
 \begin{code}
     g : forall beta : (A -> beta -> beta) -> beta -> beta
 \end{code}
-Which can be proved to be true through the use of g's free theorem \`a la \cite{Wadler1989}. For more information on free theorems see Section \ref{sec:free}
+Which can be proved to be true through the use of g's free theorem \`a la \cite{Wadler1989}. For more information on free theorems see \autoref{sec:free}
 
 \subsubsection{An example}
 Take the function from, that takes two numbers and produces a list of all the numbers from the first to the second:
@@ -82,7 +82,7 @@ See \cite{Gill1993}'s work, specifically the end of section 3.3 (\tt{unlines}) f
 
 
 
-\subsubsection{Generalization to any datastructure}
+\subsubsection{Generalization to recursive datastructues}
 This foldr/build fusion works for lists, but it has several limitations.
 One is that it only works on lists, this is alleviated using Church encodings and is described by \cite{Harper2011}.
 Secondly, the functions that we are writing need to be expressible in terms of compositions of foldrs and builds. What if we want to implement to converse approach?

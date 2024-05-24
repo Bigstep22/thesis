@@ -22,6 +22,11 @@
 %include agda_chars.tex
 %include hs_chars.tex
 
+\setcounter{tocdepth}{2}
+\newcommand{\changelocaltocdepth}[1]{%
+  \addtocontents{toc}{\protect\setcounter{tocdepth}{#1}}%
+  \setcounter{tocdepth}{#1}%
+}
 
 
 \title{Master's Thesis}
@@ -35,6 +40,7 @@
 
 %include sections/10_introduction.lhs.tex
 %include sections/20_background.lhs.tex
+\changelocaltocdepth{3}
 \input{sections/30_formalization}
 %include sections/40_haskell_optimizations.lhs.tex
 \input{sections/45_related_works}

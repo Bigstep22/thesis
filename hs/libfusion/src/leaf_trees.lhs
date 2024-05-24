@@ -234,7 +234,7 @@ sum2 = sumCh . toCh
 {-# INLINE sum2 #-}
 \end{code}
 The cochurch encoding is defined using a coinduction principle.
-Note that it is possible to implement this function using an accumulator of a list datatype (used like a queue), but it currently does not seem to provide a fused Core AST, for a more expansive discussion on tail-recursive cochurch-encoded pipelines, see \ref{sec:tail}:
+Note that it is possible to implement this function using an accumulator of a list datatype (used like a queue), but it currently does not seem to provide a fused Core AST, for a more expansive discussion on tail-recursive cochurch-encoded pipelines, see \autoref{sec:tail}:
 \begin{code}
 sumCoCh :: TreeCoCh Int -> Int
 sumCoCh (TreeCoCh h s') = loop s'
