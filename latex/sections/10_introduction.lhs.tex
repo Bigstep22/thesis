@@ -41,23 +41,35 @@ The form of optimization that we are looking for is called fusion:
 The process of taking multiple list producing/consuming functions and turning (or fusing) them into just one.
 
 Much work already exists, which is discussed in detail in \autoref{sec:related}.
-My thesis will be focusing on a specific form of fusion called shortcut fusion through the use of (Co)Church encodings as described by \cite{Harper2011}.
-
-My thesis centers on formalizing, replicating, and expanding upon \cite{Harper2011}'s work and makes two crucial contributions:
+My thesis focuses on a specific form of fusion called shortcut fusion through the use of (Co)Church encodings as described by \cite{Harper2011} and asks the following two questions:
 \begin{enumerate}
-    \item The Church and Cochurch encodings described are formalized, including the relevant category theory, in Agda, in as a general fashion as possible, leveraging containers \citep{Abbott2005} to represent strictly positive functors.
-    Furthermore, the functions that are described (producing, transforming, and consuming) are also implemented in a general fashion and shown to be equal to regular folds (i.e., catamorphisms and anamorphisms).
+  \item To implement (Co)Church encodings, what is necessary to make the code reliably fuse? This leads to the following sub-questions:
+  \begin{itemize}
+    \item What transformations are used within Haskell to enable fusion to work?
+    \item What tools are used to get Haskell's compiler to cooperate and trigger fusion?
+  \end{itemize}
+  \item Are the transformations used to enable fusion safe? Meaning:
+  \begin{itemize}
+    \item Do the transformations in Haskell preserve the semantics of the langaugage?
+    \item If the mathematics and the encodings are implemented in a dependently typed langauge, can the transformation be proved correct?
+  \end{itemize}
+\end{enumerate}
 
-    This is important because there currently does not seem to exist a formalization of the work.
-    Formally verifying the mathematics will strengthen the work done by \cite{Harper2011}, perhaps also aiding in understanding in how the different pieces of mathematics relate.
-    This is discussed in detail in \autoref{sec:formalization}.
+My thesis centers on formalizing, replicating, and expanding upon \cite{Harper2011}'s work and makes two crucial contributions, answering the two questions above:
+\begin{enumerate}
     \item The Church and Cochurch encodings' implementation in Haskell, as described by \cite{Harper2011} are replicated and investigated further as to their performance characteristics.
-    In this process, a bug was found in Haskell's optimizer, and further practical insights were gleaned as to how to get these encodings to properly fuse as well (especially for Cochurch encodings) and what optimizations enable shortcut fusion to do its work.
+    In this process, a weakness was found in Haskell's optimizer, and further practical insights were gleaned as to how to get these encodings to properly fuse as well (especially for Cochurch encodings) and what optimizations enable shortcut fusion to do its work.
 
     This is important as \cite{Harper2011} gave a good pragmatic explanation as to how to implement the (Co)Church encodings in Haskell, gave an example implementation, and benchmarked that implementation.
     He did not dive into too much detail as to \textit{why} they work stating, ``Interestingly, however, we note that Cochurch encodings consistently outperform Church encodings, sometimes by a significant margin. While we do consider these results conclusive, we think that these results merit further investigation.'' \citep{Harper2011}.
     This is what my research has (partially) set out to look into.
     This is discussed in detail in \autoref{sec:haskell}.
+    \item The Church and Cochurch encodings described are formalized and implemented, including the relevant category theory, in Agda, in as a general fashion as possible, leveraging containers \citep{Abbott2005} to represent strictly positive functors.
+    Furthermore, the functions that are described (producing, transforming, and consuming) are also implemented in a general fashion and shown to be equal to regular folds (i.e., catamorphisms and anamorphisms).
+
+    This is important because there currently does not seem to exist a formalization of the work.
+    Formally verifying the mathematics will strengthen the work done by \cite{Harper2011}, perhaps also aiding in understanding in how the different pieces of mathematics relate.
+    This is discussed in detail in \autoref{sec:formalization}.
 \end{enumerate}
 
 
