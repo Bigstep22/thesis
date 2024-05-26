@@ -43,8 +43,6 @@ Let's try this for the \tt{List} datatype:
 filt :: (a -> Bool) -> List_ a c -> List_ a c
 filt p Nil_ = Nil_
 filt p (Cons_ x xs) = if p x then Cons_ x xs else ? 
-filter3 :: (a -> Bool) -> List a -> List a
-filter3 p = fromCoCh . natCoCh (filt p) . toCoCh
 \end{code}
 The question is, what should be in the place of the \tt{?} above?
 Initially you might say \tt{xs}, as the \tt{Cons\_ x} part should be filtered away, and this would be conceptually correct except for the fact that \tt{xs} is of type \tt{c}, and not of type \tt{List\_ a c}.
@@ -57,7 +55,7 @@ One that modifies the definition of \tt{filter2} and \tt{filter3}, such that the
 The other modifies the definition of the underlying type such that the filter function is still possible to express as a transformation.
     
 \paragraph{Church}
-% Solved using a build/foldr pair
+% Solved using a build/foldr pair - this is true, but how to make the reader see it? 0_o
 Whereas before we wanted to implement our \tt{filter} function in the following manner:
 \begin{code}
 filterCh :: (forall c . List_ a c -> List_ b c) -> ListCh a -> ListCh b
@@ -65,13 +63,32 @@ filterCh p (ListCh g) = ListCh (\a -> g (a . (filt p)))
 filter2 :: (a -> Bool) -> List a -> List a
 filter2 p = fromCh . filterCh p . toCh
 \end{code}
-We now need to modify the \tt{filterCh} function such that we can still express a filter function \textit{witout} using a natural transformation.
+We now need to modify the \tt{filterCh} function such that we can still express a filter function \textit{witout} using a natural transformation:
+\begin{code}
+filterCh :: (forall c . List_ a c -> List_ b c) -> ListCh a -> ListCh b
+filterCh p (ListCh g) = ListCh (\a -> g ?)
+\end{code}
+Replacing the \tt{?} above such that we apply the \tt{a} selectively we can yield:
+\begin{code}
+filterCh p (ListCh g) = ListCh (\a -> g (\case
+    Nil_ -> a Nil_
+    Cons_ x xs -> if (p x) then a (Cons_ x xs) else xs
+  ))
+\end{code}
+Notice how we do not apply \tt{a} to \tt{xs}, and, in doing so, can put \tt{xs} in the place where wanted to.
+The definition of \tt{filterCh} was too restrictive in always postcomposing \tt{a}.
 
-% We aren't beholden to this structure!
 % If we think back to the techniques described by \cite{Gill1993}, we can express \tt{filter} as a \tt{build} followed by a \tt{fold}
 
 \paragraph{Cochurch}
 % Solved by implementing a recursive function instead of an algebra
+Whereas before we wanted to implement our \tt{filter} function in the following manner:
+\begin{code}
+filter3 :: (a -> Bool) -> List a -> List a
+filter3 p = fromCoCh . natCoCh (filt p) . toCoCh
+\end{code}
+% Idea is, we combine the transformation and postcomposition again, but this time we make the function recursively grab elements from the seed until we find one.
+
 
 \paragraph{Third solution: modify the underlying type}
 We can add a new constructor to the datatype that allows us to null out the value of our datatype: \tt{ConsN\_ xs}.
