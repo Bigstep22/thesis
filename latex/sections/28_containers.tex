@@ -4,11 +4,7 @@ In my formalization I needed to represent functors somehow.
 While a \tt{RawFunctor} datatype does exist, it does not provide the necessary structure such that proofs can be done over it, such as the functor laws.
 
 Instead, I have opted to use Containers to represent strictly positive functors as described by \cite{Abbott2005}.
-The definition of a container is as follows:
-ADFSDFSDFKJSDHFSDKLJHF
-% Description of container
-These can be given a semantics (or extension) in the following manner:
-ADFSDFSDFKJSDHFSDKLJHF
+\input{sections/agda/examples/container.tex}
 % Description of container 'interpretation'
 
 The main benefit of leveraging containers to represent functions is that positivity is maintained as well as that the functor laws are true by definition.
@@ -23,18 +19,18 @@ Taking an example:
     \item[\tt{List}]
     Taking the base functor for \tt{List}: \tt{F$_A$ X := 1 + A $\times$ X}.
 
-    For the left side we take the coproduct of \tt{Fin 1} and \tt{const A}, corresponding to the `\tt{nil}' and `\tt{cons a \_}' part, respectively.
+    For the \tt{Shape} we take the coproduct of \tt{Fin 1} and \tt{const A}, corresponding to the `\tt{nil}' and `\tt{cons a \_}' part, respectively.
 
-    For the right side, we have one constructor that is non-recursive and one that contains one recursive element, so we have:
+    For the \tt{Position}, we have one constructor that is non-recursive and one that contains one recursive element, so we have:
     \tt{0 $\to$ Fin 0} and \tt{const n $\to$ Fin 1}.
     The Fin 1 refers to the recursive X that is present in the base functor (or the `\tt{cons \_ as}' part of cons).
     % Clean this up
     \item[\tt{Binary tree}]
     Taking the base functor for \tt{Tree}: \tt{F$_A$ X := 1 + X $\times$ A $\times$ X}.
 
-    For the left side we take the coproduct of \tt{Fin 1} and \tt{const A}.
+    For the \tt{Shape} we take the coproduct of \tt{Fin 1} and \tt{const A}.
 
-    For the right side, we have one constructor that is non-recursive and one that contains two recursive elements, so we have:
+    For the \tt{Position}, we have one constructor that is non-recursive and one that contains two recursive elements, so we have:
     \tt{0 $\to$ Fin 0} and \tt{const n $\to$ Fin 2}.
     % Clean this up
 \end{itemize}
@@ -43,10 +39,9 @@ The above description is summarized below in a table:
   \begin{tabular}{|r|l|l|}\hline
      & \tt{List} &  \tt{Binary Tree} \\\hline
     Base functor         & \tt{F$_A$ X := 1 + (A $\times$ X)}  & \tt{F$_A$ X := 1 + (X $\times$ A $\times$ X)} \\\hline
-    Left container half  & \tt{Fin 1 + const A} & \tt{Fin 1 + const A} \\\hline
-    Right container half & \tt{nil $\to$ Fin 0 and const n $\to$ Fin 1} & \tt{nil $\to$ Fin 0 and const n $\to$ Fin 2} \\\hline
+    Shape  & \tt{Fin 1 + const A} & \tt{Fin 1 + const A} \\\hline
+    Position & \tt{nil $\to$ Fin 0 and const n $\to$ Fin 1} & \tt{nil $\to$ Fin 0 and const n $\to$ Fin 2} \\\hline
   \end{tabular}
 \end{table}
-\iffalse
-- Strictly positive functors
-\fi
+
+For a concrete example of how a datatype is implemented, see \autoref{sec:agda_}.
