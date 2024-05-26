@@ -231,16 +231,16 @@ sum5 = foldl' (\a b -> a+b) 0
 {-# INLINE sum5 #-}
 pipeline5 = sum5 . map5 (+2) . filter5 trodd . between5
 
--- sumApp1 (x, y)  = sum1 (append1 (between1 (x, y)) (between1 (x, y)))
--- sumApp2 (x, y)  = sum2 (append2 (between2 (x, y)) (between2 (x, y)))
--- sumApp3 (x, y)  = sum3 (append3 (between3 (x, y)) (between3 (x, y)))
-
 input :: (Int, Int)
 input = (1, 10000)
 main :: IO ()
 main = print (pipeline5 input)
 \end{code}
 \ignore{
+-- sumApp1 (x, y)  = sum1 (append1 (between1 (x, y)) (between1 (x, y)))
+-- sumApp2 (x, y)  = sum2 (append2 (between2 (x, y)) (between2 (x, y)))
+-- sumApp3 (x, y)  = sum3 (append3 (between3 (x, y)) (between3 (x, y)))
+
 \begin{code}
 {-
 main :: IO ()
@@ -301,7 +301,7 @@ main = defaultMain
    it was discovered that it performed identically to the cofused implementation.
    - This 'hand fused' pipeline was then further optimized using tail recursion.
      This turned out to give another 40% speedup, a bummer when compared to cofusion
-   - However, with a small change in the definition of the 'final' function of the fused pipeline,
+   - However, with a small change in the definition of the 'final' function of the cofused pipeline,
      su', such that it is also tail recursive gave an identical speedup to the cofused pipeline.
    - One interesting thing of note is that the Core representation of the cofused tai-recursive
      function does not make use of gotos like the hand-written one does. It does, however, seem

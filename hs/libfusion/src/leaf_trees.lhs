@@ -22,9 +22,9 @@ f' :: (Int, Int) -> Int
 f' (x, y) = loop x
   where
     loop x | x > y = 0
-           | otherwise = if odd x
-                       then (x + 1) + loop (x + 1)
-                       else loop (x + 1)
+           |otherwise = if odd x
+                        then (x + 1) + loop (x + 1)
+                        else loop (x + 1)
 \end{code}
 \paragraph{Datatypes} In his paper \cite{Harper2011} implemented his example functions using leaf trees, this is defined as \tt{Tree} below.
 Furthermore, the base functor of \tt{Tree} was defined, as \tt{Tree\_}, with the recursive positions of the functor turned into a paramater of the datatype:
@@ -252,14 +252,14 @@ pipeline1 = sum1 . map1 (+2) . filter1 odd . between1
 pipeline2 = sum2 . map2 (+2) . filter2 odd . between2
 pipeline3 = sum3 . map3 (+2) . filter3 odd . between3
 
-sumApp1 (x, y)  = sum1 (append1 (between1 (x, y)) (between1 (x, y)))
-sumApp2 (x, y)  = sum2 (append2 (between2 (x, y)) (between2 (x, y)))
-sumApp3 (x, y)  = sum3 (append3 (between3 (x, y)) (between3 (x, y)))
-
 input = (1, 10000)
 main = print (pipeline3 input)
 \end{code}
 \ignore{
+sumApp1 (x, y)  = sum1 (append1 (between1 (x, y)) (between1 (x, y)))
+sumApp2 (x, y)  = sum2 (append2 (between2 (x, y)) (between2 (x, y)))
+sumApp3 (x, y)  = sum3 (append3 (between3 (x, y)) (between3 (x, y)))
+
 main = defaultMain
   [
     bgroup "Filter pipeline"
