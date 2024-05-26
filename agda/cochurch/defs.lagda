@@ -1,4 +1,4 @@
-\paragraph{Definition of Cochurch encodings}
+\subsubsection{Definition of Cochurch encodings}
 This module defines Cochurch encodings and the two conversion functions \tt{con} and \tt{abs}, called \tt{toCoCh} and \tt{fromCoCh} here, respectively.
 It also defines the generalized producing, transformation, and consuming functions, as described by \cite{Harper2011}.
 The definition of the CoChurch datatypes is defined slightly differently to how it is initially defined by \cite{Harper2011}.

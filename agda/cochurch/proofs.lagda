@@ -1,4 +1,5 @@
-\paragraph{Proof obligations} As with Church encodings, in \cite{Harper2011}'s work, five proof obligations needed to
+\subsubsection{Proof obligations}
+As with Church encodings, in \cite{Harper2011}'s work, five proof obligations needed to
 be satisfied. These are formalized in this module.
 \begin{code}[hide]
 {-# OPTIONS --guardedness #-}

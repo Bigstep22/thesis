@@ -1,4 +1,4 @@
-\paragraph{Universal properties of catamorphisms and initiality}
+\subsubsection{Universal properties of catamorphisms and initiality}
 This module defines a function and shows it to be a catamorphism in the category of F-Agebras,
 by module proving some properties of catamorphisms and is showing that \tt{(μ F, in')} is initial.
 \begin{code}

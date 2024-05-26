@@ -1,4 +1,4 @@
-\paragraph{Terminal coalgebras and anamorphisms}
+\subsubsection{Terminal coalgebras and anamorphisms}
 This module defines a datatype and shows it to be initial; and a function and shows it to be an anamorphism in the category of F-Coalgebras.
 Specifically, it is shown that \tt{($\nu$, out)} is terminal.
 \begin{code}

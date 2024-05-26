@@ -1,4 +1,4 @@
-\paragraph{Terminal F-Coalgebra fusion}
+\subsubsection{Terminal F-Coalgebra fusion}
 This module proves the categorical fusion property.
 From it, it extracts a `fusion law' as it was defined by \cite{Harper2011}; which is easier to work with.
 This shows that the fusion law does follow from the fusion property.

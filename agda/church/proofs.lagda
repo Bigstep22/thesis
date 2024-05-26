@@ -1,4 +1,4 @@
-\paragraph{Proof obligations}
+\subsubsection{Proof obligations}
 In \cite{Harper2011}'s work, five proofs proofs are given for Church encodings.
 These are formalized in this module.
 \begin{code}[hide]

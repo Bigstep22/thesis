@@ -1,4 +1,4 @@
-\paragraph{Definition of Church encodings}
+\subsubsection{Definition of Church encodings}
 \begin{code}[hide]
 open import agda.init.initial
 \end{code}

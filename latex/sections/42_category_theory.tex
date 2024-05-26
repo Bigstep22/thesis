@@ -1,12 +1,10 @@
-
-\subsection{Category Theory Formalization}
+\subsection{Category Theory: Initiality}
 This section is about my formalization of \cite{Harper2011}'s work that describes the needed category theory, to be leveraged later on in the fusion part of the formalization.
-\subsubsection{init}
 This module defines the category of F-Algebras, initiality of $\mu$, the universal properties of folds, and the fusion properties.
 \input{sections/agda/init/initial.tex}
 \input{sections/agda/init/fusion.tex}
 
-\subsubsection{term}
+\subsection{Category Theory: Terminality}
 This module defines the category of F-CoAlgebras, a candidate terminal object $\nu$, anamorphisms, proves terminality of $\nu$, the universal properties of unfolds, and the fusion properties.
 This module is the compliment of \tt{init}.
 \input{sections/agda/term/terminal.tex}

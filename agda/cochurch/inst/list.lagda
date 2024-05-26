@@ -1,4 +1,4 @@
-\paragraph{Example: List fusion}
+\subsubsection{Example: List fusion}
 In order to clearly see how the Cochurch encodings allows functions to fuse, a datatype was selected such
 the abstracted function, which have so far been used to prove the needed properties, can be instantiated
 to demonstrate how the fusion works for functions across a cocrete datatype.
