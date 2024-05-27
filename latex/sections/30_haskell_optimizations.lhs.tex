@@ -9,6 +9,7 @@ I'll start off with the existing working code, followed by a discussion of the d
 % \subsection{Replicated Code}
 %include haskell/leaf_trees.lhs
 %include haskell/list.lhs
+%include 32_tail_recursion.lhs.tex
 
 
 \subsection{Performance Comparison}
@@ -33,9 +34,6 @@ The process went through the following steps:
 \iffalse
 I analyzed the core representation:
 - Leaf trees don't fuse nicely for the functions given
-- Lists don't fuse nicely due to filter not fusing. Two solutions:
-    - Join point optimization: In Haskell this should've worked already, but doesn't :(
-    - Make the cons constructor 'skippable'. This way we can implement filter as a natural transformation. Filter now fuses nicely.
 - Now that everything is fused, there is still one potential optimization remainin for the core representation: Tail recursion.
     - The (co)recursion principle that get defined for (co)church encodings, can sometimes be rewritten to be tail recrusive.
     - For Cochurch encodings this seems to be easier in some cases. Especially when working with functions that can calculate a result.
