@@ -40,7 +40,7 @@ case (case l of
 -- Application of chained case statements
 case l of
   Nil -> Nil
-  Cons x xs -> Cons_ x (unfold out xs)
+  Cons x xs -> Cons x (unfold out xs)
 -- Function is same as id through induction.
 
 
