@@ -159,4 +159,8 @@ filter : {A : Set} → (A → Bool) → List A → List A
 filter p = fromCh ∘ prodCh (λ f → consCh (λ where
    (nil , l) → f (nil , l)
    (cons a , l) → if (p a) then f (cons a , l) else l zero)) ∘ toCh
+filter' : {A : Set} → (A → Bool) → List A → List A
+filter' p = build (λ f → foldr' (λ where
+   (nil , l) → f (nil , l)
+   (cons a , l) → if (p a) then f (cons a , l) else l zero))
 \end{code}

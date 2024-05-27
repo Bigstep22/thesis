@@ -39,7 +39,7 @@ postulate free : {F : Container 0ℓ 0ℓ}
                  -- TODO: Do D and Y need to be the same thing? This may be a cop-out...
 unfold-invariance : {F : Container 0ℓ 0ℓ}{Y : Set}
                     (c : Y → ⟦ F ⟧ Y) →
-                    CoCh c ≡ (CoCh out) ∘ A⟦ c ⟧
+                    CoCh c ≡ CoCh out ∘ A⟦ c ⟧
 unfold-invariance c = free A⟦ c ⟧ CoCh refl
 
 to-from-id : {F : Container 0ℓ 0ℓ} → toCoCh ∘ fromCoCh {F} ≡ id
