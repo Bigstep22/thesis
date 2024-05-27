@@ -335,7 +335,7 @@ It seems as if the end function is forced to be recursive in this simple fashion
 This simple recursive function has its roots in the definition of su'. I'm going to try to tweak it to see if I can suplify that function further (removing there where).
 - It turns out that removing the where creates a big slowdown (about 3x), making the function about twice as slow as the church-encoding.
 Further questions:
-- Can I implement the filter function without employing a NilT'_ type member?
+- Can I implement the filter function without employing a ConsN'_ type member?
 	- I don't believe so, one of the preconditions for the faithful implementation of a CoChurch encoding is that the original function if a natural transformation, this is not the case for the filter function on lists (it is, however, for leaf trees, the example given in the paper.). I.e. filter is not a structure preserving function. Map is.
 - Is the story I thought of above reflected in the specialized core-representation functions output by Haskell?
 	- Haskell makes a specialized version of the final function for the CoChurch encoded pipeline, but doesn't seem to do so for the Church-encoded pipeline.

@@ -1,6 +1,6 @@
 I will present the _idea_ behind Church encodings:
 ```haskell
-data List'_ a b = Nil'_ | NilT'_ b | Cons'_ a b deriving Functor
+data List'_ a b = Nil'_ | ConsN'_ b | Cons'_ a b deriving Functor
 data List a = Nil | Cons a (List a) deriving (Functor, Show)
 data ListCoCh a = forall s . ListCoCh (s -> List'_ a s) s
 
@@ -15,7 +15,7 @@ fromCoCh (ListCoCh h s) = unfold h s
 unfold :: (b -> List'_ a b) -> b -> List a
 unfold h s = case h s of
   Nil'_ -> Nil
-  NilT'_ xs -> unfold h xs
+  ConsN'_ xs -> unfold h xs
   Cons'_ x xs -> Cons x (unfold h xs)
 
 
@@ -27,7 +27,7 @@ unfold out l
 -- Dfn of unfold
 case out l of
   Nil'_ -> Nil
-  NilT'_ xs -> unfold out xs
+  ConsN'_ xs -> unfold out xs
   Cons'_ x xs -> Cons x (unfold out xs)
 -- Dfn of out
 case (case l of
@@ -35,7 +35,7 @@ case (case l of
   Cons x xs -> Cons'_ x xs
   ) of
   Nil'_ -> Nil
-  NilT'_ xs -> unfold out xs
+  ConsN'_ xs -> unfold out xs
   Cons'_ x xs -> Cons x (unfold out xs)
 -- Application of chained case statements
 case l of
@@ -49,8 +49,9 @@ toCoCh . fromCoCh (ListCoCh h s)
 toCoCh . unfold h s
 -- Dfn of toCoCh
 ListCoCh out (unfold h s)
--- ehhh, figure this out later. Proofs 3-5 of both Church and CoChurch encodings might be involved here...
--- And then it's all the same as id :).
+-- Unfold invariance (result of CoCh's free theorem)
+ListCoCh h s
+-- Function is the same as id
 -- I believe the proof idea can be found halfway through page 50.
 ```
 CoChurch encoded versions of sum, map (+2), filter odd, and between look like the following:
@@ -59,22 +60,22 @@ su' :: (s -> List'_ Int s) -> s -> Int
 su' h s = loop s
   where loop s' = case h s' of
     Nil'_ -> 0
-    NilT'_ xs -> loop xs
+    ConsN'_ xs -> loop xs
     Cons'_ x xs -> x + loop xs
 sumCoCh :: ListCoCh Int -> Int
 sumCoCh (ListCoCh h s) = su' h s
 
 m' :: (a -> b) -> List'_ a c -> List'_ b c
 m' f (Cons'_ x xs) = Cons'_ (f x) xs
-m' _ (NilT'_ xs) = NilT'_ xs
+m' _ (ConsN'_ xs) = ConsN'_ xs
 m' _ (Nil'_) = Nil'_
 mapCoCh :: (a -> b) -> ListCoCh a -> ListCoCh b
 mapCoCh f (ListCoCh h s) = ListCoCh (m' f . h) s
 
 filt p h s = case h s of
                Nil'_ -> Nil'_
-               NilT'_ xs -> NilT'_ xs
-               Cons'_ x xs -> if p x then Cons'_ x xs else NilT'_ xs
+               ConsN'_ xs -> ConsN'_ xs
+               Cons'_ x xs -> if p x then Cons'_ x xs else ConsN'_ xs
 filterCoCh :: (a -> Bool) -> ListCoCh a -> ListCoCh a
 filterCoCh p (ListCoCh h s) = ListCoCh (filt p h) s
 
@@ -123,17 +124,17 @@ su' (m' (+2) . filt odd betweenCoCh) (x, y)
 -- Dfn of su'
 loop (x, y) = case (m' (+2) . filt odd betweenCoCh) (x, y) of
   Nil'_ -> 0
-  NilT'_ s -> loop s
+  ConsN'_ s -> loop s
   Cons'_ x s -> x + loop s
 loop (x, y)
 -- Dfn of filt
 loop (x, y) = case (m' (+2) . case betweenCoCh (x, y) of 
   Nil'_ -> Nil'_
-  NilT'_ xs -> NilT'_ xs
-  Cons'_ x xs -> if odd x then Cons'_ x xs else NilT'_ xs
+  ConsN'_ xs -> ConsN'_ xs
+  Cons'_ x xs -> if odd x then Cons'_ x xs else ConsN'_ xs
   ) of
   Nil'_ -> 0
-  NilT'_ s -> loop s
+  ConsN'_ s -> loop s
   Cons'_ x s -> x + loop s
 loop (x, y)
 -- Dfn of betweenCoCh
@@ -142,20 +143,20 @@ loop (x, y) = case (m' (+2) . case (
   | x <= y = Cons'_ x (x+1, y)
   ) of 
   Nil'_ -> Nil'_
-  NilT'_ xs -> NilT'_ xs
-  Cons'_ x xs -> if odd x then Cons'_ x xs else NilT'_ xs
+  ConsN'_ xs -> ConsN'_ xs
+  Cons'_ x xs -> if odd x then Cons'_ x xs else ConsN'_ xs
   ) of
   Nil'_ -> 0
-  NilT'_ s -> loop s
+  ConsN'_ s -> loop s
   Cons'_ x s -> x + loop s
 loop (x, y)
 -- Application of chained case matches
 loop (x, y) = case (m' (+2) . (
   | x > y = Nil'_
-  | x <= y = if odd x then Cons'_ x (x+1, y) else NilT'_ (x+1, y)
+  | x <= y = if odd x then Cons'_ x (x+1, y) else ConsN'_ (x+1, y)
   )) of
   Nil'_ -> 0
-  NilT'_ s -> loop s
+  ConsN'_ s -> loop s
   Cons'_ x s -> x + loop s
 loop (x, y)
 -- Rewrite of composition
@@ -163,10 +164,10 @@ loop (x, y) = case (
   | x > y = m' (+2) . Nil'_
   | x <= y = if odd x
              then m' (+2) . Cons'_ x (x+1, y)
-			 else m' (+2) . NilT'_ (x+1, y)
+			 else m' (+2) . ConsN'_ (x+1, y)
   ) of
   Nil'_ -> 0
-  NilT'_ s -> loop s
+  ConsN'_ s -> loop s
   Cons'_ x s -> x + loop s
 loop (x, y)
 -- Dfn of m'
@@ -174,10 +175,10 @@ loop (x, y) = case (
   | x > y = Nil'_
   | x <= y = if odd x
              then Cons'_ (x+2) (x+1, y)
-             else NilT'_ (x+1, y)
+             else ConsN'_ (x+1, y)
   ) of
   Nil'_ -> 0
-  NilT'_ s -> loop s
+  ConsN'_ s -> loop s
   Cons'_ x s -> x + loop s
 loop (x, y)
 -- Application of case
@@ -193,7 +194,7 @@ It seems as if the end function is forced to be recursive in this simple fashion
 This simple recursive function has its roots in the definition of su'. I'm going to try to tweak it to see if I can suplify that function further (removing there where).
 - It turns out that removing the where creates a big slowdown (about 3x), making the function about twice as slow as the church-encoding.
 Further questions:
-- Can I implement the filter function without employing a NilT'_ type member?
+- Can I implement the filter function without employing a ConsN'_ type member?
 	- I don't believe so, one of the preconditions for the faithful implementation of a CoChurch encoding is that the original function if a natural transformation, this is not the case for the filter function on lists (it is, however, for leaf trees, the example given in the paper.). I.e. filter is not a structure preserving function. Map is.
 - Is the story I thought of above reflected in the specialized core-representation functions output by Haskell?
 	- Haskell makes a specialized version of the final function for the CoChurch encoded pipeline, but doesn't seem to do so for the Church-encoded pipeline.
