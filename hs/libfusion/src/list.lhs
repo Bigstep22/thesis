@@ -329,6 +329,31 @@ There are existing issues in GHC's issue tracker that describe this problem. SOU
 It is possible to implement filter using a natural transformation, but this requires us to modify the type of the base functor.
 We can add a new constructor to the datatype that allows us to null out the value of our datatype: \tt{ConsN'\_ xs}.
 This way we can write the \tt{filt} function in the following fashion:
+\begin{code}
+filt' :: (a -> Bool) -> List'_ a c -> List'_ a c
+filt' p Nil'_ = Nil'_
+filt' p (ConsN'_ xs) = ConsN'_ xs
+filt' p (Cons'_ x xs) = if p x then Cons'_ x xs else ConsN'_ xs
+\end{code}
+Now we do need to modify all of our already defined functions to take into account this modified datatype.
+The astute among you might notice that this technique is actually \textit{stream fusion} is as described by \cite{Coutts2007}.
+The \tt{ConsN\_} constructor is analogous to the \tt{Skip} constructor.
+
+So why was it possible to implement \tt{filt} without modifying the datatype of leaf trees?
+Because leaf trees already have this consideration of being able to null the datatype in-place by chaining a \tt{Leaf\_ x} into an \tt{Empty\_}.
+\tt{filt} is able to remove a value from the datastructure without changing the structure of the data. I.e. it is still a transformation.
+By chaning the list datatype such that this nullability is also possible, we can also write \tt{filt} as a transformation.
+
+This insight is broader than just stream fusion.
+By modifying your datatype, you can broaden what can be expressed as a transformation.
+
+
+
+
+
+
+
+
 \ignore{
 \begin{code}
 data List'_ a b = Nil'_ | Cons'_ a b | ConsN'_ b
@@ -381,32 +406,6 @@ sum6 = sumCoCh' . toCoCh'
 {-# INLINE sum6 #-}
 \end{code}
 }
-\begin{code}
-filt' :: (a -> Bool) -> List'_ a c -> List'_ a c
-filt' p Nil'_ = Nil'_
-filt' p (ConsN'_ xs) = ConsN'_ xs
-filt' p (Cons'_ x xs) = if p x then Cons'_ x xs else ConsN'_ xs
-\end{code}
-Now we do need to modify all of our already defined functions to take into account this modified datatype.
-The astute among you might notice that this technique is actually \textit{stream fusion} is as described by \cite{Coutts2007}.
-The \tt{ConsN\_} constructor is analogous to the \tt{Skip} constructor.
-
-So why was it possible to implement \tt{filt} without modifying the datatype of leaf trees?
-Because leaf trees already have this consideration of being able to null the datatype in-place by chaining a \tt{Leaf\_ x} into an \tt{Empty\_}.
-\tt{filt} is able to remove a value from the datastructure without changing the structure of the data. I.e. it is still a transformation.
-By chaning the list datatype such that this nullability is also possible, we can also write \tt{filt} as a transformation.
-
-This insight is broader than just stream fusion.
-By modifying your datatype, you can broaden what can be expressed as a transformation.
-
-
-
-
-
-
-
-
-
 
 
 

@@ -45,33 +45,11 @@
 \input{sections/40_formalization}
 \input{sections/45_related_works}
 \input{sections/50_conclusion}
+\appendix
+%include sections/90_appendix.lhs.tex
 
 
 \bibliographystyle{apacite}
 \bibliography{references.bib}
-
-\iffalse
-\section{Outline}
-\begin{itemize}
-    \item Introduction
-    \item Background
-    \item Formalization work and structure
-    \item Implementation of Haskell generator code?
-    \item Conclusion
-\end{itemize}
-\fi
-
-\iffalse
-\section{Project plan}
-\begin{itemize}
-    \item \cite{Harper2011}'s guide for implementing shortcut fusion through Church encodings is useful.
-    This paper aims to do the following:
-    \begin{itemize}
-        \item  Formalize the proofs present in \cite{Harper2011}'s work in Agda.
-        \item  Investigate whether it is possible to mechanically generate Church encodings of arbitrary functors (initial algebra datastructures) in Haskell.
-        (Probably, but why would you?...)
-    \end{itemize}
-\end{itemize}
-\fi
-
 \end{document}
+
