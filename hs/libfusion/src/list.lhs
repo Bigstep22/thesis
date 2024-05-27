@@ -157,8 +157,8 @@ sum2 = sumCh . toCh
 The cochurch-encoded function implements a corecursion principle and applies the existing coalgebra (and input) to it:
 \begin{code}
 {-TAIL RECURSION!!!-}
-su' :: (s -> List_ Int s) -> s -> Int
-su' h s = loopt s 0
+su2 :: (s -> List_ Int s) -> s -> Int
+su2 h s = loopt s 0
   where loop s' = case h s' of
           Nil_ -> 0
           Cons_ x xs -> x + loop xs
@@ -166,7 +166,7 @@ su' h s = loopt s 0
           Nil_ -> sum
           Cons_ x xs -> loopt xs (x + sum)
 sumCoCh :: ListCoCh Int -> Int
-sumCoCh (ListCoCh h s) = su' h s
+sumCoCh (ListCoCh h s) = su2 h s
 sum3 :: List' Int -> Int
 sum3 = sumCoCh . toCoCh
 {-# INLINE sum3 #-}
@@ -207,6 +207,7 @@ sum5 :: [Int] -> Int
 sum5 = foldl' (\a b -> a+b) 0
 {-# INLINE sum5 #-}
 pipeline5 = sum5 . map5 (+2) . filter5 trodd . between5
+pipeline6 = sum6 . map6 (+2) . filter6 trodd . between6
 
 input :: (Int, Int)
 input = (1, 10000)
@@ -326,14 +327,66 @@ There are existing issues in GHC's issue tracker that describe this problem. SOU
 
 \paragraph{Solution 2: go back and modify the underlying type}
 It is possible to implement filter using a natural transformation, but this requires us to modify the type of the base functor.
-We can add a new constructor to the datatype that allows us to null out the value of our datatype: \tt{ConsN\_ xs}.
+We can add a new constructor to the datatype that allows us to null out the value of our datatype: \tt{ConsN'\_ xs}.
 This way we can write the \tt{filt} function in the following fashion:
-\begin{spec}
-filt :: (a -> Bool) -> List_ a c -> List_ a c
-filt p Nil_ = Nil_
-filt p (ConsN_ xs) = ConsN_ xs
-filt p (Cons_ x xs) = if p x then Cons_ x xs else ConsN_ xs
-\end{spec}
+\ignore{
+\begin{code}
+data List'_ a b = Nil'_ | Cons'_ a b | ConsN'_ b
+data ListCoCh' a = forall s . ListCoCh' (s -> List'_ a s) s
+toCoCh' :: List' a -> ListCoCh' a
+toCoCh' = ListCoCh' out'
+out' :: List' a -> List'_ a (List' a)
+out' Nil = Nil'_
+out' (Cons x xs) = Cons'_ x xs
+fromCoCh' :: ListCoCh' a -> List' a
+fromCoCh' (ListCoCh' h s) = unfold' h s
+unfold' :: (b -> List'_ a b) -> b -> List' a
+unfold' h s = case h s of
+  Nil'_ -> Nil
+  ConsN'_ xs -> unfold' h xs
+  Cons'_ x xs -> Cons x (unfold' h xs)
+{-# RULES "toCh/fromCh fusion"
+   forall x. toCoCh' (fromCoCh' x) = x #-}
+{-# INLINE [0] toCoCh' #-}
+{-# INLINE [0] fromCoCh' #-} 
+betweenCoCh' :: (Int, Int) -> List'_ Int (Int, Int)
+betweenCoCh' (x, y) = case x > y of
+  True -> Nil'_
+  False -> Cons'_ x (x+1, y)
+between6 :: (Int, Int) -> List' Int
+between6 = fromCoCh' . ListCoCh' betweenCoCh'
+{-# INLINE between6 #-}
+natCoCh' :: (forall c . List'_ a c -> List'_ b c) -> ListCoCh' a -> ListCoCh' b
+natCoCh' f (ListCoCh' h s) = ListCoCh' (f . h) s
+m' :: (a -> b) -> List'_ a c -> List'_ b c
+m' f (Cons'_ x xs) = Cons'_ (f x) xs
+m' _ (ConsN'_ xs) = ConsN'_ xs
+m' _ Nil'_ = Nil'_
+map6 :: (a -> b) -> List' a -> List' b
+map6 f = fromCoCh' . natCoCh' (m' f) . toCoCh'
+{-# INLINE map6 #-}
+filter6 :: (a -> Bool) -> List' a -> List' a
+filter6 p = fromCoCh' . natCoCh' (filt' p) . toCoCh'
+{-# INLINE filter6 #-}
+su' :: (s -> List'_ Int s) -> s -> Int
+su' h s = loopt s 0
+  where loopt s' sum = case h s' of
+          Nil'_ -> sum
+          ConsN'_ xs -> loopt xs sum
+          Cons'_ x xs -> loopt xs (x + sum)
+sumCoCh' :: ListCoCh' Int -> Int
+sumCoCh' (ListCoCh' h s) = su' h s
+sum6 :: List' Int -> Int
+sum6 = sumCoCh' . toCoCh'
+{-# INLINE sum6 #-}
+\end{code}
+}
+\begin{code}
+filt' :: (a -> Bool) -> List'_ a c -> List'_ a c
+filt' p Nil'_ = Nil'_
+filt' p (ConsN'_ xs) = ConsN'_ xs
+filt' p (Cons'_ x xs) = if p x then Cons'_ x xs else ConsN'_ xs
+\end{code}
 Now we do need to modify all of our already defined functions to take into account this modified datatype.
 The astute among you might notice that this technique is actually \textit{stream fusion} is as described by \cite{Coutts2007}.
 The \tt{ConsN\_} constructor is analogous to the \tt{Skip} constructor.
@@ -369,24 +422,18 @@ main = defaultMain
   [
     bgroup "Filter pipeline"
     [ 
-      bench "piplistfused1" $ nf pipeline5 input
+      bench "pipstreamfused1" $ nf pipeline6 input
+    , bench "pipstreamfused2" $ nf pipeline6 input
+    , bench "piplistfused1" $ nf pipeline5 input
     , bench "piplistfused2" $ nf pipeline5 input
     , bench "piphandfused1" $ nf pipeline4 input
     , bench "piphandfused2" $ nf pipeline4 input
-    -- , bench "piphandfused3" $ nf pipeline4 input
-    -- , bench "piphandfused4" $ nf pipeline4 input
     , bench "pipcofused1" $ nf pipeline3 input
     , bench "pipcofused2" $ nf pipeline3 input
-    -- , bench "pipcofused3" $ nf pipeline3 input
-    -- , bench "pipcofused4" $ nf pipeline3 input
     , bench "pipchfused1" $ nf pipeline2 input
     , bench "pipchfused2" $ nf pipeline2 input
-    -- , bench "pipchfused3" $ nf pipeline2 input
-    -- , bench "pipchfused4" $ nf pipeline2 input
     , bench "pipunfused1" $ nf pipeline1 input
     , bench "pipunfused2" $ nf pipeline1 input
-    -- , bench "pipunfused3" $ nf pipeline1 input
-    -- , bench "pipunfused4" $ nf pipeline1 input
     ]
     -- ,
     -- bgroup "Sum-append pipeline"
