@@ -11,7 +11,7 @@
 import Test.Tasty.Bench
 \end{code}
 }
-\subsubsection{Leaf Trees}
+\subsection{Leaf Trees}
 In this section, the replication of \cite{Harper2011}'s code is described.
 We start with his motivating example at the begginning of the paper, followed by the `fused' version that we want the pipeline to become, once compiled:
 \begin{code}

@@ -14,7 +14,7 @@ import Test.Tasty.Bench
 import GHC.List
 \end{code}
 }
-\subsubsection{Lists}
+\subsection{Lists}
 In this section further replication of \cite{Harper2011}'s work is described, but instead of implementing Leaf trees, Lists are implemented.
 
 This was done to see how the descriptions in \cite{Harper2011}'s work generalize and to have a simpler datastructure on which to perform analysis; seeing how and when the fusion works and when it doesn't.
@@ -114,32 +114,8 @@ filter1 _ Nil = Nil
 filter1 p (Cons x xs) = if p x then Cons x (filter1 p xs) else filter1 p xs
 {-# INLINE filter1 #-}
 \end{code}
-The church-encoded version does \textbf{not} leverage an algebra, as is normally done for natural transformations, but instead something else. I.e. the function \tt{a} below is only selectively applied to the resultant subterms (see the \tt{else} case specifically):
-\begin{code}
-filterCh :: (a -> Bool) -> ListCh a -> ListCh a
-filterCh p (ListCh g) = ListCh (\a -> g (\case
-    Nil_ -> a Nil_
-    Cons_ x xs -> if (p x) then a (Cons_ x xs) else xs
-  ))
-filter2 :: (a -> Bool) -> List' a -> List' a
-filter2 p = fromCh . filterCh p . toCh
-{-# INLINE filter2 #-}
-\end{code}
-For the cochurch-encoding, a natural transformation can be defined, but it is not a simple algebra, instead it is a recursive function.
-There is existing work, called joint-point optimization that should enable this function to still fully fuse, but it does not at the moment, there are existing issues in GHC's issue tracker that describe this problem:
-\begin{code}
-filt p h s = go s
-  where go s = case h s of
-          Nil_ -> Nil_
-          Cons_ x xs -> if p x then Cons_ x xs else go xs
-filterCoCh :: (a -> Bool) -> ListCoCh a -> ListCoCh a
-filterCoCh p (ListCoCh h s) = ListCoCh (filt p h) s
-filter3 :: (a -> Bool) -> List' a -> List' a
-filter3 p = fromCoCh . filterCoCh p . toCoCh
-{-# INLINE filter3 #-}
-\end{code}
-It is possible to implement filter using a natural transformation, but this requires us to modify the type of the base functor, so we can communicate `skip' to the datatype, which our corecursion principle can handle accordingly.
-This technique is called \textit{stream fusion} and is described by \cite{Coutts2007}.
+For the Church and Cochurch encoding see the extended discussion in \autoref{sec:filter_prob}.
+
 \paragraph{Map}
 Contrary to filter, it is possible to implement the map function as a natural transformation. Again three implementations, the latter two of which leverage the defined natural transformation \tt{m}:
 \begin{code}
@@ -237,12 +213,157 @@ input = (1, 10000)
 -- main :: IO ()
 -- main = print (pipeline5 input)
 \end{code}
+
+
+
+
+
+
+
+\subsubsection{The Filter Problem}\label{sec:filter_prob}
+% What is the difference between an algeabra, coalgebra, transformation, and natural transformation?
+I have moved the discussion for Church and Cochurch encoded Lists down here, as I think it warrants more discussion and illustrates a few interesting points; there are multiple ways of implementing it, none of them trivial according to \cite{Harper2011}'s description of how it should be implemented as a natural transformation.
+
+When replicating \cite{Harper2011}'s code for lists, I ran into one major hurdle:
+How to represent filter as a natural transformation for both Church and Cochurch encodings?
+In his work he implemented, using Leaf trees, a natural transformation for the filter function in the following manner:
+\begin{spec}
+filt :: (a -> Bool) -> Tree_ a c -> Tree_ a c
+filt p Empty_ = Empty_
+filt p (Leaf_ x) = if p x then Leaf_ x else Empty_
+filt p (Fork_ l r) = Fork_ l r
+filter2 :: (a -> Bool) -> Tree a -> Tree a
+filter2 p = fromCh . natCh (filt p) . toCh
+filter3 :: (a -> Bool) -> Tree a -> Tree a
+filter3 p = fromCoCh . natCoCh (filt p) . toCoCh
+\end{spec}
+This \tt{filt} function was then subsequently used in the Church and Cochurch encoded function.
+Let's try this for the \tt{List} datatype:
+\begin{spec}
+filt :: (a -> Bool) -> List_ a c -> List_ a c
+filt p Nil_ = Nil_
+filt p (Cons_ x xs) = if p x then Cons_ x xs else ? 
+\end{spec}
+The question is, what should be in the place of the \tt{?} above?
+Initially you might say \tt{xs}, as the \tt{Cons\_ x} part should be filtered away, and this would be conceptually correct except for the fact that \tt{xs} is of type \tt{c}, and not of type \tt{List\_ a c}.
+Filling in \tt{xs} gives a type error.
+Let's change the type annotation then, right?
+Well no, if we did that we wouldn't have the type of a transformation anymore, so we can't do that either.
+
+There are two solutions:
+One that modifies the definition of \tt{filter2} and \tt{filter3}, such that the definition is still possible, without leveraging transformations.
+The other modifies the definition of the underlying type such that the filter function is still possible to express as a transformation.
+    
+\paragraph{Solution 1: Pushing on}
+\subparagraph{Church}
+Whereas before we wanted to implement our \tt{filter} function in the following manner:
+\begin{spec}
+filterCh :: (forall c . List_ a c -> List_ b c) -> ListCh a -> ListCh b
+filterCh p (ListCh g) = ListCh (\a -> g (a . (filt p)))
+filter2 :: (a -> Bool) -> List a -> List a
+filter2 p = fromCh . filterCh p . toCh
+\end{spec}
+We now need to modify the \tt{filterCh} function such that we can still express a filter function \textit{witout} using a natural transformation:
+\begin{spec}
+filterCh :: (forall c . List_ a c -> List_ b c) -> ListCh a -> ListCh b
+filterCh p (ListCh g) = ListCh (\a -> g ?)
+\end{spec}
+Replacing the \tt{?} above such that we apply the \tt{a} selectively we can yield:
+\begin{code}
+filterCh :: (a -> Bool) -> ListCh a -> ListCh a
+filterCh p (ListCh g) = ListCh (\a -> g (\case
+    Nil_ -> a Nil_
+    Cons_ x xs -> if (p x) then a (Cons_ x xs) else xs
+  ))
+filter2 :: (a -> Bool) -> List' a -> List' a
+filter2 p = fromCh . filterCh p . toCh
+{-# INLINE filter2 #-}
+\end{code}
+Notice how we do not apply \tt{a} to \tt{xs}, and, in doing so, can put \tt{xs} in the place where wanted to.
+The definition of \tt{filterCh} was too restrictive in always postcomposing \tt{a}.
+
+% Solved using a build/foldr pair - this is true, but how to make the reader see it? 0_o
+The astute observer will note that this solution is just a beta reduced form of a build/foldr composition pair!
+
+% This begs the question:
+% Is it worth rewriting my entire list and leaf trees implementation in terms of foldr and build to drive this point home?
+% This will also make extremely apparent the connection between Harper's work and the earlier works on foldr/build and destroy/unfoldr fusion.
+
+% https://hackage.haskell.org/package/ghc-internal-9.1001.0/docs/src//GHC.Internal.Base.html
+% My word what a mess...
+% mapFB is litery just function composition, but with 4 extra steps
+% There has to be a better way :,(
+
+% I was just reading this: https://link.springer.com/chapter/10.1007/978-3-540-30477-7_22
+% This is one of the fusion rules that is leveraged in GHC.List fusion.
+% Interesting read.
+
+
+\subparagraph{Cochurch}
+Whereas before we wanted to implement our \tt{filter} function in the following manner:
+\begin{spec}
+filter3 :: (a -> Bool) -> List a -> List a
+filter3 p = fromCoCh . natCoCh (filt p) . toCoCh
+\end{spec}
+For the cochurch-encoding, a natural transformation can be defined, but it is not a simple algebra, instead it is a recursive function.
+The core idea is: we combine the transformation and postcomposition again, but this time we make the function recursively grab elements from the seed until we find one that satisfies the predicate.
+\begin{code}
+filt :: (a -> Bool) -> (s -> List_ a s) -> s -> List_ a s
+filt p h s = go s
+  where go s = case h s of
+          Nil_ -> Nil_
+          Cons_ x xs -> if p x then Cons_ x xs else go xs
+filterCoCh :: (a -> Bool) -> ListCoCh a -> ListCoCh a
+filterCoCh p (ListCoCh h s) = ListCoCh (filt p h) s
+filter3 :: (a -> Bool) -> List' a -> List' a
+filter3 p = fromCoCh . filterCoCh p . toCoCh
+{-# INLINE filter3 #-}
+\end{code}
+This \tt{filt} function is recursive, so it does not inline (fuse) neatly into the main function body in the way that the rest of the pipeline does.
+There is existing work, called joint-point optimization that should enable this function to still fully fuse, but it does not at the moment.
+There are existing issues in GHC's issue tracker that describe this problem. SOURCE?
+
+
+\paragraph{Solution 2: go back and modify the underlying type}
+It is possible to implement filter using a natural transformation, but this requires us to modify the type of the base functor.
+We can add a new constructor to the datatype that allows us to null out the value of our datatype: \tt{ConsN\_ xs}.
+This way we can write the \tt{filt} function in the following fashion:
+\begin{spec}
+filt :: (a -> Bool) -> List_ a c -> List_ a c
+filt p Nil_ = Nil_
+filt p (ConsN_ xs) = ConsN_ xs
+filt p (Cons_ x xs) = if p x then Cons_ x xs else ConsN_ xs
+\end{spec}
+Now we do need to modify all of our already defined functions to take into account this modified datatype.
+The astute among you might notice that this technique is actually \textit{stream fusion} is as described by \cite{Coutts2007}.
+The \tt{ConsN\_} constructor is analogous to the \tt{Skip} constructor.
+
+So why was it possible to implement \tt{filt} without modifying the datatype of leaf trees?
+Because leaf trees already have this consideration of being able to null the datatype in-place by chaining a \tt{Leaf\_ x} into an \tt{Empty\_}.
+\tt{filt} is able to remove a value from the datastructure without changing the structure of the data. I.e. it is still a transformation.
+By chaning the list datatype such that this nullability is also possible, we can also write \tt{filt} as a transformation.
+
+This insight is broader than just stream fusion.
+By modifying your datatype, you can broaden what can be expressed as a transformation.
+
+
+
+
+
+
+
+
+
+
+
+
+
 \ignore{
+\begin{code}
 -- sumApp1 (x, y)  = sum1 (append1 (between1 (x, y)) (between1 (x, y)))
 -- sumApp2 (x, y)  = sum2 (append2 (between2 (x, y)) (between2 (x, y)))
 -- sumApp3 (x, y)  = sum3 (append3 (between3 (x, y)) (between3 (x, y)))
 
-\begin{code}
 main :: IO ()
 main = defaultMain
   [
