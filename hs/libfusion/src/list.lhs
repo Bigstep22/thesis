@@ -8,6 +8,7 @@
 {-# OPTIONS_GHC -ddump-simpl -ddump-to-file -dsuppress-all -dno-suppress-type-signatures -dno-typeable-binds -dsuppress-uniques #-}
 {-# OPTIONS_GHC -Wno-missing-signatures #-}
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
+{-# OPTIONS_GHC -O2 #-}
 import Prelude hiding (foldr)
 import Test.Tasty.Bench
 import GHC.List
@@ -233,8 +234,8 @@ pipeline5 = sum5 . map5 (+2) . filter5 trodd . between5
 
 input :: (Int, Int)
 input = (1, 10000)
-main :: IO ()
-main = print (pipeline5 input)
+-- main :: IO ()
+-- main = print (pipeline5 input)
 \end{code}
 \ignore{
 -- sumApp1 (x, y)  = sum1 (append1 (between1 (x, y)) (between1 (x, y)))
@@ -242,7 +243,6 @@ main = print (pipeline5 input)
 -- sumApp3 (x, y)  = sum3 (append3 (between3 (x, y)) (between3 (x, y)))
 
 \begin{code}
-{-
 main :: IO ()
 main = defaultMain
   [
@@ -284,7 +284,6 @@ main = defaultMain
     -- ,  bench "sumunfused4" $ nf sumApp1 input
     -- ]
   ]
--}
 {- Report on core representation analysis for List datatypes,
  - In the core fused representation, lists are completely absent
    for both fused and cofused pipeline

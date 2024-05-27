@@ -59,7 +59,7 @@ executable libfusion
     import:           warnings
 
     -- .hs or .lhs file containing the Main module.
-    main-is:          leaf_trees.lhs
+    main-is:          list.lhs
 
     -- Modules included in this executable, other than Main.
     -- other-modules:    hefty.hs
