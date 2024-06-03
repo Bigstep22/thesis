@@ -1,5 +1,8 @@
-I will present the _idea_ behind Church encodings:
-```haskell
+
+\subsection{Cochurch Stream-fused encoding derivation}\label{app:cochurch_stream}
+Here I will provide an example derivation of a Church encoded function pipeline.
+We start with the definitions:
+\begin{spec}
 data List_ a b = Nil_ | Cons_ a b deriving Functor
 data List a = Nil | Cons a (List a) deriving (Functor, Show)
 data ListCh a = ListCh (forall b . (List_ a b -> b) -> b)
@@ -15,12 +18,11 @@ fromCh (ListCh fold) = fold in'
 in' :: List_ a (List a) -> List a
 in' Nil_ = Nil
 in' (Cons_ x xs) = Cons x xs
-```
-Focus on the toCh and fromCh.
-- toCh takes an input datastructure and puts it into a thunked fold that is still waiting for an input function
-- fromCh takes the fold, and executes it, replacing our Tree_ datastructure with the normal Tree.
+\end{spec}
+\tt{toCh} takes an input datastructure and puts it into a thunked fold that is still waiting for an input function.
+\tt{fromCh} takes the fold, and executes it, replacing our Tree\_ datastructure with the normal Tree.
 Church encoded versions of sum, map (+1), filter odd, and between look like the following:
-```haskell
+\begin{spec}
 b :: (List_ Int b -> b) -> (Int, Int) -> b
 b a (x, y) = loop (x, y)
   where loop (x, y) = case x > y of
@@ -46,9 +48,9 @@ s Nil_ = 0
 s (Cons_ x y) = x + y
 sumCh :: ListCh Int -> Int
 sumCh (ListCh g) = g s
-```
-Next, the _actual_ functions:
-```haskell
+\end{spec}
+Next, the actual functions:
+\begin{spec}
 sum :: List Int -> Int
 sum = sumCh . toCh
 
@@ -60,22 +62,22 @@ filter p = fromCh . filterCh p . toCh
 
 between :: (Int, Int) -> List Int
 between = fromCh . betweenCh
-```
-Remember the pipeline? Now it looks like this:
-```haskell
+\end{spec}
+I will be providing an example fusion of this pipeline:
+\begin{spec}
 f = sum . map (+1) . filter odd . between
 
 f =	     sumCh        . toCh .
 fromCh . mapCh (+1)   . toCh .
 fromCh . filterCh odd . toCh .
 fromCh . betweenCh
-```
-When 'fused' it looks like this:
-```haskell
+\end{spec}
+When 'fused' (\tt{toCh . fromCh} removed) it looks like this:
+\begin{spec}
 sumCh . mapCh (+1) . filterCh odd . betweenCh
-```
-For some input (x, y):
-```haskell
+\end{spec}
+For some input (x, y), we derive:
+\begin{spec}
 sumCh . mapCh (+1) . filterCh odd . betweenCh (x, y)
 -- Inlining of betweenCh
 sumCh . mapCh (+1) . filterCh odd . ListCh (\a -> b a (x, y))
@@ -155,7 +157,7 @@ loop (x, y) = if x > y
               then 0
               else if (p x)
                    then x+1 + loop (x+1, y)
-		           else loop (x+1, y)
+		               else loop (x+1, y)
 loop (x, y)
-```
-$\blacksquare$
+\end{spec}
+This concludes the example derivation for Church fusion.

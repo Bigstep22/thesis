@@ -1,4 +1,4 @@
-I will present the _idea_ behind Church encodings:
+I will now present an example derivation of a pipeline fusing in Haskell:
 ```haskell
 data List'_ a b = Nil'_ | NilT'_ b | Cons'_ a b deriving Functor
 data List a = Nil | Cons a (List a) deriving (Functor, Show)
@@ -17,41 +17,6 @@ unfold h s = case h s of
   Nil'_ -> Nil
   NilT'_ xs -> unfold h xs
   Cons'_ x xs -> Cons x (unfold h xs)
-
-
-fromCoCh . toCoCh l
--- Dfn of toCoCh
-fromCoCh . ListCoCh out l
--- Dfn of fromCoCh
-unfold out l
--- Dfn of unfold
-case out l of
-  Nil'_ -> Nil
-  NilT'_ xs -> unfold out xs
-  Cons'_ x xs -> Cons x (unfold out xs)
--- Dfn of out
-case (case l of
-  Nil -> Nil'_
-  Cons x xs -> Cons'_ x xs
-  ) of
-  Nil'_ -> Nil
-  NilT'_ xs -> unfold out xs
-  Cons'_ x xs -> Cons x (unfold out xs)
--- Application of chained case statements
-case l of
-  Nil -> Nil
-  Cons x xs -> Cons x (unfold out xs)
--- Function is same as id through induction.
-
-
-toCoCh . fromCoCh (ListCoCh h s)
--- Unfold fromCoCh
-toCoCh . unfold h s
--- Dfn of toCoCh
-ListCoCh out (unfold h s)
--- ehhh, figure this out later. Proofs 3-5 of both Church and CoChurch encodings might be involved here...
--- And then it's all the same as id :).
--- I believe the proof idea can be found halfway through page 50.
 ```
 CoChurch encoded versions of sum, map (+2), filter odd, and between look like the following:
 ```haskell
@@ -79,12 +44,11 @@ filterCoCh :: (a -> Bool) -> ListCoCh a -> ListCoCh a
 filterCoCh p (ListCoCh h s) = ListCoCh (filt p h) s
 
 betweenCoCh :: (Int, Int) -> List'_ Int (Int, Int)
-betweenCoCh (x, y)
-  | x > y = Nil'_
-  | x <= y = Cons'_ x (x+1, y)
-  | otherwise = Nil'_
+betweenCoCh (x, y) = case x > y of
+  True -> Nil'_
+  False -> Cons'_ x (x+1, y)
 ```
-Next, the _actual_ functions:
+Next, the actual functions:
 ```haskell
 sum :: List Int -> Int
 sum = sumCoCh . toCoCh
@@ -114,19 +78,19 @@ sumCoCh . mapCoCh (+2) . filterCoCh odd . ListCoCh betweenCoCh
 For some input (x, y):
 ```haskell
 sumCoCh . mapCoCh (+2) . filterCoCh odd . ListCoCh betweenCoCh (x, y)
--- Inlining of filterCoCh
+-- Inlining of filterCoCh + beta reduction
 sumCoCh . mapCoCh (+2) . ListCoCh (filt odd betweenCoCh) (x, y)
--- Inlining of mapCoCh
+-- Inlining of mapCoCh + beta reduction
 sumCoCh . ListCoCh (m' (+2) . filt odd betweenCoCh) (x, y)
--- Inlining of sumCoCh
+-- Inlining of sumCoCh + beta reduction
 su' (m' (+2) . filt odd betweenCoCh) (x, y)
--- Inlining of su'
+-- Inlining of su' + beta reduction
 loop (x, y) acc = case ((m' (+2) . filt odd betweenCoCh) (x, y)) of
   Nil'_ -> acc
   NilT'_ s -> loop s acc
   Cons'_ x s -> loop s (x + acc)
 loop (x, y) 0
--- Inlining of filt
+-- Inlining of filt + beta reduction + beta reduction
 loop (x, y) acc = case (m' (+2) . (
   case betweenCoCh (x, y) of 
       Nil'_ -> Nil'_
@@ -137,7 +101,7 @@ loop (x, y) acc = case (m' (+2) . (
   NilT'_ s -> loop s acc
   Cons'_ x s -> loop s (x + acc)
 loop (x, y) 0
--- Inlining of betweenCoCh
+-- Inlining of betweenCoCh + beta reduction
 loop (x, y) acc = case (m' (+2) . (
   case (
     case (x > y) of
@@ -222,7 +186,7 @@ loop (x, y) acc = case (
   NilT'_ s -> loop s
   Cons'_ x s -> x + loop s
 loop (x, y) 0
--- Inlining of if
+-- Inlining of if + beta reduction
 loop (x, y) acc = case (
   case (x > y) of
     True -> Nil'_
@@ -333,11 +297,3 @@ loop (x, y) 0
 -- Notice how the final result, like the original su', is tail-recursive
 ```
 $\blacksquare$
-It seems as if the end function is forced to be recursive in this simple fashion, no further unfolding is needed. In the Church-encoded version we manually had to identify an f' such that we had a cleanly recursing function. I wonder if this is the source of why Cochurch-encoded function is faster.
-This simple recursive function has its roots in the definition of su'. I'm going to try to tweak it to see if I can suplify that function further (removing there where).
-- It turns out that removing the where creates a big slowdown (about 3x), making the function about twice as slow as the church-encoding.
-Further questions:
-- Can I implement the filter function without employing a NilT'_ type member?
-	- I don't believe so, one of the preconditions for the faithful implementation of a CoChurch encoding is that the original function if a natural transformation, this is not the case for the filter function on lists (it is, however, for leaf trees, the example given in the paper.). I.e. filter is not a structure preserving function. Map is.
-- Is the story I thought of above reflected in the specialized core-representation functions output by Haskell?
-	- Haskell makes a specialized version of the final function for the CoChurch encoded pipeline, but doesn't seem to do so for the Church-encoded pipeline.

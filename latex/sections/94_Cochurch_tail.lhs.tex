@@ -1,6 +1,7 @@
 
 \subsection{Cochurch Stream-fused tail-recursive encoding derivation}
-I will present the \textit{idea} behind Church encodings:
+Here I will provide an example derivation of a Cochurch encoded function pipeline, using stream fusion techniques, making sure that the coinduction principle is tail-recursive.
+We start with the definitions:
 \begin{spec}
 data List'_ a b = Nil'_ | NilT'_ b | Cons'_ a b deriving Functor
 data List a = Nil | Cons a (List a) deriving (Functor, Show)
@@ -19,41 +20,6 @@ unfold h s = case h s of
   Nil'_ -> Nil
   NilT'_ xs -> unfold h xs
   Cons'_ x xs -> Cons x (unfold h xs)
-
-
-fromCoCh . toCoCh l
--- Dfn of toCoCh
-fromCoCh . ListCoCh out l
--- Dfn of fromCoCh
-unfold out l
--- Dfn of unfold
-case out l of
-  Nil'_ -> Nil
-  NilT'_ xs -> unfold out xs
-  Cons'_ x xs -> Cons x (unfold out xs)
--- Dfn of out
-case (case l of
-  Nil -> Nil'_
-  Cons x xs -> Cons'_ x xs
-  ) of
-  Nil'_ -> Nil
-  NilT'_ xs -> unfold out xs
-  Cons'_ x xs -> Cons x (unfold out xs)
--- Application of chained case statements
-case l of
-  Nil -> Nil
-  Cons x xs -> Cons x (unfold out xs)
--- Function is same as id through induction.
-
-
-toCoCh . fromCoCh (ListCoCh h s)
--- Unfold fromCoCh
-toCoCh . unfold h s
--- Dfn of toCoCh
-ListCoCh out (unfold h s)
--- ehhh, figure this out later. Proofs 3-5 of both Church and CoChurch encodings might be involved here...
--- And then it's all the same as id :).
--- I believe the proof idea can be found halfway through page 50.
 \end{spec}
 CoChurch encoded versions of sum, map (+2), filter odd, and between look like the following:
 \begin{spec}
@@ -81,12 +47,11 @@ filterCoCh :: (a -> Bool) -> ListCoCh a -> ListCoCh a
 filterCoCh p (ListCoCh h s) = ListCoCh (filt p h) s
 
 betweenCoCh :: (Int, Int) -> List'_ Int (Int, Int)
-betweenCoCh (x, y)
-  | x > y = Nil'_
-  | x <= y = Cons'_ x (x+1, y)
-  | otherwise = Nil'_
+betweenCoCh (x, y) = case x > y of
+  True -> Nil'_
+  False -> Cons'_ x (x+1, y)
 \end{spec}
-Next, the \textit{actual} functions:
+Next, the actual functions:
 \begin{spec}
 sum :: List Int -> Int
 sum = sumCoCh . toCoCh
@@ -100,7 +65,7 @@ filter p = fromCoCh . filterCoCh p . toCoCh
 between :: (Int, Int) -> List Int
 between = fromCoCh . ListCoCh betweenCoCh
 \end{spec}
-Remember the pipeline? Now it looks like this:
+Here is the example piepline:
 \begin{spec}
 f = sum . map (+2) . filter odd . between
 
@@ -113,22 +78,22 @@ When 'fused' it looks like this:
 \begin{spec}
 sumCoCh . mapCoCh (+2) . filterCoCh odd . ListCoCh betweenCoCh
 \end{spec}
-For some input (x, y):
+For some input (x, y), we derive:
 \begin{spec}
 sumCoCh . mapCoCh (+2) . filterCoCh odd . ListCoCh betweenCoCh (x, y)
--- Inlining of filterCoCh
+-- Inlining of filterCoCh + beta reduction
 sumCoCh . mapCoCh (+2) . ListCoCh (filt odd betweenCoCh) (x, y)
--- Inlining of mapCoCh
+-- Inlining of mapCoCh + beta reduction
 sumCoCh . ListCoCh (m' (+2) . filt odd betweenCoCh) (x, y)
--- Inlining of sumCoCh
+-- Inlining of sumCoCh + beta reduction
 su' (m' (+2) . filt odd betweenCoCh) (x, y)
--- Inlining of su'
+-- Inlining of su' + beta reduction
 loop (x, y) acc = case ((m' (+2) . filt odd betweenCoCh) (x, y)) of
   Nil'_ -> acc
   NilT'_ s -> loop s acc
   Cons'_ x s -> loop s (x + acc)
 loop (x, y) 0
--- Inlining of filt
+-- Inlining of filt + beta reduction + beta reduction
 loop (x, y) acc = case (m' (+2) . (
   case betweenCoCh (x, y) of 
       Nil'_ -> Nil'_
@@ -139,7 +104,7 @@ loop (x, y) acc = case (m' (+2) . (
   NilT'_ s -> loop s acc
   Cons'_ x s -> loop s (x + acc)
 loop (x, y) 0
--- Inlining of betweenCoCh
+-- Inlining of betweenCoCh + beta reduction
 loop (x, y) acc = case (m' (+2) . (
   case (
     case (x > y) of
@@ -224,7 +189,7 @@ loop (x, y) acc = case (
   NilT'_ s -> loop s
   Cons'_ x s -> x + loop s
 loop (x, y) 0
--- Inlining of if
+-- Inlining of if + beta reduction
 loop (x, y) acc = case (
   case (x > y) of
     True -> Nil'_
@@ -335,3 +300,4 @@ loop (x, y) 0
 -- Notice how the final result, like the original su', is tail-recursive
 \end{spec}
 $\blacksquare$
+This concludes the example derivation for tail-recursive Cochurch stream fusion.

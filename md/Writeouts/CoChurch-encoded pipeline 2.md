@@ -1,4 +1,4 @@
-I will present the _idea_ behind Cochurch encodings:
+I will present the \textit{idea} behind Cochurch encodings:
 ```haskell
 data List'_ a b = Nil'_ | NilT'_ b | Cons'_ a b deriving Functor
 data List a = Nil | Cons a (List a) deriving (Functor, Show)
@@ -17,41 +17,6 @@ unfold h s = case h s of
   Nil'_ -> Nil
   NilT'_ xs -> unfold h xs
   Cons'_ x xs -> Cons x (unfold h xs)
-
-
-fromCoCh . toCoCh l
--- Dfn of toCoCh
-fromCoCh . ListCoCh out l
--- Dfn of fromCoCh
-unfold out l
--- Dfn of unfold
-case out l of
-  Nil'_ -> Nil
-  NilT'_ xs -> unfold out xs
-  Cons'_ x xs -> Cons x (unfold out xs)
--- Dfn of out
-case (case l of
-  Nil -> Nil'_
-  Cons x xs -> Cons'_ x xs
-  ) of
-  Nil'_ -> Nil
-  NilT'_ xs -> unfold out xs
-  Cons'_ x xs -> Cons x (unfold out xs)
--- Application of chained case statements
-case l of
-  Nil -> Nil
-  Cons x xs -> Cons x (unfold out xs)
--- Function is same as id through induction.
-
-
-toCoCh . fromCoCh (ListCoCh h s)
--- Unfold fromCoCh
-toCoCh . unfold h s
--- Dfn of toCoCh
-ListCoCh out (unfold h s)
--- ehhh, figure this out later. Proofs 3-5 of both Church and CoChurch encodings might be involved here...
--- And then it's all the same as id :).
--- I believe the proof idea can be found halfway through page 50.
 ```
 CoChurch encoded versions of sum, map (+2), filter odd, and between look like the following:
 ```haskell
@@ -79,12 +44,11 @@ filterCoCh :: (a -> Bool) -> ListCoCh a -> ListCoCh a
 filterCoCh p (ListCoCh h s) = ListCoCh (filt p h) s
 
 betweenCoCh :: (Int, Int) -> List'_ Int (Int, Int)
-betweenCoCh (x, y)
-  | x > y = Nil'_
-  | x <= y = Cons'_ x (x+1, y)
-  | otherwise = Nil'_
+betweenCoCh (x, y) = case x > y of
+  case True -> Nil'_
+  case False -> Cons'_ x (x+1, y)
 ```
-Next, the _actual_ functions:
+Next, the actual functions:
 ```haskell
 sum :: List Int -> Int
 sum = sumCoCh . toCoCh
@@ -102,7 +66,7 @@ Remember the pipeline? Now it looks like this:
 ```haskell
 f = sum . map (+2) . filter odd . between
 
-f =	     sumCoCh          . toCoCh .
+f =        sumCoCh        . toCoCh .
 fromCoCh . mapCoCh (+2)   . toCoCh .
 fromCoCh . filterCoCh odd . toCoCh .
 fromCoCh . ListCoCh betweenCoCh
@@ -114,19 +78,19 @@ sumCoCh . mapCoCh (+2) . filterCoCh odd . ListCoCh betweenCoCh
 For some input (x, y):
 ```haskell
 sumCoCh . mapCoCh (+2) . filterCoCh odd . ListCoCh betweenCoCh (x, y)
--- Dfn of filterCoCh
+-- Dfn of filterCoCh + beta reduction
 sumCoCh . mapCoCh (+2) . ListCoCh (filt odd betweenCoCh) (x, y)
--- Dfn of mapCoCh
+-- Dfn of mapCoCh + beta reduction
 sumCoCh . ListCoCh (m' (+2) . filt odd betweenCoCh) (x, y)
--- Dfn of sumCoCh
+-- Dfn of sumCoCh + beta reduction
 su' (m' (+2) . filt odd betweenCoCh) (x, y)
--- Dfn of su'
+-- Dfn of su' + beta reduction
 loop (x, y) = case ((m' (+2) . filt odd betweenCoCh) (x, y)) of
   Nil'_ -> 0
   NilT'_ s -> loop s
   Cons'_ x s -> x + loop s
 loop (x, y)
--- Dfn of filt
+-- Dfn of filt + beta reduction
 loop (x, y) = case (m' (+2) . (
                 case betweenCoCh (x, y) of 
                     Nil'_ -> Nil'_
@@ -137,7 +101,7 @@ loop (x, y) = case (m' (+2) . (
   NilT'_ s -> loop s
   Cons'_ x s -> x + loop s
 loop (x, y)
--- Dfn of betweenCoCh
+-- Dfn of betweenCoCh + beta reduction
 loop (x, y) = case (m' (+2) . (
                 case (
                   case (x > y) of
@@ -152,7 +116,7 @@ loop (x, y) = case (m' (+2) . (
   NilT'_ s -> loop s
   Cons'_ x s -> x + loop s
 loop (x, y)
--- Case of case optimization
+-- Case-of-case optimization
 loop (x, y) = case (m' (+2) . (
                 case (x > y) of
                   True -> case (Nil'_) of
@@ -168,7 +132,7 @@ loop (x, y) = case (m' (+2) . (
   NilT'_ s -> loop s
   Cons'_ x s -> x + loop s
 loop (x, y)
--- Application of cases
+-- Case-of-known-case optimization
 loop (x, y) = case (m' (+2) (case (x > y) of
     True -> Nil'_
     False -> if odd x then Cons'_ x (x+1, y) else NilT'_ (x+1, y)
@@ -177,7 +141,7 @@ loop (x, y) = case (m' (+2) (case (x > y) of
   NilT'_ s -> loop s
   Cons'_ x s -> x + loop s
 loop (x, y)
--- Dfn of m'
+-- Dfn of m' + beta reduction
 loop (x, y) = case (
                 case (
                   case (x > y) of
@@ -192,7 +156,7 @@ loop (x, y) = case (
                 NilT'_ s -> loop s
                 Cons'_ x s -> x + loop s
 loop (x, y)
--- Case of case optimization for inner
+-- Case-of-case optimization
 loop (x, y) = case (
                 case (x > y) of
                   True -> case (Nil'_) of
@@ -208,7 +172,7 @@ loop (x, y) = case (
                 NilT'_ s -> loop s
                 Cons'_ x s -> x + loop s
 loop (x, y)
--- Application of cases
+-- Case-of-known-case optimization
 loop (x, y) = case (
                 case (x > y) of
                   True -> Nil'_
@@ -221,7 +185,7 @@ loop (x, y) = case (
                 NilT'_ s -> loop s
                 Cons'_ x s -> x + loop s
 loop (x, y)
--- Dfn of if
+-- Dfn of if + beta reduction
 loop (x, y) = case (
                 case (x > y) of
                   True -> Nil'_
@@ -238,7 +202,7 @@ loop (x, y) = case (
                 NilT'_ s -> loop s
                 Cons'_ x s -> x + loop s
 loop (x, y)
--- case of case of inner
+-- case-of-case optimization
 loop (x, y) = case (
                 case (x > y) of
                   True -> Nil'_
@@ -256,7 +220,7 @@ loop (x, y) = case (
                 NilT'_ s -> loop s
                 Cons'_ x s -> x + loop s
 loop (x, y)
--- Application of cases
+-- Case-of-known-case optimization
 loop (x, y) = case (
                 case (x > y) of
                   True -> Nil'_
@@ -268,7 +232,7 @@ loop (x, y) = case (
                 NilT'_ s -> loop s
                 Cons'_ x s -> x + loop s
 loop (x, y)
--- case of case optimization
+-- case-of-case optimization
 loop (x, y) = case (x > y) of
                 True -> case (Nil'_) of
                   Nil'_ -> 0
@@ -283,7 +247,7 @@ loop (x, y) = case (x > y) of
                   NilT'_ s -> loop s
                   Cons'_ x s -> x + loop s
 loop (x, y)
--- Application of cases
+-- Case-of-known-case optimization
 loop (x, y) = case (x > y) of
                 True -> 0
                 False -> case (
@@ -295,7 +259,7 @@ loop (x, y) = case (x > y) of
                   NilT'_ s -> loop s
                   Cons'_ x s -> x + loop s
 loop (x, y)
--- case of case
+-- case-of-case optimization
 loop (x, y) = case (x > y) of
                 True -> 0
                 False -> case (odd x) of
@@ -308,7 +272,7 @@ loop (x, y) = case (x > y) of
                     NilT'_ s -> loop s
                     Cons'_ x s -> x + loop s
 loop (x, y)
--- Application of cases
+-- Case-of-known-case optimization
 loop (x, y) = case (x > y) of
                 True -> 0
                 False -> case (odd x) of
@@ -319,10 +283,10 @@ loop (x, y)
 loop (x, y) = case (x > y) of
                 True -> 0
                 False -> case (odd x) of
-                  True -> (x + 2) + loop (x+1, y)
+                  True -> (x+2) + loop (x+1, y)
                   False -> loop (x+1, y)
 loop (x, y)
--- With some nicer syntax, compiles to same case of case tree
+-- With some nicer syntax, compiles to same case of case tree:
 loop (x, y) = if (x > y)
               then 0
               else if (odd x)
@@ -331,6 +295,51 @@ loop (x, y) = if (x > y)
 loop (x, y)
 ```
 $\blacksquare$
+Here is the proof that toCoCh and fromCoCh are mutually inverse:
+```haskell
+fromCoCh . toCoCh l
+-- Dfn of toCoCh + beta reduction
+fromCoCh . ListCoCh out l
+-- Dfn of fromCoCh + beta reduction
+unfold out l
+-- Dfn of unfold + beta reduction
+case out l of
+  Nil'_ -> Nil
+  NilT'_ xs -> unfold out xs
+  Cons'_ x xs -> Cons x (unfold out xs)
+-- Dfn of out + beta reduction
+case (
+  case l of
+    Nil -> Nil'_
+    Cons x xs -> Cons'_ x xs
+  ) of
+  Nil'_ -> Nil
+  NilT'_ xs -> unfold out xs
+  Cons'_ x xs -> Cons x (unfold out xs)
+-- case-of-case
+case l of
+  Nil -> case Nil'_ of
+    Nil'_ -> Nil
+    NilT'_ xs -> unfold out xs
+    Cons'_ x xs -> Cons x (unfold out xs)
+  Cons x xs -> case Cons'_ x xs
+    Nil'_ -> Nil
+    NilT'_ xs -> unfold out xs
+    Cons'_ x xs -> Cons x (unfold out xs)
+-- case-of-known-case
+case l of
+  Nil -> Nil
+  Cons x xs -> Cons x (unfold out xs)
+-- Function is same as id through induction.
+
+
+toCoCh . fromCoCh (ListCoCh h s)
+-- Unfold fromCoCh
+toCoCh . unfold h s
+-- Dfn of toCoCh
+ListCoCh out (unfold h s)
+-- This is true, so long as parametricity holds, see second proof of page 51 of Harper
+```
 It seems as if the end function is forced to be recursive in this simple fashion, no further unfolding is needed. In the Church-encoded version we manually had to identify an f' such that we had a cleanly recursing function. I wonder if this is the source of why Cochurch-encoded function is faster.
 This simple recursive function has its roots in the definition of su'. I'm going to try to tweak it to see if I can suplify that function further (removing there where).
 - It turns out that removing the where creates a big slowdown (about 3x), making the function about twice as slow as the church-encoding.

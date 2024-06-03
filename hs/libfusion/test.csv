@@ -1,0 +1,7 @@
+Name,Mean (ps),2*Stdev (ps),Allocated,Copied,Peak Memory
+All.Filter pipeline 1000000.pipstreamfused1,688725778,24612148,0,0,6291456
+All.Filter pipeline 1000000.piplistfused1,624130542,14968762,0,0,6291456
+All.Filter pipeline 1000000.piphandfused1,500873293,12008162,0,0,6291456
+All.Filter pipeline 1000000.pipcofused1,2640999875,51899486,47996915,2042,6291456
+All.Filter pipeline 1000000.pipchfused1,5227683706,167051774,8258008,75395,18874368
+All.Filter pipeline 1000000.pipunfused1,19208036850,167101834,148264713,140761,23068672

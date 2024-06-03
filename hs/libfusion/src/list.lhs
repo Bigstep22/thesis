@@ -85,9 +85,10 @@ between1 (x, y) = case x > y of
 For the Church-encoded version we define a recursion principle \tt{b} and use that to define the encoded church function:
 \begin{code}
 b :: (List_ Int b -> b) -> (Int, Int) -> b
-b a (x, y) = case x > y of
-  True -> a Nil_
-  False -> a (Cons_ x (b a (x+1,y)))
+b a (x, y) = loop x
+  where loop x = case x > y of
+          True -> a Nil_
+          False -> a (Cons_ x (loop (x+1)))
 betweenCh :: (Int, Int) -> ListCh Int
 betweenCh (x, y) = ListCh (\a -> b a (x, y))
 between2 :: (Int, Int) -> List' Int
@@ -208,11 +209,6 @@ sum5 = foldl' (\a b -> a+b) 0
 {-# INLINE sum5 #-}
 pipeline5 = sum5 . map5 (+2) . filter5 trodd . between5
 pipeline6 = sum6 . map6 (+2) . filter6 trodd . between6
-
-input :: (Int, Int)
-input = (1, 10000)
--- main :: IO ()
--- main = print (pipeline5 input)
 \end{code}
 
 
@@ -394,11 +390,11 @@ filter6 :: (a -> Bool) -> List' a -> List' a
 filter6 p = fromCoCh' . natCoCh' (filt' p) . toCoCh'
 {-# INLINE filter6 #-}
 su' :: (s -> List'_ Int s) -> s -> Int
-su' h s = loopt s 0
-  where loopt s' sum = case h s' of
+su' h s = loopt 0 s
+  where loopt sum s' = case h s' of
           Nil'_ -> sum
-          ConsN'_ xs -> loopt xs sum
-          Cons'_ x xs -> loopt xs (x + sum)
+          ConsN'_ xs -> loopt sum xs
+          Cons'_ x xs -> loopt (x + sum) xs
 sumCoCh' :: ListCoCh' Int -> Int
 sumCoCh' (ListCoCh' h s) = su' h s
 sum6 :: List' Int -> Int
@@ -416,24 +412,27 @@ sum6 = sumCoCh' . toCoCh'
 -- sumApp2 (x, y)  = sum2 (append2 (between2 (x, y)) (between2 (x, y)))
 -- sumApp3 (x, y)  = sum3 (append3 (between3 (x, y)) (between3 (x, y)))
 
+
+input :: (Int, Int)
+input = (1, 10000)
+-- main :: IO ()
+-- main = print (pipeline5 input)
+makegroup n = [ 
+      bench "pipstreamfused1" $ nf pipeline6 (1, n)
+    , bench "piplistfused1" $ nf pipeline5 (1, n)
+    , bench "piphandfused1" $ nf pipeline4 (1, n)
+    , bench "pipcofused1" $ nf pipeline3 (1, n)
+    , bench "pipchfused1" $ nf pipeline2 (1, n)
+    , bench "pipunfused1" $ nf pipeline1 (1, n)
+    ]
 main :: IO ()
 main = defaultMain
   [
-    bgroup "Filter pipeline"
-    [ 
-      bench "pipstreamfused1" $ nf pipeline6 input
-    , bench "pipstreamfused2" $ nf pipeline6 input
-    , bench "piplistfused1" $ nf pipeline5 input
-    , bench "piplistfused2" $ nf pipeline5 input
-    , bench "piphandfused1" $ nf pipeline4 input
-    , bench "piphandfused2" $ nf pipeline4 input
-    , bench "pipcofused1" $ nf pipeline3 input
-    , bench "pipcofused2" $ nf pipeline3 input
-    , bench "pipchfused1" $ nf pipeline2 input
-    , bench "pipchfused2" $ nf pipeline2 input
-    , bench "pipunfused1" $ nf pipeline1 input
-    , bench "pipunfused2" $ nf pipeline1 input
-    ]
+    -- bgroup "Filter pipeline 100" (makegroup 100),
+    -- bgroup "Filter pipeline 1000" (makegroup 1000),
+    -- bgroup "Filter pipeline 10000" (makegroup 10000),
+    -- bgroup "Filter pipeline 100000" (makegroup 100000),
+    bgroup "Filter pipeline 1000000" (makegroup 1000000)
     -- ,
     -- bgroup "Sum-append pipeline"
     -- [

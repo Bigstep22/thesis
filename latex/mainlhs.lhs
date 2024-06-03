@@ -46,11 +46,11 @@
 \input{sections/40_formalization}
 \input{sections/45_related_works}
 \input{sections/50_conclusion}
+\bibliographystyle{apacite}
+\bibliography{references.bib}
 \appendix
 %include sections/90_appendix.lhs.tex
 
 
-\bibliographystyle{apacite}
-\bibliography{references.bib}
 \end{document}
 
