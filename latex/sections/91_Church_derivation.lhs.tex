@@ -136,21 +136,21 @@ b (\x -> case x of
 -- Inlining s + beta reduction
 b (\x -> case x of
   Nil_ -> 0
-  Cons_ x xs -> if (p x) then ((+1) x) + xs) else xs
+  Cons_ x xs -> if (p x) then (((+1) x) + xs) else xs
 ) (x, y)
 -- Inlining of b + beta reduction
 loop (x, y) = case x > y of
   True -> case Nil_ of
     Nil_ -> 0
-    Cons_ x xs -> if (p x) then ((+1) x) + xs) else xs
+    Cons_ x xs -> if (p x) then (((+1) x) + xs) else xs
   False -> case (Cons_ x (loop (x+1,y))) of
     Nil_ -> 0
-    Cons_ x xs -> if (p x) then ((+1) x) + xs) else xs
+    Cons_ x xs -> if (p x) then (((+1) x) + xs) else xs
 loop (x, y)
 -- case-of-known-case optimization
 loop (x, y) = case x > y of
   True -> 0
-  False -> if (p x) then ((+1) x) + loop (x+1,y)) else loop (x+1,y)
+  False -> if (p x) then ((+1) x + loop (x+1,y)) else loop (x+1,y)
 loop (x, y)
 -- Cleaning it up:
 loop (x, y) = if x > y 
