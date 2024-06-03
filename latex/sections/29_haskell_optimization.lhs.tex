@@ -41,11 +41,11 @@ Is case-of-known-constructor, we can simplify it to:
 \begin{spec}
 Expr
 \end{spec}
-Together, these optimizations can often lead to the removal of unecessary computations. Take as an example (\citep{Jones1996}):
+Together, these optimizations can often lead to the removal of unecessary computations. Take as an example \citep{Jones1996}:
 \begin{spec}
 if (not x) then E1 else E2
 \end{spec}
-``No decent compiler would actually negate the value of \textbf{x} at runtime! [...] After desugaring the conditional , and inlining the definition of \textbf{not} , we get'' \citep{Jones1996}:
+``No decent compiler would actually negate the value of \textbf{x} at runtime! [...] After desugaring the conditional, and inlining the definition of \textbf{not}, we get'' \citep{Jones1996}:
 \begin{spec}
 case (case x of
   True -> False
@@ -70,7 +70,7 @@ case x of
   True -> E2
   False -> E1
 \end{spec}
-No more evalutation of not!
+No more runtime evaluation of not!
 
 
 ADD A (LARGE) EXAMPLE AS TO WHY THIS IS SO IMPORTANT FOR THE FUSED PIPELINES
