@@ -3,6 +3,7 @@
 \usepackage[a4paper,margin=25mm,
 % left=35mm,right=35mm
 ]{geometry}
+\usepackage{svg}
 \usepackage{apacite}
 \usepackage{natbib}
 \usepackage{listings}
@@ -13,6 +14,7 @@
 \usepackage{agda}
 \usepackage[colorlinks=true,allcolors=blue]{hyperref}
 %include lhs2TeX.fmt
+
 
 \renewcommand{\tt}[1]{\texttt{#1}}
 \usepackage{stmaryrd}

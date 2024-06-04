@@ -40,7 +40,7 @@ in' (Cons_ x xs) = Cons x xs
 \end{code}
 We introduce three important pragmas.
 One is the actual fusion rule, taking two functions and removing them from the compilation process.
-The second and third are to make sure that the \tt{toCh} and \tt{fromCh} functions are inlined as soon as possible; exposing their definition, which includes the \tt{toCh} and \tt{fromCh} that are to be fused during the compilation process:
+The second and third are to make sure that the \tt{toCh} and \tt{fromCh} functions are inlined as late as possible; maximising the time that they can be fused during the compilation process:
 \begin{code}
 {-# RULES "toCh/fromCh fusion"
    forall x. toCh (fromCh x) = x #-}
@@ -159,23 +159,42 @@ sumCh (ListCh g) = g su
 sum2 :: List' Int -> Int
 sum2 = sumCh . toCh
 {-# INLINE sum2 #-}
+
+
+su2' :: List_ Int (Int -> Int) -> (Int -> Int)
+su2' Nil_ s = s
+su2' (Cons_ x y) s = y (s + x)
+sumCh' :: ListCh Int -> (Int -> Int)
+sumCh' (ListCh g) = g su2'
+sum7 :: List' Int -> Int
+sum7 = flip sumCh' 0 . toCh
+{-# INLINE sum7 #-}
+
+
 \end{code}
 The cochurch-encoded function implements a corecursion principle and applies the existing coalgebra (and input) to it:
 \begin{code}
 {-TAIL RECURSION!!!-}
 su2 :: (s -> List_ Int s) -> s -> Int
 su2 h s = loopt s 0
+  where loopt s' sum = case h s' of
+          Nil_ -> sum
+          Cons_ x xs -> loopt xs (x + sum)
+su3 :: (s -> List_ Int s) -> s -> Int
+su3 h s = loop s
   where loop s' = case h s' of
           Nil_ -> 0
           Cons_ x xs -> x + loop xs
-        loopt s' sum = case h s' of
-          Nil_ -> sum
-          Cons_ x xs -> loopt xs (x + sum)
 sumCoCh :: ListCoCh Int -> Int
 sumCoCh (ListCoCh h s) = su2 h s
+sumCoCh2' :: ListCoCh Int -> Int
+sumCoCh2' (ListCoCh h s) = su3 h s
 sum3 :: List' Int -> Int
 sum3 = sumCoCh . toCoCh
 {-# INLINE sum3 #-}
+sum8 :: List' Int -> Int
+sum8 = sumCoCh . toCoCh
+{-# INLINE sum8 #-}
 \end{code}
 Note that two subfunctions are provided to \tt{su'}, the \tt{loop} and the \tt{loopt} function.
 The former function is implement as one would naively expect.
@@ -192,13 +211,15 @@ trodd n = n `rem` 2 == 0
 
 pipeline1 = sum1 . map1 (+2) . filter1 trodd . between1
 pipeline2 = sum2 . map2 (+2) . filter2 trodd . between2
+pipeline7 = sum7 . map2 (+2) . filter2 trodd . between2
 pipeline3 = sum3 . map3 (+2) . filter3 trodd . between3
-pipeline4 (x, y) = loop x y 0
-  where loop z y sum = case z > y of
-                     True -> sum
-                     False -> if trodd z
-                              then loop (z+1) y (sum+z+2)
-                              else loop (z+1) y sum
+pipeline8 = sum8 . map3 (+2) . filter3 trodd . between3
+pipeline4 (x, y) = loop x 0
+  where loop z sum = if z > y 
+                     then sum
+                     else if trodd z
+                          then loop (z+1) (sum+z+2)
+                          else loop (z+1) sum
 
 between5 :: (Int, Int) -> [Int]
 between5 (x, y) = [x..y]
@@ -214,6 +235,9 @@ sum5 = foldl' (\a b -> a+b) 0
 {-# INLINE sum5 #-}
 pipeline5 = sum5 . map5 (+2) . filter5 trodd . between5
 pipeline6 = sum6 . map6 (+2) . filter6 trodd . between6
+pipeline9 = sum9 . map6 (+2) . filter6 trodd . between6
+pipeline10 = sum10 . map10 (+2) . filter10 trodd . between10
+pipeline11 = sum11 . map10 (+2) . filter10 trodd . between10
 \end{code}
 
 
@@ -398,19 +422,83 @@ su' h s = loopt 0 s
           Nil'_ -> sum
           ConsN'_ xs -> loopt sum xs
           Cons'_ x xs -> loopt (x + sum) xs
+su3' :: (s -> List'_ Int s) -> s -> Int
+su3' h s = loop s
+  where loop s' = case h s' of
+          Nil'_ -> 0
+          ConsN'_ xs -> loop xs
+          Cons'_ x xs -> x + loop xs
 sumCoCh' :: ListCoCh' Int -> Int
 sumCoCh' (ListCoCh' h s) = su' h s
+sumCoCh3' :: ListCoCh' Int -> Int
+sumCoCh3' (ListCoCh' h s) = su3' h s
 sum6 :: List' Int -> Int
 sum6 = sumCoCh' . toCoCh'
 {-# INLINE sum6 #-}
-\end{code}
-}
+sum9 :: List' Int -> Int
+sum9 = sumCoCh3' . toCoCh'
+{-# INLINE sum9 #-}
 
 
 
 
-\ignore{
-\begin{code}
+
+data ListCh' a = ListCh' (forall b . (List'_ a b -> b) -> b)
+toCh' :: List' a -> ListCh' a
+toCh' t = ListCh' (\a -> fold' a t)
+fold' :: (List'_ a b -> b) -> List' a -> b
+fold' a Nil         = a Nil'_
+fold' a (Cons x xs) = a (Cons'_ x (fold' a xs))
+fromCh' :: ListCh' a -> List' a
+fromCh' (ListCh' fold') = fold' in''
+in'' :: List'_ a (List' a) -> List' a
+in'' Nil'_ = Nil
+in'' (ConsN'_ xs) = xs
+in'' (Cons'_ x xs) = Cons x xs
+{-# RULES "toCh/fromCh fusion"
+   forall x. toCh' (fromCh' x) = x #-}
+{-# INLINE [0] toCh' #-}
+{-# INLINE [0] fromCh' #-}
+natCh' :: (forall c . List'_ a c -> List'_ b c) -> ListCh' a -> ListCh' b
+natCh' f (ListCh' g) = ListCh' (\a -> g (a . f))
+
+
+b'' :: (List'_ Int b -> b) -> (Int, Int) -> b
+b'' a (x, y) = loop x
+  where loop x = case x > y of
+          True -> a Nil'_
+          False -> a (Cons'_ x (loop (x+1)))
+betweenCh' :: (Int, Int) -> ListCh' Int
+betweenCh' (x, y) = ListCh' (\a -> b'' a (x, y))
+between10 :: (Int, Int) -> List' Int
+between10 = fromCh' . betweenCh'
+{-# INLINE between10 #-}
+map10 :: (a -> b) -> List' a -> List' b
+map10 f = fromCh' . natCh' (m' f) . toCh'
+{-# INLINE map10 #-}
+filter10 :: (a -> Bool) -> List' a -> List' a
+filter10 p = fromCh' . natCh' (filt' p) . toCh'
+{-# INLINE filter10 #-}
+su''' :: List'_ Int Int -> Int
+su''' Nil'_ = 0
+su''' (ConsN'_ y) = y
+su''' (Cons'_ x y) = x + y
+sumCh'' :: ListCh' Int -> Int
+sumCh'' (ListCh' g) = g su'''
+sum10 :: List' Int -> Int
+sum10 = sumCh . toCh
+{-# INLINE sum10 #-}
+su2'' :: List'_ Int (Int -> Int) -> (Int -> Int)
+su2'' Nil'_ s = s
+su2'' (ConsN'_ y) s = y s
+su2'' (Cons'_ x y) s = y (s + x)
+sumCh''' :: ListCh' Int -> (Int -> Int)
+sumCh''' (ListCh' g) = g su2''
+sum11 :: List' Int -> Int
+sum11 = flip sumCh' 0 . toCh
+{-# INLINE sum11 #-}
+
+
 -- sumApp1 (x, y)  = sum1 (append1 (between1 (x, y)) (between1 (x, y)))
 -- sumApp2 (x, y)  = sum2 (append2 (between2 (x, y)) (between2 (x, y)))
 -- sumApp3 (x, y)  = sum3 (append3 (between3 (x, y)) (between3 (x, y)))
@@ -421,12 +509,17 @@ input = (1, 10000)
 -- main :: IO ()
 -- main = print (pipeline5 input)
 makegroup n = [ 
-      bench "pipstreamfused1" $ nf pipeline6 (1, n)
-    , bench "piplistfused1" $ nf pipeline5 (1, n)
-    , bench "piphandfused1" $ nf pipeline4 (1, n)
-    , bench "pipcofused1" $ nf pipeline3 (1, n)
-    , bench "pipchfused1" $ nf pipeline2 (1, n)
-    , bench "pipunfused1" $ nf pipeline1 (1, n)
+      bench "pipunfused" $ nf pipeline1 (1, n)
+    , bench "pipchfused" $ nf pipeline2 (1, n)
+    , bench "pipchtailfused" $ nf pipeline7 (1, n)
+    , bench "pipchstreamfused" $ nf pipeline10 (1, n)
+    , bench "pipchstreamtailfused" $ nf pipeline11 (1, n)
+    , bench "pipcofused" $ nf pipeline8 (1, n)
+    , bench "pipcotailfused" $ nf pipeline3 (1, n)
+    , bench "pipcostreamfused" $ nf pipeline9 (1, n)
+    , bench "pipcostreamtailfused" $ nf pipeline6 (1, n)
+    , bench "piplistfused" $ nf pipeline5 (1, n)
+    , bench "piphandfused" $ nf pipeline4 (1, n)
     ]
 main :: IO ()
 main = defaultMain
@@ -434,8 +527,8 @@ main = defaultMain
     -- bgroup "Filter pipeline 100" (makegroup 100),
     -- bgroup "Filter pipeline 1000" (makegroup 1000),
     -- bgroup "Filter pipeline 10000" (makegroup 10000),
-    -- bgroup "Filter pipeline 100000" (makegroup 100000),
-    bgroup "Filter pipeline 1000000" (makegroup 1000000)
+    bgroup "Filter pipeline 100000" (makegroup 100000)
+    -- bgroup "Filter pipeline 1000000" (makegroup 1000000)
     -- ,
     -- bgroup "Sum-append pipeline"
     -- [
