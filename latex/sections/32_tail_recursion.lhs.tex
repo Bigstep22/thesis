@@ -1,5 +1,12 @@
 
 \subsubsection{Tail Recursion}\label{sec:tail}
+\paragraph{Definition}
+We call a recursive function tail-recursive, if all its recursive calls are returned immediately upon completion i.e., they don't do any additional calculations upon the result of the recursive call before returning a result.
+
+When a function is tail-recursive, it is possible to reuse the stack frame of the current function call, reducing a lot of memory overhead.
+Haskell is able to identify tail-recursive functions and optimize the compiled byte code accordingly.
+
+\paragraph{Example}
 The following code, when applying fusion, case-of-case, and case-of-known-case optimization:
 \begin{spec}
 sumCoCh . mapCoCh (+2) . filterCoCh odd . ListCoCh betweenCoCh
@@ -10,9 +17,11 @@ loop (x, y) = if (x > y)
               then 0
               else if (odd x)
                    then (x + 2) + loop (x+1, y)
-                   else -> loop (x+1, y)
+                   else loop (x+1, y)
 loop (x, y)
 \end{spec}
+This definition is not tail recursive as the \tt{then (x + 2) + loop (x+1, y)} line includes some calcualtions that still need to made upon completion of the recursive \tt{loop} call; i.e. the \tt{loop} function is not in tail position.
+
 If we tweak the definition of sum, such that it is tail recursive we get a different derivation (See \autoref{app:cochurch_tail} for derivation):
 \begin{spec}
 sumCoCh . mapCoCh (+2) . filterCoCh odd . ListCoCh betweenCoCh
@@ -22,7 +31,7 @@ Reduces to:
 loop (x, y) acc = if (x > y)
                   then acc
                   else if (odd x)
-                       then loop (x+1, y) ((x+2)+acc)
+                       then loop (x+1, y) ((x + 2) + acc)
                        else loop (x+1, y)
 loop (x, y) 0
 \end{spec}
@@ -30,5 +39,4 @@ Which is identical except for the fact that \tt{loop} is tail-recursive.
 All that has been changed is the recursion principle \tt{su'}.
 
 Cochurch encodings better lend themselves to having fully tail-recursive fused pipelines, as writing a coinduction principle that is tail-recursive is easier than writing a recursion principle that is.
-WHY??????????????
-Call Arity: Joachim Breitner
+For a further discussion on this, see \cite{Breitner2018}'s work.

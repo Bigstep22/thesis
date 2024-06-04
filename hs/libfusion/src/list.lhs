@@ -11,16 +11,16 @@
 {-# OPTIONS_GHC -O2 #-}
 import Prelude hiding (foldr)
 import Test.Tasty.Bench
-import GHC.List
 \end{code}
 }
 \subsection{Lists}
-In this section further replication of \cite{Harper2011}'s work is described, but instead of implementing Leaf trees, Lists are implemented.
+In this section further replication of \cite{Harper2011}'s work is described, but Lists are implemented instead of Leaf trees.
 
 This was done to see how the descriptions in \cite{Harper2011}'s work generalize and to have a simpler datastructure on which to perform analysis; seeing how and when the fusion works and when it doesn't.
 
 We again start with the datatype descriptions. We use \tt{List'} instead of \tt{List} as there is a namespace collision with GHC's \tt{List} datatype:
 \begin{code}
+import GHC.List
 data List' a = Nil | Cons a (List' a)
 data List_ a b = Nil_ | Cons_ a b
 \end{code}
@@ -37,6 +37,11 @@ fromCh (ListCh fold') = fold' in'
 in' :: List_ a (List' a) -> List' a
 in' Nil_ = Nil
 in' (Cons_ x xs) = Cons x xs
+\end{code}
+We introduce three important pragmas.
+One is the actual fusion rule, taking two functions and removing them from the compilation process.
+The second and third are to make sure that the \tt{toCh} and \tt{fromCh} functions are inlined as soon as possible; exposing their definition, which includes the \tt{toCh} and \tt{fromCh} that are to be fused during the compilation process:
+\begin{code}
 {-# RULES "toCh/fromCh fusion"
    forall x. toCh (fromCh x) = x #-}
 {-# INLINE [0] toCh #-}
@@ -47,7 +52,7 @@ A generalized natural transformation function is defined:
 natCh :: (forall c . List_ a c -> List_ b c) -> ListCh a -> ListCh b
 natCh f (ListCh g) = ListCh (\a -> g (a . f))
 \end{code}
-The cochurch encodings are defined similarly:
+The cochurch encodings are defined similarly, including pragmas necessary for fusion:
 \begin{code}
 data ListCoCh a = forall s . ListCoCh (s -> List_ a s) s
 toCoCh :: List' a -> ListCoCh a
@@ -219,9 +224,10 @@ pipeline6 = sum6 . map6 (+2) . filter6 trodd . between6
 
 \subsubsection{The Filter Problem}\label{sec:filter_prob}
 % What is the difference between an algeabra, coalgebra, transformation, and natural transformation?
-I have moved the discussion for Church and Cochurch encoded Lists down here, as I think it warrants more discussion and illustrates a few interesting points; there are multiple ways of implementing it, none of them trivial according to \cite{Harper2011}'s description of how it should be implemented as a natural transformation.
+I have moved the discussion for Church and Cochurch encoded Lists down here, as I think it warrants more discussion and illustrates a few interesting points.
+There are multiple ways of implementing it, none of them trivial according to \cite{Harper2011}'s description of how it should be implemented as a natural transformation.
 
-When replicating \cite{Harper2011}'s code for lists, I ran into one major hurdle:
+When replicating \cite{Harper2011}'s code for lists, there is one major limitation on natrual transformation functions:
 How to represent filter as a natural transformation for both Church and Cochurch encodings?
 In his work he implemented, using Leaf trees, a natural transformation for the filter function in the following manner:
 \begin{spec}
@@ -251,7 +257,7 @@ There are two solutions:
 One that modifies the definition of \tt{filter2} and \tt{filter3}, such that the definition is still possible, without leveraging transformations.
 The other modifies the definition of the underlying type such that the filter function is still possible to express as a transformation.
     
-\paragraph{Solution 1: Pushing on}
+\paragraph{Solution 1: Abandoning Natural Transformations}
 \subparagraph{Church}
 Whereas before we wanted to implement our \tt{filter} function in the following manner:
 \begin{spec}
@@ -279,17 +285,8 @@ filter2 p = fromCh . filterCh p . toCh
 Notice how we do not apply \tt{a} to \tt{xs}, and, in doing so, can put \tt{xs} in the place where wanted to.
 The definition of \tt{filterCh} was too restrictive in always postcomposing \tt{a}.
 
-% Solved using a build/foldr pair - this is true, but how to make the reader see it? 0_o
 The astute observer will note that this solution is just a beta reduced form of a build/foldr composition pair!
-
-% This begs the question:
-% Is it worth rewriting my entire list and leaf trees implementation in terms of foldr and build to drive this point home?
-% This will also make extremely apparent the connection between Harper's work and the earlier works on foldr/build and destroy/unfoldr fusion.
-
-% https://hackage.haskell.org/package/ghc-internal-9.1001.0/docs/src//GHC.Internal.Base.html
-% My word what a mess...
-% mapFB is litery just function composition, but with 4 extra steps
-% There has to be a better way :,(
+% TODO: Write out a build/foldr pair and beta reduce it
 
 % I was just reading this: https://link.springer.com/chapter/10.1007/978-3-540-30477-7_22
 % This is one of the fusion rules that is leveraged in GHC.List fusion.
@@ -302,8 +299,8 @@ Whereas before we wanted to implement our \tt{filter} function in the following 
 filter3 :: (a -> Bool) -> List a -> List a
 filter3 p = fromCoCh . natCoCh (filt p) . toCoCh
 \end{spec}
-For the cochurch-encoding, a natural transformation can be defined, but it is not a simple algebra, instead it is a recursive function.
-The core idea is: we combine the transformation and postcomposition again, but this time we make the function recursively grab elements from the seed until we find one that satisfies the predicate.
+For the cochurch-encoding, a natural transformation can be defined, but it is not a simple algebra, instead it is a recursive function.\footnote{And not necessarily guaranteed to terminate, the seed could generate an infinite structure.}
+The core idea is: we combine the natural transformation and postcomposition again, but this time we make the function recursively grab elements from the seed until we find one that satisfies the predicate.
 \begin{code}
 filt :: (a -> Bool) -> (s -> List_ a s) -> s -> List_ a s
 filt p h s = go s
@@ -316,9 +313,9 @@ filter3 :: (a -> Bool) -> List' a -> List' a
 filter3 p = fromCoCh . filterCoCh p . toCoCh
 {-# INLINE filter3 #-}
 \end{code}
-This \tt{filt} function is recursive, so it does not inline (fuse) neatly into the main function body in the way that the rest of the pipeline does.
-There is existing work, called joint-point optimization that should enable this function to still fully fuse, but it does not at the moment.
-There are existing issues in GHC's issue tracker that describe this problem. SOURCE?
+The \tt{go} subfunction is recursive, so it does not inline (fuse) neatly into the main function body in the way that the rest of the pipeline does.
+There is existing work, called join-point optimization that should enable this function to still fully fuse, but it does not at the moment.
+There are existing issues in GHC's issue tracker that describe this problem.\footnote{\url{https://gitlab.haskell.org/ghc/ghc/-/issues/22227}}
 
 
 \paragraph{Solution 2: go back and modify the underlying type}
@@ -332,18 +329,24 @@ filt' p (ConsN'_ xs) = ConsN'_ xs
 filt' p (Cons'_ x xs) = if p x then Cons'_ x xs else ConsN'_ xs
 \end{code}
 Now we do need to modify all of our already defined functions to take into account this modified datatype.
-The astute among you might notice that this technique is actually \textit{stream fusion} is as described by \cite{Coutts2007}.
+The astute among you might notice that this technique is actually \textit{stream fusion} as described by \cite{Coutts2007}.
 The \tt{ConsN\_} constructor is analogous to the \tt{Skip} constructor.
+Therefore, this is a known and understood technique, motivated by the limitations of the techniques described by Harper.
 
 So why was it possible to implement \tt{filt} without modifying the datatype of leaf trees?
 Because leaf trees already have this consideration of being able to null the datatype in-place by chaining a \tt{Leaf\_ x} into an \tt{Empty\_}.
-\tt{filt} is able to remove a value from the datastructure without changing the structure of the data. I.e. it is still a transformation.
-By chaning the list datatype such that this nullability is also possible, we can also write \tt{filt} as a transformation.
+\tt{filt} is able to remove a value from the datastructure without changing the structure of the data. I.e. it is still a natural transformation.
+By chaning the list datatype such that this nullability is also possible, we can also write \tt{filt} as a natural transformation.
 
-This insight is broader than just stream fusion.
-By modifying your datatype, you can broaden what can be expressed as a transformation.
-
-
+This technique could be broader than a modification to just lists.
+By modifying (making nullable) any datatype, it might be possible to broaden the class of functions that can be represented as a natural transformation.
+One other example of this is already the difference between a \tt{Binary Tree} and a \tt{Leaf Tree} datatype:
+\begin{spec}
+data BinTree a = Leaf a | Fork (BinTree a) (BinTree a)
+data LeafTree a = Empty | Leaf a | Fork (LeafTree a) (LeafTree a)
+\end{spec}
+The \tt{Leaf} constructor of \tt{BinTree} is also made nullable.
+I will leave the following question to future work: Is this generalizable?
 
 
 
