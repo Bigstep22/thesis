@@ -101,6 +101,7 @@ between2 = fromCh . betweenCh
           where loop x = if x > y
                          then a Nil_
                          else a (Cons_ x (loop (x+1)))
+        {-# INLINE betweenCh #-}
 {-# INLINE between2 #-}
 \end{code}
 For the Cochurch-encoded version we define a coalgebra:
@@ -111,6 +112,7 @@ between3 = fromCoCh . ListCoCh betweenCoCh
         betweenCoCh (x, y) = if x > y 
                              then Nil_
                              else Cons_ x (x+1, y)
+        {-# INLINE betweenCoCh #-}
 {-# INLINE between3 #-}
 \end{code}
 \paragraph{Filter}
@@ -211,7 +213,7 @@ pipeline1 = sum1 . map1 (+2) . filter1 trodd . between1
 \ignore{
 \begin{code}
 trodd :: Int -> Bool
-trodd n = n `rem` 3 == 0
+trodd n = n `rem` 2 == 0
 {-# INLINE trodd #-}
 
 pipeline2 = sum2 . map2 (+2) . filter2 trodd . between2
