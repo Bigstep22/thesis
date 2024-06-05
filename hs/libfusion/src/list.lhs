@@ -32,14 +32,14 @@ data List_ a b = Nil_ | Cons_ a b
 data ListCh a = ListCh (forall b . (List_ a b -> b) -> b)
 toCh :: List' a -> ListCh a
 toCh t = ListCh (\a -> fold a t)
-fold :: (List_ a b -> b) -> List' a -> b
-fold a Nil         = a Nil_
-fold a (Cons x xs) = a (Cons_ x (fold a xs))
+  where fold :: (List_ a b -> b) -> List' a -> b
+        fold a Nil         = a Nil_
+        fold a (Cons x xs) = a (Cons_ x (fold a xs))
 fromCh :: ListCh a -> List' a
 fromCh (ListCh fold') = fold' in'
-in' :: List_ a (List' a) -> List' a
-in' Nil_ = Nil
-in' (Cons_ x xs) = Cons x xs
+  where in' :: List_ a (List' a) -> List' a
+        in' Nil_ = Nil
+        in' (Cons_ x xs) = Cons x xs
 \end{code}
 We introduce three important pragmas.
 One is the actual fusion rule, taking two functions and removing them from the compilation process.
@@ -60,15 +60,15 @@ The cochurch encodings are defined similarly, including pragmas necessary for fu
 data ListCoCh a = forall s . ListCoCh (s -> List_ a s) s
 toCoCh :: List' a -> ListCoCh a
 toCoCh = ListCoCh out
-out :: List' a -> List_ a (List' a)
-out Nil = Nil_
-out (Cons x xs) = Cons_ x xs
+  where out :: List' a -> List_ a (List' a)
+        out Nil = Nil_
+        out (Cons x xs) = Cons_ x xs
 fromCoCh :: ListCoCh a -> List' a
 fromCoCh (ListCoCh h s) = unfold h s
-unfold :: (b -> List_ a b) -> b -> List' a
-unfold h s = case h s of
-  Nil_ -> Nil
-  Cons_ x xs -> Cons x (unfold h xs)
+  where unfold :: (b -> List_ a b) -> b -> List' a
+        unfold h s = case h s of
+          Nil_ -> Nil
+          Cons_ x xs -> Cons x (unfold h xs)
 {-# RULES "toCh/fromCh fusion"
    forall x. toCoCh (fromCoCh x) = x #-}
 {-# INLINE [0] toCoCh #-}
@@ -92,27 +92,25 @@ between1 (x, y) = case x > y of
 \end{code}
 For the Church-encoded version we define a recursion principle \tt{b} and use that to define the encoded church function:
 \begin{code}
-b :: (List_ Int b -> b) -> (Int, Int) -> b
-b a (x, y) = loop x
-  where loop x = case x > y of
-          True -> a Nil_
-          False -> a (Cons_ x (loop (x+1)))
-betweenCh :: (Int, Int) -> ListCh Int
-betweenCh (x, y) = ListCh (\a -> b a (x, y))
-{-# INLINE betweenCh #-}
 between2 :: (Int, Int) -> List' Int
 between2 = fromCh . betweenCh
+  where betweenCh :: (Int, Int) -> ListCh Int
+        betweenCh (x, y) = ListCh (\a -> b a (x, y))
+        b :: (List_ Int b -> b) -> (Int, Int) -> b
+        b a (x, y) = loop x
+          where loop x = if x > y
+                         then a Nil_
+                         else a (Cons_ x (loop (x+1)))
 {-# INLINE between2 #-}
 \end{code}
 For the Cochurch-encoded version we define a coalgebra:
 \begin{code}
-betweenCoCh :: (Int, Int) -> List_ Int (Int, Int)
-betweenCoCh (x, y) = if x > y 
-                     then Nil_
-                     else Cons_ x (x+1, y)
-{-# INLINE betweenCoCh #-}
 between3 :: (Int, Int) -> List' Int
 between3 = fromCoCh . ListCoCh betweenCoCh
+  where betweenCoCh :: (Int, Int) -> List_ Int (Int, Int)
+        betweenCoCh (x, y) = if x > y 
+                             then Nil_
+                             else Cons_ x (x+1, y)
 {-# INLINE between3 #-}
 \end{code}
 \paragraph{Filter}
@@ -156,49 +154,46 @@ sum1 (Cons x xs) = x + sum1 xs
 \end{code}
 The church-encoded function leverages an algebra and applies that the existing recursion principle:
 \begin{code}
-su :: List_ Int Int -> Int
-su Nil_ = 0
-su (Cons_ x y) = x + y
-sumCh :: ListCh Int -> Int
-sumCh (ListCh g) = g su
 sum2 :: List' Int -> Int
 sum2 = sumCh . toCh
+  where sumCh :: ListCh Int -> Int
+        sumCh (ListCh g) = g su
+        su :: List_ Int Int -> Int
+        su Nil_ = 0
+        su (Cons_ x y) = x + y
 {-# INLINE sum2 #-}
-
-
-su2' :: List_ Int (Int -> Int) -> (Int -> Int)
-su2' Nil_ s = s
-su2' (Cons_ x y) s = y (s + x)
-sumCh' :: ListCh Int -> (Int -> Int)
-sumCh' (ListCh g) = g su2'
 sum7 :: List' Int -> Int
-sum7 = flip sumCh' 0 . toCh
+sum7 = flip sumCh 0 . toCh
+  where sumCh :: ListCh Int -> (Int -> Int)
+        sumCh (ListCh g) = g su
+        su :: List_ Int (Int -> Int) -> (Int -> Int)
+        su Nil_ s = s
+        su (Cons_ x y) s = y (s + x)
 {-# INLINE sum7 #-}
-
-
 \end{code}
+A second recursion principle is also implemented that modifies the type of the recursion element in the base functor. Leveraging techniques as described by \cite{Breitner2018} to obtain a tail recursive implementation of sum for Church-encodings.
+
 The cochurch-encoded function implements a corecursion principle and applies the existing coalgebra (and input) to it:
 \begin{code}
-{-TAIL RECURSION!!!-}
-su2 :: (s -> List_ Int s) -> s -> Int
-su2 h s = loopt s 0
-  where loopt s' sum = case h s' of
-          Nil_ -> sum
-          Cons_ x xs -> loopt xs (x + sum)
-su3 :: (s -> List_ Int s) -> s -> Int
-su3 h s = loop s
-  where loop s' = case h s' of
-          Nil_ -> 0
-          Cons_ x xs -> x + loop xs
-sumCoCh :: ListCoCh Int -> Int
-sumCoCh (ListCoCh h s) = su2 h s
-sumCoCh2' :: ListCoCh Int -> Int
-sumCoCh2' (ListCoCh h s) = su3 h s
 sum3 :: List' Int -> Int
 sum3 = sumCoCh . toCoCh
+  where sumCoCh :: ListCoCh Int -> Int
+        sumCoCh (ListCoCh h s) = su h s
+        su :: (s -> List_ Int s) -> s -> Int
+        su h s = loopt s 0
+          where loopt s' sum = case h s' of
+                  Nil_ -> sum
+                  Cons_ x xs -> loopt xs (x + sum)
 {-# INLINE sum3 #-}
 sum8 :: List' Int -> Int
 sum8 = sumCoCh . toCoCh
+  where sumCoCh :: ListCoCh Int -> Int
+        sumCoCh (ListCoCh h s) = su h s
+        su :: (s -> List_ Int s) -> s -> Int
+        su h s = loop s
+          where loop s' = case h s' of
+                  Nil_ -> 0
+                  Cons_ x xs -> x + loop xs
 {-# INLINE sum8 #-}
 \end{code}
 Note that two subfunctions are provided to \tt{su'}, the \tt{loop} and the \tt{loopt} function.
@@ -208,13 +203,17 @@ Because this \tt{loopt} function constitutes a corecursion principle, all the al
 For more details, see the discussion in \autoref{sec:tail}.
 
 \paragraph{Pipelines and GHC list fusion}
+Now we can make a pipeline in the following fashion:
+\begin{code}
+pipeline1 :: (Int, Int) -> Int
+pipeline1 = sum1 . map1 (+2) . filter1 trodd . between1
+\end{code}
+\ignore{
 \begin{code}
 trodd :: Int -> Bool
-trodd n = n `rem` 2 == 0
+trodd n = n `rem` 3 == 0
 {-# INLINE trodd #-}
 
-
-pipeline1 = sum1 . map1 (+2) . filter1 trodd . between1
 pipeline2 = sum2 . map2 (+2) . filter2 trodd . between2
 pipeline7 = sum7 . map2 (+2) . filter2 trodd . between2
 pipeline3 = sum3 . map3 (+2) . filter3 trodd . between3
@@ -244,7 +243,7 @@ pipeline9 = sum9 . map6 (+2) . filter6 trodd . between6
 pipeline10 = sum10 . map10 (+2) . filter10 trodd . between10
 pipeline11 = sum11 . map10 (+2) . filter10 trodd . between10
 \end{code}
-
+}
 
 
 
@@ -252,7 +251,6 @@ pipeline11 = sum11 . map10 (+2) . filter10 trodd . between10
 
 
 \subsubsection{The Filter Problem}\label{sec:filter_prob}
-% What is the difference between an algeabra, coalgebra, transformation, and natural transformation?
 I have moved the discussion for Church and Cochurch encoded Lists down here, as I think it warrants more discussion and illustrates a few interesting points.
 There are multiple ways of implementing it, none of them trivial according to \cite{Harper2011}'s description of how it should be implemented as a natural transformation.
 
@@ -313,11 +311,7 @@ filter2 p = fromCh . filterCh p . toCh
 \end{code}
 Notice how we do not apply \tt{a} to \tt{xs}, and, in doing so, can put \tt{xs} in the place where wanted to.
 The definition of \tt{filterCh} was too restrictive in always postcomposing \tt{a}.
-
-The astute observer will note that this solution is just a beta reduced form of a build/foldr composition pair!
-% TODO: Write out a build/foldr pair and beta reduce it
-% Is it a build/foldr pair? There is no recursion...
-% Something like a half-algebra...
+Instead a new algebra is made that selectively postcomposes \tt{a}.
 
 % I was just reading this: https://link.springer.com/chapter/10.1007/978-3-540-30477-7_22
 % This is one of the fusion rules that is leveraged in GHC.List fusion.
@@ -389,17 +383,17 @@ I will leave the following question to future work: Is this generalizable?
 data List'_ a b = Nil'_ | Cons'_ a b | ConsN'_ b
 data ListCoCh' a = forall s . ListCoCh' (s -> List'_ a s) s
 toCoCh' :: List' a -> ListCoCh' a
-toCoCh' = ListCoCh' out'
-out' :: List' a -> List'_ a (List' a)
-out' Nil = Nil'_
-out' (Cons x xs) = Cons'_ x xs
+toCoCh' = ListCoCh' out
+  where out :: List' a -> List'_ a (List' a)
+        out Nil = Nil'_
+        out (Cons x xs) = Cons'_ x xs
 fromCoCh' :: ListCoCh' a -> List' a
-fromCoCh' (ListCoCh' h s) = unfold' h s
-unfold' :: (b -> List'_ a b) -> b -> List' a
-unfold' h s = case h s of
-  Nil'_ -> Nil
-  ConsN'_ xs -> unfold' h xs
-  Cons'_ x xs -> Cons x (unfold' h xs)
+fromCoCh' (ListCoCh' h s) = unfold h s
+  where unfold :: (b -> List'_ a b) -> b -> List' a
+        unfold h s = case h s of
+          Nil'_ -> Nil
+          ConsN'_ xs -> unfold h xs
+          Cons'_ x xs -> Cons x (unfold h xs)
 {-# RULES "toCh/fromCh fusion"
    forall x. toCoCh' (fromCoCh' x) = x #-}
 {-# INLINE [0] toCoCh' #-}
@@ -424,27 +418,27 @@ map6 f = fromCoCh' . natCoCh' (m' f) . toCoCh'
 filter6 :: (a -> Bool) -> List' a -> List' a
 filter6 p = fromCoCh' . natCoCh' (filt' p) . toCoCh'
 {-# INLINE filter6 #-}
-su' :: (s -> List'_ Int s) -> s -> Int
-su' h s = loopt 0 s
-  where loopt sum s' = case h s' of
-          Nil'_ -> sum
-          ConsN'_ xs -> loopt sum xs
-          Cons'_ x xs -> loopt (x + sum) xs
-su3' :: (s -> List'_ Int s) -> s -> Int
-su3' h s = loop s
-  where loop s' = case h s' of
-          Nil'_ -> 0
-          ConsN'_ xs -> loop xs
-          Cons'_ x xs -> x + loop xs
-sumCoCh' :: ListCoCh' Int -> Int
-sumCoCh' (ListCoCh' h s) = su' h s
-sumCoCh3' :: ListCoCh' Int -> Int
-sumCoCh3' (ListCoCh' h s) = su3' h s
 sum6 :: List' Int -> Int
-sum6 = sumCoCh' . toCoCh'
+sum6 = sumCoCh . toCoCh'
+  where sumCoCh :: ListCoCh' Int -> Int
+        sumCoCh (ListCoCh' h s) = su h s
+        su :: (s -> List'_ Int s) -> s -> Int
+        su h s = loopt 0 s
+          where loopt sum s' = case h s' of
+                  Nil'_ -> sum
+                  ConsN'_ xs -> loopt sum xs
+                  Cons'_ x xs -> loopt (x + sum) xs
 {-# INLINE sum6 #-}
 sum9 :: List' Int -> Int
-sum9 = sumCoCh3' . toCoCh'
+sum9 = sumCoCh . toCoCh'
+  where sumCoCh :: ListCoCh' Int -> Int
+        sumCoCh (ListCoCh' h s) = su h s
+        su :: (s -> List'_ Int s) -> s -> Int
+        su h s = loop s
+          where loop s' = case h s' of
+                  Nil'_ -> 0
+                  ConsN'_ xs -> loop xs
+                  Cons'_ x xs -> x + loop xs
 {-# INLINE sum9 #-}
 
 
@@ -471,13 +465,13 @@ natCh' :: (forall c . List'_ a c -> List'_ b c) -> ListCh' a -> ListCh' b
 natCh' f (ListCh' g) = ListCh' (\a -> g (a . f))
 
 
-b'' :: (List'_ Int b -> b) -> (Int, Int) -> b
-b'' a (x, y) = loop x
+b' :: (List'_ Int b -> b) -> (Int, Int) -> b
+b' a (x, y) = loop x
   where loop x = case x > y of
           True -> a Nil'_
           False -> a (Cons'_ x (loop (x+1)))
 betweenCh' :: (Int, Int) -> ListCh' Int
-betweenCh' (x, y) = ListCh' (\a -> b'' a (x, y))
+betweenCh' (x, y) = ListCh' (\a -> b' a (x, y))
 {-# INLINE betweenCh' #-}
 between10 :: (Int, Int) -> List' Int
 between10 = fromCh' . betweenCh'
@@ -488,35 +482,26 @@ map10 f = fromCh' . natCh' (m' f) . toCh'
 filter10 :: (a -> Bool) -> List' a -> List' a
 filter10 p = fromCh' . natCh' (filt' p) . toCh'
 {-# INLINE filter10 #-}
-su''' :: List'_ Int Int -> Int
-su''' Nil'_ = 0
-su''' (ConsN'_ y) = y
-su''' (Cons'_ x y) = x + y
-sumCh'' :: ListCh' Int -> Int
-sumCh'' (ListCh' g) = g su'''
 sum10 :: List' Int -> Int
-sum10 = sumCh'' . toCh'
+sum10 = sumCh . toCh'
+  where sumCh :: ListCh' Int -> Int
+        sumCh (ListCh' g) = g su
+        su :: List'_ Int Int -> Int
+        su Nil'_ = 0
+        su (ConsN'_ y) = y
+        su (Cons'_ x y) = x + y
 {-# INLINE sum10 #-}
-su2'' :: List'_ Int (Int -> Int) -> (Int -> Int)
-su2'' Nil'_ = oneShot (\s -> s)
-su2'' (ConsN'_ y) = oneShot (\s -> y s)
-su2'' (Cons'_ x y) = oneShot (\s -> y (s + x))
-sumCh''' :: ListCh' Int -> (Int -> Int)
-sumCh''' (ListCh' g) = g su2''
 sum11 :: List' Int -> Int
-sum11 = flip sumCh''' 0 . toCh'
+sum11 = flip sumCh 0 . toCh'
+  where sumCh :: ListCh' Int -> (Int -> Int)
+        sumCh (ListCh' g) = g su
+        su :: List'_ Int (Int -> Int) -> (Int -> Int)
+        su Nil'_ = oneShot (\s -> s)
+        su (ConsN'_ y) = oneShot (\s -> y s)
+        su (Cons'_ x y) = oneShot (\s -> y (s + x))
 {-# INLINE sum11 #-}
 
 
--- sumApp1 (x, y)  = sum1 (append1 (between1 (x, y)) (between1 (x, y)))
--- sumApp2 (x, y)  = sum2 (append2 (between2 (x, y)) (between2 (x, y)))
--- sumApp3 (x, y)  = sum3 (append3 (between3 (x, y)) (between3 (x, y)))
-
-
-input :: (Int, Int)
-input = (1, 10000)
--- main :: IO ()
--- main = print (pipeline5 input)
 makegroup n = [ 
       bench "pipunfused1" $ nf pipeline1 (1, n)
     , bench "pipunfused2" $ nf pipeline1 (1, n)
@@ -583,24 +568,8 @@ main = defaultMain
     bgroup "Filter pipeline 100000" (makegroup 100000),
     bgroup "Filter pipeline 1000000" (makegroup 1000000),
     bgroup "Filter pipeline 10000000" (makegroup 10000000)
-    -- ,
-    -- bgroup "Sum-append pipeline"
-    -- [
-    --    bench "sumcofused1" $ nf sumApp3 input             
-    -- ,  bench "sumcofused2" $ nf sumApp3 input             
-    -- ,  bench "sumcofused3" $ nf sumApp3 input             
-    -- ,  bench "sumcofused4" $ nf sumApp3 input             
-    -- ,  bench "sumchfused1" $ nf sumApp2 input
-    -- ,  bench "sumchfused2" $ nf sumApp2 input
-    -- ,  bench "sumchfused3" $ nf sumApp2 input
-    -- ,  bench "sumchfused4" $ nf sumApp2 input
-    -- ,  bench "sumunfused1" $ nf sumApp1 input
-    -- ,  bench "sumunfused2" $ nf sumApp1 input
-    -- ,  bench "sumunfused3" $ nf sumApp1 input
-    -- ,  bench "sumunfused4" $ nf sumApp1 input
-    -- ]
   ]
-{- Report on core representation analysis for List datatypes,
+{- Initial report on core representation analysis for List datatypes,
  - In the core fused representation, lists are completely absent
    for both fused and cofused pipeline
  - The cofused function ends up pulling ahead slightly, not sure why.
