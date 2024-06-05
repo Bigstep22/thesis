@@ -8,9 +8,12 @@
 {-# OPTIONS_GHC -ddump-simpl -ddump-to-file -dsuppress-all -dno-suppress-type-signatures -dno-typeable-binds -dsuppress-uniques #-}
 {-# OPTIONS_GHC -Wno-missing-signatures #-}
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
+{-# OPTIONS_GHC -Wno-unused-matches #-}
 {-# OPTIONS_GHC -O2 #-}
-import Prelude hiding (foldr)
+import Prelude hiding (foldr, concatMap)
 import Test.Tasty.Bench
+import GHC.Base
 \end{code}
 }
 \subsection{Lists}
@@ -96,6 +99,7 @@ b a (x, y) = loop x
           False -> a (Cons_ x (loop (x+1)))
 betweenCh :: (Int, Int) -> ListCh Int
 betweenCh (x, y) = ListCh (\a -> b a (x, y))
+{-# INLINE betweenCh #-}
 between2 :: (Int, Int) -> List' Int
 between2 = fromCh . betweenCh
 {-# INLINE between2 #-}
@@ -103,9 +107,10 @@ between2 = fromCh . betweenCh
 For the Cochurch-encoded version we define a coalgebra:
 \begin{code}
 betweenCoCh :: (Int, Int) -> List_ Int (Int, Int)
-betweenCoCh (x, y) = case x > y of
-  True -> Nil_
-  False -> Cons_ x (x+1, y)
+betweenCoCh (x, y) = if x > y 
+                     then Nil_
+                     else Cons_ x (x+1, y)
+{-# INLINE betweenCoCh #-}
 between3 :: (Int, Int) -> List' Int
 between3 = fromCoCh . ListCoCh betweenCoCh
 {-# INLINE between3 #-}
@@ -311,6 +316,8 @@ The definition of \tt{filterCh} was too restrictive in always postcomposing \tt{
 
 The astute observer will note that this solution is just a beta reduced form of a build/foldr composition pair!
 % TODO: Write out a build/foldr pair and beta reduce it
+% Is it a build/foldr pair? There is no recursion...
+% Something like a half-algebra...
 
 % I was just reading this: https://link.springer.com/chapter/10.1007/978-3-540-30477-7_22
 % This is one of the fusion rules that is leveraged in GHC.List fusion.
@@ -398,9 +405,10 @@ unfold' h s = case h s of
 {-# INLINE [0] toCoCh' #-}
 {-# INLINE [0] fromCoCh' #-} 
 betweenCoCh' :: (Int, Int) -> List'_ Int (Int, Int)
-betweenCoCh' (x, y) = case x > y of
-  True -> Nil'_
-  False -> Cons'_ x (x+1, y)
+betweenCoCh' (x, y) = if (x > y)
+                      then Nil'_
+                      else Cons'_ x (x+1, y)
+{-# INLINE betweenCoCh' #-}
 between6 :: (Int, Int) -> List' Int
 between6 = fromCoCh' . ListCoCh' betweenCoCh'
 {-# INLINE between6 #-}
@@ -470,6 +478,7 @@ b'' a (x, y) = loop x
           False -> a (Cons'_ x (loop (x+1)))
 betweenCh' :: (Int, Int) -> ListCh' Int
 betweenCh' (x, y) = ListCh' (\a -> b'' a (x, y))
+{-# INLINE betweenCh' #-}
 between10 :: (Int, Int) -> List' Int
 between10 = fromCh' . betweenCh'
 {-# INLINE between10 #-}
@@ -486,16 +495,16 @@ su''' (Cons'_ x y) = x + y
 sumCh'' :: ListCh' Int -> Int
 sumCh'' (ListCh' g) = g su'''
 sum10 :: List' Int -> Int
-sum10 = sumCh . toCh
+sum10 = sumCh'' . toCh'
 {-# INLINE sum10 #-}
 su2'' :: List'_ Int (Int -> Int) -> (Int -> Int)
-su2'' Nil'_ s = s
-su2'' (ConsN'_ y) s = y s
-su2'' (Cons'_ x y) s = y (s + x)
+su2'' Nil'_ = oneShot (\s -> s)
+su2'' (ConsN'_ y) = oneShot (\s -> y s)
+su2'' (Cons'_ x y) = oneShot (\s -> y (s + x))
 sumCh''' :: ListCh' Int -> (Int -> Int)
 sumCh''' (ListCh' g) = g su2''
 sum11 :: List' Int -> Int
-sum11 = flip sumCh' 0 . toCh
+sum11 = flip sumCh''' 0 . toCh'
 {-# INLINE sum11 #-}
 
 
@@ -509,26 +518,71 @@ input = (1, 10000)
 -- main :: IO ()
 -- main = print (pipeline5 input)
 makegroup n = [ 
-      bench "pipunfused" $ nf pipeline1 (1, n)
-    , bench "pipchfused" $ nf pipeline2 (1, n)
-    , bench "pipchtailfused" $ nf pipeline7 (1, n)
-    , bench "pipchstreamfused" $ nf pipeline10 (1, n)
-    , bench "pipchstreamtailfused" $ nf pipeline11 (1, n)
-    , bench "pipcofused" $ nf pipeline8 (1, n)
-    , bench "pipcotailfused" $ nf pipeline3 (1, n)
-    , bench "pipcostreamfused" $ nf pipeline9 (1, n)
-    , bench "pipcostreamtailfused" $ nf pipeline6 (1, n)
-    , bench "piplistfused" $ nf pipeline5 (1, n)
-    , bench "piphandfused" $ nf pipeline4 (1, n)
+      bench "pipunfused1" $ nf pipeline1 (1, n)
+    , bench "pipunfused2" $ nf pipeline1 (1, n)
+    , bench "pipunfused3" $ nf pipeline1 (1, n)
+    , bench "pipunfused4" $ nf pipeline1 (1, n)
+    , bench "pipunfused5" $ nf pipeline1 (1, n)
+    , bench "pipchfused1" $ nf pipeline2 (1, n)
+    , bench "pipchfused2" $ nf pipeline2 (1, n)
+    , bench "pipchfused3" $ nf pipeline2 (1, n)
+    , bench "pipchfused4" $ nf pipeline2 (1, n)
+    , bench "pipchfused5" $ nf pipeline2 (1, n)
+    , bench "pipchtailfused1" $ nf pipeline7 (1, n)
+    , bench "pipchtailfused2" $ nf pipeline7 (1, n)
+    , bench "pipchtailfused3" $ nf pipeline7 (1, n)
+    , bench "pipchtailfused4" $ nf pipeline7 (1, n)
+    , bench "pipchtailfused5" $ nf pipeline7 (1, n)
+    , bench "pipchstreamfused1" $ nf pipeline10 (1, n)
+    , bench "pipchstreamfused2" $ nf pipeline10 (1, n)
+    , bench "pipchstreamfused3" $ nf pipeline10 (1, n)
+    , bench "pipchstreamfused4" $ nf pipeline10 (1, n)
+    , bench "pipchstreamfused5" $ nf pipeline10 (1, n)
+    , bench "pipchstreamtailfused1" $ nf pipeline11 (1, n)
+    , bench "pipchstreamtailfused2" $ nf pipeline11 (1, n)
+    , bench "pipchstreamtailfused3" $ nf pipeline11 (1, n)
+    , bench "pipchstreamtailfused4" $ nf pipeline11 (1, n)
+    , bench "pipchstreamtailfused5" $ nf pipeline11 (1, n)
+    , bench "pipcofused1" $ nf pipeline8 (1, n)
+    , bench "pipcofused2" $ nf pipeline8 (1, n)
+    , bench "pipcofused3" $ nf pipeline8 (1, n)
+    , bench "pipcofused4" $ nf pipeline8 (1, n)
+    , bench "pipcofused5" $ nf pipeline8 (1, n)
+    , bench "pipcotailfused1" $ nf pipeline3 (1, n)
+    , bench "pipcotailfused2" $ nf pipeline3 (1, n)
+    , bench "pipcotailfused3" $ nf pipeline3 (1, n)
+    , bench "pipcotailfused4" $ nf pipeline3 (1, n)
+    , bench "pipcotailfused5" $ nf pipeline3 (1, n)
+    , bench "pipcostreamfused1" $ nf pipeline9 (1, n)
+    , bench "pipcostreamfused2" $ nf pipeline9 (1, n)
+    , bench "pipcostreamfused3" $ nf pipeline9 (1, n)
+    , bench "pipcostreamfused4" $ nf pipeline9 (1, n)
+    , bench "pipcostreamfused5" $ nf pipeline9 (1, n)
+    , bench "pipcostreamtailfused1" $ nf pipeline6 (1, n)
+    , bench "pipcostreamtailfused2" $ nf pipeline6 (1, n)
+    , bench "pipcostreamtailfused3" $ nf pipeline6 (1, n)
+    , bench "pipcostreamtailfused4" $ nf pipeline6 (1, n)
+    , bench "pipcostreamtailfused5" $ nf pipeline6 (1, n)
+    , bench "piplistfused1" $ nf pipeline5 (1, n)
+    , bench "piplistfused2" $ nf pipeline5 (1, n)
+    , bench "piplistfused3" $ nf pipeline5 (1, n)
+    , bench "piplistfused4" $ nf pipeline5 (1, n)
+    , bench "piplistfused5" $ nf pipeline5 (1, n)
+    , bench "piphandfused1" $ nf pipeline4 (1, n)
+    , bench "piphandfused2" $ nf pipeline4 (1, n)
+    , bench "piphandfused3" $ nf pipeline4 (1, n)
+    , bench "piphandfused4" $ nf pipeline4 (1, n)
+    , bench "piphandfused5" $ nf pipeline4 (1, n)
     ]
 main :: IO ()
 main = defaultMain
   [
-    -- bgroup "Filter pipeline 100" (makegroup 100),
-    -- bgroup "Filter pipeline 1000" (makegroup 1000),
-    -- bgroup "Filter pipeline 10000" (makegroup 10000),
-    bgroup "Filter pipeline 100000" (makegroup 100000)
-    -- bgroup "Filter pipeline 1000000" (makegroup 1000000)
+    bgroup "Filter pipeline 100" (makegroup 100),
+    bgroup "Filter pipeline 1000" (makegroup 1000),
+    bgroup "Filter pipeline 10000" (makegroup 10000),
+    bgroup "Filter pipeline 100000" (makegroup 100000),
+    bgroup "Filter pipeline 1000000" (makegroup 1000000),
+    bgroup "Filter pipeline 10000000" (makegroup 10000000)
     -- ,
     -- bgroup "Sum-append pipeline"
     -- [
