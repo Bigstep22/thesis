@@ -12,6 +12,8 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{agda}
+\usepackage{subcaption}
+\usepackage{enumitem}
 \usepackage[colorlinks=true,allcolors=blue]{hyperref}
 %include lhs2TeX.fmt
 
