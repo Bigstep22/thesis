@@ -3,7 +3,7 @@
 \subsection{Library Writer's Guide to Shortcut Fusion}
 Now that the sufficient category theory has been explained, it is possible to describe \cite{Harper2011}'s paper, which my thesis centers on called ``A Library Writer's Guide to Shortcut Fusion''.
 
-In the work, \cite{Harper2011} explain the concept of Church and CoChurch encodings in four steps:
+In the work, \cite{Harper2011} explain the concept of Church and Cochurch encodings in four steps:
 The necessary underlying category theory, the concepts of encodings and the proof obligations necessary for ensuring correctness of the encodings, the concepts of (Co)Church encodings with the proof of correctness, and finally an example implementation for leaf trees.
 I will now go through each step briefly.
 
@@ -27,10 +27,11 @@ They do exist in my formalization.
 The purpose of the encodings is to encode recursive functions, which are not inlined by Haskell's optimizer, into ones that are capable of being inlined and therefore fused:
 ``For example, assume that we want to convert values of the recursive datatype \tt{$\mu$F} to values of a type \tt{F}.  The idea is that \tt{C} can faithfully represent values of \tt{$\mu$F}, but composed functions over \tt{C} can be fused automatically'' \citep{Harper2011}.
 
-Now, instead of writing functions over \tt{$\mu$F}, we write functions over \tt{C}, along with two conversion functions \tt{con: $\mu$F $\to$ C} (converst) and \tt{abs : C $\to$ $\mu$F} (abstract).
+Now, instead of writing functions over \tt{$\mu$F}, we write functions over \tt{C}, along with two conversion functions \tt{con: $\mu$F $\to$ C} (concrete) and \tt{abs : C $\to$ $\mu$F} (abstract).
 In order for the datatype \tt{C} to faithfully represent \tt{$\mu$F}, we need $abs \circ con = id_{\mu F}$. I.e. that \tt{C} can represent all values of \tt{$\mu$F} uniquely.
 
 In total there are four main proof obligations, the one mentioned above, as well as the commutation of the following three diagrams:
+
 \begin{figure}[H]\hfill
 \begin{tikzcd}
     \mu F  \arrow[d,"f",swap] & C \arrow[l,"abs"] \arrow[d, "f_C"] \\
@@ -45,7 +46,9 @@ In total there are four main proof obligations, the one mentioned above, as well
     T
 \end{tikzcd}\hfill\null
 \end{figure}
-Where, in the second diagram, \tt{p} is a producer function, generating a recursive data structure from a seed of type \tt{S}, and, in the third diagram, \tt{c} is a consumer function, consuming a recursive data structure to produce a value of type \tt{T}.
+
+In the second diagram, \tt{p} is a producer function, generating a recursive data structure from a seed of type \tt{S}.
+In the third diagram, \tt{c} is a consumer function, consuming a recursive data structure to produce a value of type \tt{T}.
 
 \subsubsection{(Co)Church Encodings}
 Next, \cite{Harper2011} proposes two encodings, \tt{Church} and \tt{CoChurch}.

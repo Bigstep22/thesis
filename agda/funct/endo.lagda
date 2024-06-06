@@ -11,9 +11,9 @@ open import Relation.Binary.PropositionalEquality
 open ≡-Reasoning
 open import agda.funct.funext using (funext)
 open import Function
+module agda.funct.endo where
 \end{code}
 \begin{code}
-module agda.funct.endo where
 F[_] : (F : Container 0ℓ 0ℓ) → Endofunctor (Sets 0ℓ)
 F[ F ] = record { F₀ = ⟦ F ⟧ ; F₁ = map
                 ; identity = refl ; homomorphism = refl
