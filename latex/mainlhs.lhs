@@ -1,8 +1,9 @@
-\documentclass{article}
+\documentclass[titlepage]{article}
 \usepackage[T1]{fontenc}
 \usepackage[a4paper,margin=25mm,
 % left=35mm,right=35mm
 ]{geometry}
+\usepackage[nottoc,numbib]{tocbibind}
 \usepackage{svg}
 \usepackage{apacite}
 \usepackage{natbib}
@@ -14,6 +15,8 @@
 \usepackage{agda}
 \usepackage{subcaption}
 \usepackage{enumitem}
+\usepackage{epstopdf}
+\usepackage{changepage}
 \usepackage[colorlinks=true,allcolors=blue]{hyperref}
 %include lhs2TeX.fmt
 
@@ -34,13 +37,16 @@
 }
 
 
-\title{Master's Thesis}
-\author{Eben Rogers}
 
 \begin{document}
 
-\maketitle
-\tableofcontents
+\input{sections/04_titlepage}
+\input{sections/06_abstract}
+\begingroup
+  \hypersetup{hidelinks}
+  \tableofcontents
+\endgroup
+\pagebreak
 
 
 %include sections/10_introduction.lhs.tex
