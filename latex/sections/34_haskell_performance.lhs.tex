@@ -4,59 +4,122 @@ I defined 11 Different functions which can be categorized into the following fiv
 \item Unfused
 \item Hand fused
 \item GHC List fused
-\item Church fused (normally, with tail recursion, with skip constructor, and both)
+\item Church fused (normally, with tail recursion\footnote{\href{https://gitlab.haskell.org/ghc/ghc/-/wikis/one-shot}{oneShot} needed to be used in order to get this to work.}, with skip constructor, and both)
 \item Cochurch fused (normally, with tail recursion, with skip constructor, and both)
 \end{itemize}
 
 There are many things to take into consideration when implementing functions in haskell that are fusible:
 \begin{itemize}[noitemsep]
-    \item Make sure you only pass through parameters that change between recursive calls
-    \item Ensure that functions are inlined properly
-    \item Ensure that the fused result is tail recursive
-    \item Ensure that the fused result is a single recursive function (so no helper functions such as \tt{go})
+    \item Make sure you only pass through parameters that change between recursive calls. Instead of writing:
+    \begin{spec}
+b a (x, y) = loop x y
+  where loop x y = if x > y
+                   then a Nil_
+                   else a (Cons_ x (loop (x+1) y))
+    \end{spec}
+    Where the \tt{y} doesn't change between calls of \tt{loop}, modify \tt{loop} such that it doesn't pass through the \tt{y}:
+    \begin{spec}
+b a (x, y) = loop x
+  where loop x = if x > y
+                 then a Nil_
+                 else a (Cons_ x (loop (x+1)))
+    \end{spec}
+    This way, less data needs to be pushed around for each (recursive) function call.
+    \item Ensure that functions are inlined properly. So for the second example above add a pragma that inlines the function.
+    This maximises the time that haskell can apply other optimizations between the bodies of multiple fusing functions:
+    \begin{spec}
+        {-# INLINE betweenCh #-}
+    \end{spec}
+    \item Ensure that the fused result is tail recursive.
+    For consumer functions, it is often possible to make the function tail recursive.
+    For corecursion principle for sum \tt{su}:
+    \begin{spec}
+su :: (s -> List_ Int s) -> s -> Int
+su h s = loop s
+  where loop s' = case h s' of
+          Nil_ -> 0
+                          Cons_ x xs -> x + loop xs
+    \end{spec}
+    It is possible to modify the definition of the corecursion \tt{loop} such that it is tail-recursive:
+    \begin{spec}
+su :: (s -> List_ Int s) -> s -> Int
+su h s = loopt s 0
+  where loopt s' sum = case h s' of
+          Nil_ -> sum
+                          Cons_ x xs -> loopt xs (x + sum)
+    \end{spec}
+    For Church encodings, it is a little bit more tricky to get the resultant function to be tail-recursive, it is possible however. Taking the algebra for sum again:
+    \begin{spec}
+sum2 :: List' Int -> Int
+sum2 = sumCh . toCh
+  where sumCh :: ListCh Int -> Int
+        sumCh (ListCh g) = g su
+        su :: List_ Int Int -> Int
+        su Nil_ = 0
+        su (Cons_ x y) = x + y
+\end{spec}
+    The type of the recursive part of list can be modified to be a function instead of just a simple function (\tt{Int -> Int} instead of \tt{Int}):
+\begin{spec}
+sum7 :: List' Int -> Int
+sum7 = flip sumCh 0 . toCh
+  where sumCh :: ListCh Int -> (Int -> Int)
+        sumCh (ListCh g) = g su
+        su :: List_ Int (Int -> Int) -> (Int -> Int)
+        su Nil_ s = s
+        su (Cons_ x y) s = y (s + x)
+    \end{spec}
+    This is technique similar to the one described by \cite{Breitner2018}.
+    \item Ensure that the fused result is a single recursive function (so no helper functions such as \tt{go}).
+
+    % Cue story about haskell's optimizer and that it is only willing to inline non-recursive functions. You only can recurse once... (Maybe something, something joing points?)
+    % Adding a Skip constructor can make a big difference to enabling the avoidance of additionally needed recursive functions.
 \end{itemize}
 
-For the testing, it was ensured, that the first two of the above points were always taken into consideration, partially through analysis of the GHC\footnote{\url{https://downloads.haskell.org/ghc/latest/docs/users_guide/debugging.html\#core-representation-and-simplification}} generated Core representation.
+For the testing I ensured that the first two of the above points were satisfied, partially through analysis of the GHC\footnote{\url{https://downloads.haskell.org/ghc/latest/docs/users_guide/debugging.html\#core-representation-and-simplification}} generated Core representation.
 The latter two points became part of the testing setup.
-The performance tests were evaluated using tastybench\footnote{\url{https://hackage.haskell.org/package/tasty-bench}}
+I measured the performance using tastybench\footnote{\url{https://hackage.haskell.org/package/tasty-bench}}
 
 \subsubsection{Performance differences}
 There are two main results figures, which can be seen at \autoref{fig:results1} and \autoref{fig:results2}.
 However, their y axes are logarithamic, due to the nature of the input sizes provided from \tt{(1,100)} to \tt{(1,10000000)} in powers of 10.
 It is more illustrative to look a linear scale, and that is easiest when zooming in on one specific input.
-For the illustration, I will choose \tt{(1,10000)} as input, as it is relatively representative. There specific are variations when changing scale, but those will be discussed in \autoref{sec:scale_var}.
+For the illustration, I will choose \tt{(1,10000)} as input, as it is relatively representative.
+There are specific variations when changing scale, but those will be discussed in \autoref{sec:scale_var}.
 
 In \autoref{fig:res_1000} you can see how implementing fusion can bring quite a large speedup to a function pipeline.
 With the following things of note:
 \begin{itemize}[noitemsep]
     \item Tail recursive church, stream church, and stream cochurch implementations were the fastest, and as fast as each other. A speedup of 25x over the unfused pipeline for this input.
-    \item Stream fusion does not offer a speedup for Church encodings
+    \item Stream fusion does not offer a speedup for Church encodings.
     \item Adding tail recursion speeds up the encoding in all cases, except:
-    \item Church-encoded non-stream pipelines are not faster, this is due to a recursive natural transformation for filter.
+    \item Church-encoded non-stream pipelines are not faster, this is due to a recursive natural transformation for filter (the function \tt{go}).
 \end{itemize}
 
-\begin{figure}[h] % TODO: Fix this figure
+\begin{figure}[h]
     \includesvg[width=\textwidth]{figures/Execution time for input (1, 10000).svg}
-    \caption{Temp1}
+    \caption{Comparison of execution times between the different pipelines.}
     \label{fig:res_1000}
 \end{figure}
 
 \subsubsection{Scale Variations}\label{sec:scale_var}
-As the scale increases (see \autoref{fig:all_exec} and \autoref{fig:all_exec_log} for all graphs):
+In general, as the scale increases (see \autoref{fig:all_exec} and \autoref{fig:all_exec_log} for all graphs):
 \begin{itemize}[noitemsep]
     \item The factor speedup between the unfused and three fully fused pipelines increases, most notably between \tt{(1, 10000)} and \tt{(1,100000)}, going from 25.4x to 31.5x.
-    This might have to do with the generated datastructures not fitting in cache anymore and needing to be pushed to ram.
-    \item All the non tail-recursive encoding implementations get slower. This is likely due to extra time spend allocating to and retrieving from memory.
-    \item Most importantly for all fully fused pipelines: The speedup that fusion offers only seems to increase as the size of the calculation grows.
+    This likely has to do with the increased volume of data that needs to be stored in random access memory.
+    \item All the non tail-recursive encoding implementations get slower relative to the tail-recursive implementations.
+    This is likely due to extra time spend allocating to and retrieving from memory.
+    \item Most importantly for all fully fused pipelines: The speedup that fusion offers only seems to increase as the order of magnitude of the calculation grows.
 \end{itemize}
 
-\begin{figure}[h]
-    \includesvg[width=\textwidth]{figures/Execution time for all pipelines.svg}
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.7\textwidth]{figures/Execution time for all pipelines.svg}
     \caption{Temp1}
     \label{fig:results1}
 \end{figure}
-\begin{figure}[h]
-    \includesvg[width=\textwidth]{figures/Execution time for all pipelines - stacked.svg}
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.7\textwidth]{figures/Execution time for all pipelines - stacked.svg}
     \caption{Temp1}
     \label{fig:results2}
 \end{figure}
