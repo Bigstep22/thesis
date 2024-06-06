@@ -65,10 +65,10 @@ The two previous proofs, constituting a proof of existence and uniqueness, are c
 \begin{code}
 initial-in : {F : Container 0ℓ 0ℓ} → IsInitial C[ F ]Alg (to-Algebra in')
 initial-in = record { ! = λ {A} →
-                                record {
-                                       f = ⦅ α A ⦆
-                                       ; commutes = λ {x} → cong-app (univ-to {_}{_}{α A} refl) x  }
-                    ; !-unique = λ {A} fhom {x} → sym $ univ-from (α A) (f fhom) (funext (λ y → commutes fhom {y})) x }
+                 record { f = ⦅ α A ⦆
+                   ; commutes = λ {x} → cong-app (univ-to {_}{_}{α A} refl) x  }
+               ; !-unique = λ {A} fhom {x} → sym $
+                   univ-from (α A) (f fhom) (funext (λ y → commutes fhom {y})) x }
 \end{code}
 The \textit{computation law} \citep{Harper2011}:
 \begin{code}

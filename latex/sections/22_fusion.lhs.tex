@@ -1,14 +1,16 @@
 \subsection{Foldr/build fusion (on lists)}\label{sec:foldr/build}
-Starting with the basics of fusion. In \cite{Gill1993}'s paper the original 'schortcut deforestation' technique was described. The core idea is described here as follows:
+Starting with the basics of fusion.
+\cite{Gill1993}'s described the original 'shortcut deforestation' technique.
+The core idea is as follows:
 
-In functional programming lists are (often) used to store the output of one function such that it can then be consumed by another function. To co-opt \cite{Gill1993}'s example:
+In functional programming, lists are (often) used to store the output of one function such that it can then be consumed by another function. To co-opt \cite{Gill1993}'s example:
 \begin{code}
     all p xs = and (map p xs)
 \end{code}
 
-\tt{map p xs} applies \tt{p} to all of the elements, producing a boolean list, and \tt{and} takes that new list and ``ands'' all of them together to produce a resulting boolean value. ``The intermediate list is discarded, and eventually recovered by the garbage collector'' \citep{Gill1993}.
+\tt{map p xs} applies \tt{p} to all the elements, producing a boolean list, and \tt{and} takes that new list and `ands' all of them together to produce a resulting boolean value. ``The intermediate list is discarded, and eventually recovered by the garbage collector'' \citep{Gill1993}.
 
-This generation and immediate consumption of an intermediate datastructure introduces a lot of computation overhead. Allocating resources for each cons datatype instance, storing the data inside of that instance, and then reading back that data, all take time. One could instead write the above function like this:
+This generation and immediate consumption of an intermediate datastructure introduces a lot of computation overhead. Allocating memory for each \tt{cons} cell, storing the data inside that instance, and then reading back that data, all take time. One could instead write the above function like this:
 \begin{code}
     all' p xs = h xs
        where h []     = True
@@ -30,7 +32,7 @@ Such that:
 \begin{code}
     g : forall beta : (A -> beta -> beta) -> beta -> beta
 \end{code}
-Which can be proved to be true through the use of g's free theorem \`a la \cite{Wadler1989}. For more information on free theorems see \autoref{sec:free}
+Which can be proved to be true through the use of g's free theorem \`a la \cite{Wadler1989}. For more information on free theorems see \autoref{sec:free}.
 
 \subsubsection{An example}
 Take the function from, that takes two numbers and produces a list of all the numbers from the first to the second:
@@ -55,12 +57,13 @@ With some inlining and $\beta$ reduction, one can see that this definition is id
       = foldr (+) 0 (build (from' a b))
       = from' a b (+) 0
 \end{code}
-Notice how we can apply the \tt{foldr/build} rule here to prevent an intermediate list being produced. Any adjacent \tt{foldr/build} pair ``cancel away''.
+Notice how we can apply the \tt{foldr/build} rule here to prevent the generation of an intermediate list.
+Any adjacent \tt{foldr/build} pair ``cancel away''.
 This is an example of shortcut fusion.
 
 One can rewrite many functions in terms of \tt{foldr} and \tt{build} such that this fusion can be applied. This can be seen in Figure \ref{fig:foldr/build_ex}.
-See \cite{Gill1993}'s work, specifically the end of section 3.3 (\tt{unlines}) for a more expansive example of how fusion, $\beta$ reduction, and inlining can combine to fuse a pipeline of functions down an as efficcient minimum as can be expected.
-\begin{figure}[h]
+See \cite{Gill1993}'s work, specifically the end of section 3.3 (\tt{unlines}) for a more expansive example of how fusion, $\beta$ reduction, and inlining can combine to fuse a pipeline of functions down an as efficient minimum as can be expected.
+\begin{figure}[ht]
     \centering
     \begin{code}
     map f xs    = build (\ c n -> foldr (\ a b -> c (f a) b) n xs)
@@ -82,10 +85,10 @@ See \cite{Gill1993}'s work, specifically the end of section 3.3 (\tt{unlines}) f
 
 
 
-\subsubsection{Generalization to recursive datastructues}
+\subsubsection{Generalization to recursive datastructures}
 This foldr/build fusion works for lists, but it has several limitations.
 One is that it only works on lists, this is alleviated using Church encodings and is described by \cite{Harper2011}.
-Secondly, the functions that we are writing need to be expressible in terms of compositions of foldrs and builds. What if we want to implement to converse approach?
+Secondly, the functions that we are writing need to be expressible in terms of compositions of foldr's and builds. What if we want to implement to converse approach?
 This exists and is destroy/unfoldr fusion and is described by \cite{Coutts2007}.
 This work generalized by Cochurch encodings, also described by \cite{Harper2011}.
 

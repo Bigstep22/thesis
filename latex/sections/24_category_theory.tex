@@ -47,7 +47,7 @@ These pieces of data should satisfy these two properties:
     \item (\textbf{Composition law}) for any two morphisms $f\in\homm{C}{X,Y},g\in\homm{C}{Y,Z}$: \begin{align*} F(g\circ f) = F g \circ F f \end{align*}
     \item (\textbf{Identity law}) For any $X\in\mathcal{C}_0$, we have: \begin{align*} F(\tt{Id}_X) = \tt{Id}_{F(X)} \end{align*}
 \end{enumerate}
-An \textbf{endofunctor} is a functor that maps objects back to the category itself, i.e. $F:\mathcal{C}\to\mathcal{C}$
+An \textbf{endofunctor} is a functor that maps objects back to the category itself i.e., $F:\mathcal{C}\to\mathcal{C}$
 
 \subsubsection{(Category of) F-(Co)Algebras}
 Given an endofunctor $F:\mathcal{C}\to\mathcal{C}$:
@@ -58,7 +58,7 @@ An \textbf{F-Algebra} consists of two pieces of data:
     \item A morphism $\phi\in\homm{C}{F(C),C}$
 \end{enumerate}
 
-An \textbf{F-Algebra Homomorphism} is, given two F-Algebras $(C,\phi),(D,\psi)$, a morphism $f\in\homm{C}{C,D}$, such that the following diagram commutes (i.e. $f\circ\phi=\psi\circ Ff$):
+An \textbf{F-Algebra Homomorphism} is, given by two F-Algebras $(C,\phi),(D,\psi)$, and a morphism\\ $f\in\homm{C}{C,D}$, such that the following diagram commutes (i.e. $f\circ\phi=\psi\circ Ff$):
 \begin{figure}[H]\vspace{-1em}\hfill
 \begin{tikzcd}
     FC \arrow[r,"\phi"] \arrow[d,"F f",swap] & C \arrow[d, "f"] \\

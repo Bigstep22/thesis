@@ -8,7 +8,8 @@ open import Agda.Builtin.Sigma public
 open import Level using (0ℓ; Level) renaming (suc to lsuc) public
 open import Data.Container using (Container; ⟦_⟧; map; _▷_) public
 open import Function using (_∘_; _$_; id; const) public
-open import Relation.Binary.PropositionalEquality as Eq using (_≡_; refl; sym; cong; cong-app; subst) public
+open import Relation.Binary.PropositionalEquality as Eq using
+  (_≡_; refl; sym; cong; cong-app; subst) public
 open Eq.≡-Reasoning public
 \end{code}
 \begin{code}[hide]
@@ -75,14 +76,16 @@ univ-from h {c} eq x = let (op , ar) = c x in
 The two previous proofs, constituting a proof of existence and uniqueness, are combined to show that \tt{($\nu$ F, out)} is terminal:
 \begin{code}
 terminal-out : {F : Container 0ℓ 0ℓ} → IsTerminal C[ F ]CoAlg (to-Coalgebra out)
-terminal-out = record { ! = λ {A} → record {
-                                    f = A⟦ α A ⟧
-                                    ; commutes = λ {x} → cong-app (univ-to A⟦ α A ⟧ {α A} refl) x }
-                      ; !-unique = λ {A} fhom {x} → sym (univ-from (f fhom) {α A} (funext (λ y → commutes fhom {y})) x) }
+terminal-out = record { ! = λ {A} →
+                   record { f = A⟦ α A ⟧
+                     ; commutes = λ {x} → cong-app (univ-to A⟦ α A ⟧ {α A} refl) x }
+                 ; !-unique = λ {A} fhom {x} → sym $
+                     univ-from (f fhom) {α A} (funext (λ y → commutes fhom {y})) x }
 \end{code}
 The \textit{computation law} \cite{Harper2011}:
 \begin{code}
-computation-law : {F : Container 0ℓ 0ℓ}{C : Set}(c : C → ⟦ F ⟧ C) → out ∘ A⟦ c ⟧ ≡ map A⟦ c ⟧ ∘ c
+computation-law : {F : Container 0ℓ 0ℓ}{C : Set}(c : C → ⟦ F ⟧ C) →
+                  out ∘ A⟦ c ⟧ ≡ map A⟦ c ⟧ ∘ c
 computation-law c = refl
 \end{code}
 The \textit{reflection law} \cite{Harper2011}:

@@ -1,4 +1,4 @@
-\subsubsection{Example: List fusion}
+\subsubsection{Example: List fusion}\label{sec:agda_church_list}
 In order to clearly see how the Church encodings allows functions to fuse, a datatype was selected such
 the abstracted function, which have so far been used to prove the needed properties, can be instantiated
 to demonstrate how the fusion works for functions across a cocrete datatype.
@@ -96,6 +96,9 @@ checkmap = refl
 \subparagraph{sum}
 The algebra \tt{s}, which when used in an algebra, represents the sum function:
 \begin{code}
+s' : List' ℕ (ℕ → ℕ) → (ℕ → ℕ)
+s' (nil , fn) s = s
+s' (cons n , fn) s = fn zero (n + s)
 s : List' ℕ ℕ → ℕ
 s (nil , _) = 0
 s (cons n , f) = n + f zero
@@ -108,9 +111,9 @@ sum1 : List ℕ → ℕ
 sum1 = ⦅ s ⦆
 sum2 : List ℕ → ℕ
 sum2 = consu s
-eqsum : sum1 ≡ sum2
-eqsum = refl
-checksum : sum1 (5 :: 6 :: 7 :: []) ≡ 18
+sum2' : List ℕ → ℕ
+sum2' l = consu s' l 0
+checksum : sum2 (5 :: 6 :: 7 :: []) ≡ 18
 checksum = refl
 \end{code}
 \subparagraph{equality}
@@ -120,13 +123,14 @@ the church-encoded pipeline:
 eq : {f : ℕ → ℕ} → sum1 ∘ map1 f ∘ between1 ≡ sum2 ∘ map2 f ∘ between2
 eq {f} = begin
     ⦅ s ⦆ ∘ ⦅ in' ∘ m f ⦆ ∘ b in'
-  ≡⟨ cong (λ g → ⦅ s ⦆ ∘ ⦅ in' ∘ m f ⦆ ∘ g) (prod-pres b) ⟩ -- reflexive
+  ≡⟨ cong (λ g → ⦅ s ⦆ ∘ ⦅ in' ∘ m f ⦆ ∘ g) (prod-pres b) ⟩ -- refl
     ⦅ s ⦆ ∘ ⦅ in' ∘ m f ⦆ ∘ fromCh ∘ prodCh b
   ≡⟨ cong (λ f → ⦅ s ⦆ ∘ f ∘ prodCh b) (sym $ trans-pres (m f)) ⟩
     ⦅ s ⦆ ∘ fromCh ∘ natTransCh (m f) ∘ prodCh b
-  ≡⟨ cong (λ g → g ∘ fromCh ∘ natTransCh (m f) ∘ prodCh b) (cons-pres s) ⟩ -- reflexive
+  ≡⟨ cong (λ g → g ∘ fromCh ∘ natTransCh (m f) ∘ prodCh b) (cons-pres s) ⟩ -- refl
     consCh s ∘ toCh ∘ fromCh ∘ natTransCh (m f) ∘ prodCh b
-  ≡⟨ cong (λ g → consCh s ∘ toCh ∘ fromCh ∘ natTransCh (m f) ∘ g ∘ prodCh b) (sym to-from-id) ⟩
+  ≡⟨ cong (λ g → consCh s ∘ toCh ∘ fromCh ∘ natTransCh (m f) ∘ g ∘ prodCh b)
+          (sym to-from-id) ⟩
     consCh s ∘ toCh ∘ fromCh ∘ natTransCh (m f) ∘ toCh ∘ fromCh ∘ prodCh b
   ≡⟨⟩
     consu s ∘ natTrans (m f) ∘ prod b
@@ -150,8 +154,8 @@ odd = not ∘ even
 countworks : count even (5 :: 6 :: 7 :: 8 :: []) ≡ 2
 countworks = refl
 
--- Investigation related to filter, the following lines are tangentially related to list
-build : {F : Container _ _}{X : Set} → ({Y : Set} → (⟦ F ⟧ Y → Y) → X → Y) → (x : X) → μ F
+build : {F : Container _ _}{X : Set} → ({Y : Set} →
+        (⟦ F ⟧ Y → Y) → X → Y) → (x : X) → μ F
 build g = fromCh ∘ prodCh g
 foldr' : {F : Container _ _}{X : Set} → (⟦ F ⟧ X → X) → μ F → X
 foldr' c = consCh c ∘ toCh

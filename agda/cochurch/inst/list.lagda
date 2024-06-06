@@ -1,4 +1,4 @@
-\subsubsection{Example: List fusion}
+\paragraph{Example: List fusion}
 In order to clearly see how the Cochurch encodings allows functions to fuse, a datatype was selected such
 the abstracted function, which have so far been used to prove the needed properties, can be instantiated
 to demonstrate how the fusion works for functions across a cocrete datatype.
@@ -135,14 +135,16 @@ Because of this the first and second proof step for \tt{eq} in the church-encode
 eq : {f : ℕ → ℕ} → sum1 ∘ map1 f ∘ between1 ≡ sum2 ∘ map2 f ∘ between2
 eq {f} = begin
     s out ∘ A⟦ m f ∘ out ⟧ ∘ A⟦ b ⟧
-  ≡⟨ cong (λ g → s out ∘ A⟦ m f ∘ out ⟧ ∘ g) (prod-pres b) ⟩
+  ≡⟨ cong (λ g → s out ∘ A⟦ m f ∘ out ⟧ ∘ g) (prod-pres b) ⟩ -- refl
     s out ∘ A⟦ m f ∘ out ⟧ ∘ fromCoCh ∘ prodCoCh b
-  ≡⟨ cong (λ g → s out ∘ g ∘ prodCoCh b) (sym (trans-pres b (m f) λ _ → funext (λ {(nil , l) → refl; (cons n , l) → refl} ))) ⟩
+  ≡⟨ cong (λ g → s out ∘ g ∘ prodCoCh b) (sym (trans-pres b (m f)
+      (λ _ → funext (λ {(nil , l) → refl; (cons n , l) → refl})))) ⟩
     s out ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b
-  ≡⟨ cong (λ g → g ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b) (cons-pres s) ⟩
+  ≡⟨ cong (λ g → g ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b) (cons-pres s) ⟩ -- refl
     consCoCh s ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b
-  ≡⟨ cong (λ g → consCoCh s ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ g ∘ prodCoCh b) (sym to-from-id) ⟩
-    consCoCh s ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ toCoCh ∘ fromCoCh ∘ prodCoCh b
+  ≡⟨ cong (λ g → consCoCh s ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ g ∘ prodCoCh b)
+          (sym to-from-id) ⟩
+  consCoCh s ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ toCoCh ∘ fromCoCh ∘ prodCoCh b
   ≡⟨⟩
     consu s ∘ natTrans (m f) ∘ prod b
   ∎

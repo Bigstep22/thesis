@@ -29,10 +29,12 @@ fromCoCh (CoCh h x) = A⟦ h ⟧ x
 The generalized encoded producing, transformation, and consuming functions, alongside the proof that they are equal to the functions they are encoding.
 First, the producing function, note that this is a generalized version of \cite{Svenningsson2002}'s \tt{unfoldr} function:
 \begin{code}
-prodCoCh : {F : Container 0ℓ 0ℓ}{Y : Set} → (g : Y → ⟦ F ⟧ Y) → Y → CoChurch F
+prodCoCh : {F : Container 0ℓ 0ℓ}{Y : Set} → (g : Y → ⟦ F ⟧ Y) →
+           Y → CoChurch F
 prodCoCh g x = CoCh g x
 
-prod : {F : Container 0ℓ 0ℓ}{Y : Set} → (g : Y → ⟦ F ⟧ Y) → Y → ν F
+prod : {F : Container 0ℓ 0ℓ}{Y : Set} → (g : Y → ⟦ F ⟧ Y) →
+       Y → ν F
 prod g = fromCoCh ∘ prodCoCh g
 
 eqprod : {F : Container 0ℓ 0ℓ}{Y : Set}{g : (Y → ⟦ F ⟧ Y)} →
@@ -41,10 +43,12 @@ eqprod = refl
 \end{code}
 Second the transformation function:
 \begin{code}
-natTransCoCh : {F G : Container 0ℓ 0ℓ}(nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) → CoChurch F → CoChurch G
+natTransCoCh : {F G : Container 0ℓ 0ℓ}(nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
+               CoChurch F → CoChurch G
 natTransCoCh n (CoCh h s) = CoCh (n ∘ h) s
 
-natTrans : {F G : Container 0ℓ 0ℓ}(nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) → ν F → ν G
+natTrans : {F G : Container 0ℓ 0ℓ}(nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
+           ν F → ν G
 natTrans nat = fromCoCh ∘ natTransCoCh nat ∘ toCoCh
 
 eqNatTrans : {F G : Container 0ℓ 0ℓ}{nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X} →
@@ -53,10 +57,12 @@ eqNatTrans = refl
 \end{code}
 Third the consuming function, note that this a is a generalized version of \cite{Svenningsson2002}'s \tt{destroy} function:
 \begin{code}
-consCoCh : {F : Container 0ℓ 0ℓ}{Y : Set} → (c : {S : Set} → (S → ⟦ F ⟧ S) → S → Y) → CoChurch F → Y
+consCoCh : {F : Container 0ℓ 0ℓ}{Y : Set} → (c : {S : Set} → (S → ⟦ F ⟧ S) → S → Y) →
+           CoChurch F → Y
 consCoCh c (CoCh h s) = c h s
 
-cons : {F : Container 0ℓ 0ℓ}{Y : Set} → (c : {S : Set} → (S → ⟦ F ⟧ S) → S → Y) → ν F → Y
+cons : {F : Container 0ℓ 0ℓ}{Y : Set} → (c : {S : Set} → (S → ⟦ F ⟧ S) → S → Y) →
+       ν F → Y
 cons c = consCoCh c ∘ toCoCh
 
 eqcons : {F : Container 0ℓ 0ℓ}{X : Set}{c : {S : Set} → (S → ⟦ F ⟧ S) → S → X} →

@@ -36,7 +36,6 @@ postulate free : {F : Container 0ℓ 0ℓ}
                  {C D : Set}{Y : Set₁}{c : C → ⟦ F ⟧ C}{d : D → ⟦ F ⟧ D}
                  (h : C → D)(f : {X : Set} → (X → ⟦ F ⟧ X) → X → Y) →
                  map h ∘ c ≡ d ∘ h → f c ≡ f d ∘ h
-                 -- TODO: Do D and Y need to be the same thing? This may be a cop-out...
 unfold-invariance : {F : Container 0ℓ 0ℓ}{Y : Set}
                     (c : Y → ⟦ F ⟧ Y) →
                     CoCh c ≡ CoCh out ∘ A⟦ c ⟧
@@ -87,7 +86,8 @@ The proof leverages the categorical fusion property and the naturality of \tt{f}
 \begin{code}
 -- PAGE 52 - Proof 5
 valid-hom : {F G : Container 0ℓ 0ℓ}{X : Set}(h : X → ⟦ F ⟧ X)
-            (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)(nat : ∀ {X : Set}(g : X → ν F) → map g ∘ f ≡ f ∘ map g) →
+            (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)(nat : ∀ {X : Set}
+            (g : X → ν F) → map g ∘ f ≡ f ∘ map g) →
             map A⟦ h ⟧ ∘ f ∘ h ≡ f ∘ out ∘ A⟦ h ⟧
 valid-hom h f nat = begin
     (map A⟦ h ⟧ ∘ f) ∘ h
@@ -97,8 +97,9 @@ valid-hom h f nat = begin
     f ∘ out ∘ A⟦ h ⟧
   ∎
 
-trans-pres : {F G : Container 0ℓ 0ℓ}{X : Set}(h : X → ⟦ F ⟧ X) (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)
-             (nat : {X : Set}(g : X → ν F) → map g ∘ f ≡ f ∘ map g) →
+trans-pres : {F G : Container 0ℓ 0ℓ}{X : Set}(h : X → ⟦ F ⟧ X)
+             (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)(nat : {X : Set}
+             (g : X → ν F) → map g ∘ f ≡ f ∘ map g) →
              fromCoCh ∘ natTransCoCh f ≡ A⟦ f ∘ out ⟧ ∘ fromCoCh
 trans-pres h f nat = funext λ where
   (CoCh h x) → begin
@@ -107,9 +108,9 @@ trans-pres h f nat = funext λ where
       fromCoCh (CoCh (f ∘ h) x)
     ≡⟨⟩ -- Definition of fromCh
       A⟦ f ∘ h ⟧ x
-    ≡⟨ cong-app (fusion A⟦ h ⟧ (sym (valid-hom h f nat))) x ⟩ -- Can I remove the fusion prop?
+    ≡⟨ cong-app (fusion A⟦ h ⟧ (sym (valid-hom h f nat))) x ⟩
       A⟦ f ∘ out ⟧ (A⟦ h ⟧ x)
-    ≡⟨⟩ -- This step is missing from the paper, but mirrors the step taken on the Church-side.
+    ≡⟨⟩ -- This step is not in the paper, but mirrors the one on the Church-side.
       A⟦ f ∘ out ⟧ (fromCoCh (CoCh h x))
     ∎
 \end{code}
@@ -121,7 +122,8 @@ to one single natural transformation:
 natfuse : {F G H : Container 0ℓ 0ℓ}
           (nat1 : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
           (nat2 : {X : Set} → ⟦ G ⟧ X → ⟦ H ⟧ X) →
-          natTransCoCh nat2 ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat1 ≡ natTransCoCh (nat2 ∘ nat1)
+          natTransCoCh nat2 ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat1 ≡
+          natTransCoCh (nat2 ∘ nat1)
 natfuse nat1 nat2 = begin
             natTransCoCh nat2 ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat1
           ≡⟨ cong (λ f → natTransCoCh nat2 ∘ f ∘ natTransCoCh nat1) to-from-id ⟩
@@ -139,7 +141,8 @@ pipefuse : {F G : Container 0ℓ 0ℓ}{X : Set}(c : X → ⟦ F ⟧ X)
           cons f ∘ natTrans nat ∘ prod c ≡ f (nat ∘ c)
 pipefuse c nat f = begin
     consCoCh f ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat ∘ toCoCh ∘ fromCoCh ∘ prodCoCh c
-  ≡⟨ cong (λ g → consCoCh f ∘ g ∘ natTransCoCh nat ∘ toCoCh ∘ fromCoCh ∘ prodCoCh c) to-from-id ⟩
+  ≡⟨ cong (λ g → consCoCh f ∘ g ∘ natTransCoCh nat ∘ toCoCh ∘ fromCoCh ∘ prodCoCh c)
+          to-from-id ⟩
     consCoCh f ∘ natTransCoCh nat ∘ toCoCh ∘ fromCoCh ∘ prodCoCh c
   ≡⟨ cong (λ g → consCoCh f ∘ natTransCoCh nat ∘ g ∘ prodCoCh c) to-from-id ⟩
     consCoCh f ∘ natTransCoCh nat ∘ prodCoCh c

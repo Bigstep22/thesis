@@ -19,7 +19,8 @@ The categorical fusion property:
 \begin{code}
 fusionprop : {F : Container 0ℓ 0ℓ}{C D ν : Set}
              {ϕ : C → ⟦ F ⟧ C}{ψ : D → ⟦ F ⟧ D}{term : ν → ⟦ F ⟧ ν}
-             (i : IsTerminal C[ F ]CoAlg (to-Coalgebra term))(f : C[ F ]CoAlg [ to-Coalgebra ψ , to-Coalgebra ϕ ]) →
+             (i : IsTerminal C[ F ]CoAlg (to-Coalgebra term))
+             (f : C[ F ]CoAlg [ to-Coalgebra ψ , to-Coalgebra ϕ ]) →
              C[ F ]CoAlg [ i .! ≈ C[ F ]CoAlg [ i .! ∘ f ] ]
 fusionprop {F} i f = i .!-unique (C[ F ]CoAlg [ i .! ∘ f ])
 \end{code}
@@ -28,5 +29,7 @@ The `fusion law':
 fusion : {F : Container 0ℓ 0ℓ}{C D : Set}
          {c : C → ⟦ F ⟧ C}{d : D → ⟦ F ⟧ D}(h : C → D) →
          d ∘ h ≡ map h ∘ c → A⟦ c ⟧ ≡ A⟦ d ⟧ ∘ h
-fusion h comm = funext λ x → fusionprop terminal-out (record {f = h ; commutes = λ {y} → cong-app comm y}) {x}
+fusion h comm = funext λ x → fusionprop terminal-out (
+                  record {f = h ; commutes = λ {y} → cong-app comm y}
+                ) {x}
 \end{code}
