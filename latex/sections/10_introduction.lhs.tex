@@ -12,7 +12,7 @@ Being able to compose functions in this fashion is part of what makes functional
 Each time allocating a list cell, only to subsequently deallocate it once the value has been read.
 We could instead rewrite \tt{all} in the following fashion:
 \begin{code}
-all' p xs = h xs
+all p xs = h xs
   where h []     = True
         h (x:xs) = p x && h xs
 \end{code}
@@ -25,21 +25,22 @@ f = sum . map (+1) . filter odd . between
 \end{code}
 With some (more) effort and optimization, one could arrive at the following solution:
 \begin{code}
-f' :: (Int, Int) -> Int
-f' (x, y) = loop x
+f :: (Int, Int) -> Int
+f (x, y) = loop x
   where loop x | x > y    = 0
                |otherwise = if odd x
                              then (x+1) + loop (x+1)
                              else loop (x+1)
 \end{code}
 Doing this by hand every time, to get from the nice, elegant, compositional style of programming to the higher-performance, single-traversal style, gets old very quick.
-Especially if this needs to be done, by hand, \textbf{every} time you compose any two functions.
+Especially if this needs to be done, by hand, every single time you compose any two functions.
 Is there some way to automate this process?
-\paragraph{Fusion}
-The answer is yes*, but it comes with an asterisk attached, namely: *The functions that we are working with are folds or unfolds.
-The form of optimization that we are looking for is called fusion:
-The process of taking multiple list producing/consuming functions and turning (or fusing) them into just one.
 
+The answer is yes*, but it comes with an asterisk attached, namely: *The functions that we are working with need to be folds or unfolds.
+The form of optimization that we are looking for is called fusion:
+The process of taking multiple list producing/consuming functions and turning (or fusing) them into one that traverses the datastructure just once.
+
+\paragraph{Question}
 Much work already exists, which is discussed in detail in \autoref{sec:related}.
 My thesis focuses on a specific form of fusion called shortcut fusion through the use of (Co)Church encodings as described by \cite{Harper2011} and asks the following two questions:
 \begin{enumerate}
@@ -50,18 +51,19 @@ My thesis focuses on a specific form of fusion called shortcut fusion through th
   \end{itemize}
   \item Are the transformations used to enable fusion safe? Meaning:
   \begin{itemize}
-    \item Do the transformations in Haskell preserve the semantics of the languagage?
-    \item If the mathematics and the encodings are implemented in a dependently typed language, can the transformation be proved to be correct?
+    \item Do the transformations in Haskell preserve the semantics of the language?
+    \item If the mathematics and the encodings are implemented in a dependently typed language, is it possible to prove them to be correct?
   \end{itemize}
 \end{enumerate}
 
+\paragraph{Contributions}
 My thesis centers on formalizing, replicating, and expanding upon \cite{Harper2011}'s work and makes two crucial contributions, answering the two questions above:
 \begin{enumerate}
     \item The Church and Cochurch encodings' implementation in Haskell, as described by \cite{Harper2011} are replicated and investigated further as to their performance characteristics.
-    In this process, a weakness was found in Haskell's optimizer, and further practical insights were gleaned as to how to get these encodings to properly fuse as well (especially for Cochurch encodings) and what optimizations enable shortcut fusion to do its work.
+    In this process, a weakness is found in Haskell's optimizer, and further practical insights are gleaned as to how to get these encodings to properly fuse as well (especially for Cochurch encodings) and what optimizations enable shortcut fusion to do its work.
 
     This is important as \cite{Harper2011} gave a good pragmatic explanation as to how to implement the (Co)Church encodings in Haskell, gave an example implementation, and benchmarked that implementation.
-    He did not dive into too much detail as to \textit{why} they work stating, ``Interestingly, however, we note that Cochurch encodings consistently outperform Church encodings, sometimes by a significant margin. While we do consider these results conclusive, we think that these results merit further investigation.'' \citep{Harper2011}.
+    He did not, however, dive into too much detail as to \textit{why} they work stating: ``Interestingly, however, we note that Cochurch encodings consistently outperform Church encodings, sometimes by a significant margin. While we do consider these results conclusive, we think that these results merit further investigation.'' \citep{Harper2011}.
     This is what my research has (partially) set out to look into.
     This is discussed in detail in \autoref{sec:haskell}.
     \item The Church and Cochurch encodings described are formalized and implemented, including the relevant category theory, in Agda, in as a general fashion as possible, leveraging containers \citep{Abbott2005} to represent strictly positive functors.

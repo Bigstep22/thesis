@@ -28,7 +28,7 @@ The purpose of the encodings is to encode recursive functions, which are not inl
 ``For example, assume that we want to convert values of the recursive datatype \tt{$\mu$F} to values of a type \tt{F}.  The idea is that \tt{C} can faithfully represent values of \tt{$\mu$F}, but composed functions over \tt{C} can be fused automatically'' \citep{Harper2011}.
 
 Now, instead of writing functions over \tt{$\mu$F}, we write functions over \tt{C}, along with two conversion functions \tt{con: $\mu$F $\to$ C} (concrete) and \tt{abs : C $\to$ $\mu$F} (abstract).
-In order for the datatype \tt{C} to faithfully represent \tt{$\mu$F}, we need $abs \circ con = id_{\mu F}$. I.e. that \tt{C} can represent all values of \tt{$\mu$F} uniquely.
+In order for the datatype \tt{C} to faithfully represent \tt{$\mu$F}, we need $abs \circ con = id_{\mu F}$ i.e., that \tt{C} can represent all values of \tt{$\mu$F} uniquely.
 
 In total there are four main proof obligations, the one mentioned above, as well as the commutation of the following three diagrams:
 
@@ -95,7 +95,7 @@ For this he uses Leaf Trees.
 He implements four functions, \tt{between}, \tt{filter}, \tt{concat}, and \tt{sum}, as a normal, recursive function, in Church encoded form, and in Cochurch encoded form.
 
 In doing so, he shows exactly how one goes from using the normal, recursive datatypes and function that are typically used in Haskell, to Church and Cochurch encoded versions.
-To conclude the performance of different compositions of functions are compared to show the performance benefits and differences between the three different variants of functions.
+To conclude he compares the performance of different compositions of functions to show the performance benefits and differences between the three different variants of functions.
 
 \iffalse
 \begin{itemize}

@@ -1,5 +1,9 @@
 \subsection{Performance Comparison}
-I defined 11 Different functions which can be categorized into the following five groups:
+I tested the performance of the following pipelines:
+\begin{spec}
+f = sumCoCh . mapCoCh (+2) . filterCoCh odd . ListCoCh betweenCoCh
+\end{spec}
+I defined 11 different variants of the above functions which can be categorized into the following five groups:
 \begin{itemize}[noitemsep]
 \item Unfused
 \item Hand fused
@@ -8,7 +12,10 @@ I defined 11 Different functions which can be categorized into the following fiv
 \item Cochurch fused (normally, with tail recursion, with skip constructor, and both)
 \end{itemize}
 
-There are many things to take into consideration when implementing functions in haskell that are fusible:
+I'll discuss the results after first describing what goes into writings fusible functions.
+For the implementation of all the functions, see the source code in the artifacts.
+
+In order to make sure a pipeline of functions fuses in Haskell, there are several things that need to be taken into consideration.
 \begin{itemize}[noitemsep]
     \item Make sure you only pass through parameters that change between recursive calls. Instead of writing:
     \begin{spec}
@@ -24,9 +31,9 @@ b a (x, y) = loop x
                  then a Nil_
                  else a (Cons_ x (loop (x+1)))
     \end{spec}
-    This way, less data needs to be pushed around for each (recursive) function call.
+    This way, fewer data need to be pushed around in memory for each (recursive) function call.
     \item Ensure that functions are inlined properly. So for the second example above add a pragma that inlines the function.
-    This maximises the time that haskell can apply other optimizations between the bodies of multiple fusing functions:
+    This maximizes the time that Haskell can apply other optimizations between the bodies of multiple fusing functions:
     \begin{spec}
         {-# INLINE betweenCh #-}
     \end{spec}
@@ -48,7 +55,8 @@ su h s = loopt s 0
           Nil_ -> sum
                           Cons_ x xs -> loopt xs (x + sum)
     \end{spec}
-    For Church encodings, it is a little bit more tricky to get the resultant function to be tail-recursive, it is possible however. Taking the algebra for sum again:
+    For Church encodings, it is a little more tricky to get the resultant function to be tail-recursive, it is possible, however.
+    Taking the algebra for sum again:
     \begin{spec}
 sum2 :: List' Int -> Int
 sum2 = sumCh . toCh
@@ -68,6 +76,7 @@ sum7 = flip sumCh 0 . toCh
         su Nil_ s = s
         su (Cons_ x y) s = y (s + x)
     \end{spec}
+
     This is technique similar to the one described by \cite{Breitner2018}.
     \item Ensure that the fused result is a single recursive function (so no helper functions such as \tt{go}).
 
@@ -77,11 +86,11 @@ sum7 = flip sumCh 0 . toCh
 
 For the testing I ensured that the first two of the above points were satisfied, partially through analysis of the GHC\footnote{\url{https://downloads.haskell.org/ghc/latest/docs/users_guide/debugging.html\#core-representation-and-simplification}} generated Core representation.
 The latter two points became part of the testing setup.
-I measured the performance using tastybench\footnote{\url{https://hackage.haskell.org/package/tasty-bench}}
+I measured the performance using tasty-bench\footnote{\url{https://hackage.haskell.org/package/tasty-bench}}.
 
 \subsubsection{Performance differences}
 There are two main results figures, which can be seen at \autoref{fig:results1} and \autoref{fig:results2}.
-However, their y axes are logarithamic, due to the nature of the input sizes provided from \tt{(1,100)} to \tt{(1,10000000)} in powers of 10.
+However, their y axes are logarithmic, due to the nature of the input sizes provided from \tt{(1,100)} to \tt{(1,10000000)} in powers of 10.
 It is more illustrative to look a linear scale, and that is easiest when zooming in on one specific input.
 For the illustration, I will choose \tt{(1,10000)} as input, as it is relatively representative.
 There are specific variations when changing scale, but those will be discussed in \autoref{sec:scale_var}.
@@ -89,7 +98,7 @@ There are specific variations when changing scale, but those will be discussed i
 In \autoref{fig:res_1000} you can see how implementing fusion can bring quite a large speedup to a function pipeline.
 With the following things of note:
 \begin{itemize}[noitemsep]
-    \item Tail recursive church, stream church, and stream cochurch implementations were the fastest, and as fast as each other. A speedup of 25x over the unfused pipeline for this input.
+    \item Tail recursive Church, stream Church, and stream Cochurch implementations were the fastest, and as fast as each other. A speedup of 25x over the unfused pipeline for this input.
     \item Stream fusion does not offer a speedup for Church encodings.
     \item Adding tail recursion speeds up the encoding in all cases, except:
     \item Church-encoded non-stream pipelines are not faster, this is due to a recursive natural transformation for filter (the function \tt{go}).
@@ -113,13 +122,13 @@ In general, as the scale increases (see \autoref{fig:all_exec} and \autoref{fig:
 
 \begin{figure}[H]
     \centering
-    \includesvg[width=0.7\textwidth]{figures/Execution time for all pipelines.svg}
-    \caption{Temp1}
+    \includesvg[width=0.83\textwidth]{figures/Execution time for all pipelines.svg}
+    \caption{Comparison of executions times between the different pipelines and input sizes, bar chart}
     \label{fig:results1}
 \end{figure}
 \begin{figure}[H]
     \centering
-    \includesvg[width=0.7\textwidth]{figures/Execution time for all pipelines - stacked.svg}
-    \caption{Temp1}
+    \includesvg[width=0.83\textwidth]{figures/Execution time for all pipelines - stacked.svg}
+    \caption{Comparison of executions times between the different pipelines and input sizes, line chart. This view makes it slightly easier to compare the differences between pipelines across different inputs.}
     \label{fig:results2}
 \end{figure}

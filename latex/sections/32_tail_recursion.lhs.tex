@@ -20,7 +20,7 @@ loop (x, y) = if (x > y)
                    else loop (x+1, y)
 loop (x, y)
 \end{spec}
-This definition is not tail recursive as the \tt{then (x + 2) + loop (x+1, y)} line includes some calcualtions that still need to made upon completion of the recursive \tt{loop} call; i.e. the \tt{loop} function is not in tail position.
+This definition is not tail recursive as the \tt{then (x + 2) + loop (x+1, y)} line includes some calculations that still need to made upon completion of the recursive \tt{loop} call; i.e., the \tt{loop} function is not in tail position.
 
 If we tweak the definition of sum, such that it is tail recursive we get a different derivation (See \autoref{app:cochurch_tail} for derivation):
 \begin{spec}

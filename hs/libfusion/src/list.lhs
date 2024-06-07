@@ -154,7 +154,7 @@ sum1 Nil = 0
 sum1 (Cons x xs) = x + sum1 xs
 {-# INLINE sum1 #-}
 \end{code}
-The church-encoded function leverages an algebra and applies that the existing recursion principle:
+The church-encoded function leverages an algebra and applies that to the existing recursion principle:
 \begin{code}
 sum2 :: List' Int -> Int
 sum2 = sumCh . toCh
