@@ -1,9 +1,12 @@
 \subsubsection{Terminal coalgebras and anamorphisms}
-This module defines a datatype and shows it to be initial; and a function and shows it to be an anamorphism in the category of F-Coalgebras.
-Specifically, it is shown that \tt{($\nu$, out)} is terminal.
+This module defines a datatype and shows it to be terminal; and a function and shows it to be an anamorphism in the category of F-Coalgebras.
+Specifically, it is shown that \tt{($\nu$F, out)} is terminal.
 \begin{code}
 {-# OPTIONS --guardedness #-}
 module agda.term.terminal where
+open import Codata.Guarded.M using (head; tail) renaming (M to ν; unfold to A⟦_⟧) public
+\end{code}
+\begin{code}[hide]
 open import Agda.Builtin.Sigma public
 open import Level using (0ℓ; Level) renaming (suc to lsuc) public
 open import Data.Container using (Container; ⟦_⟧; map; _▷_) public
@@ -11,8 +14,6 @@ open import Function using (_∘_; _$_; id; const) public
 open import Relation.Binary.PropositionalEquality as Eq using
   (_≡_; refl; sym; cong; cong-app; subst) public
 open Eq.≡-Reasoning public
-\end{code}
-\begin{code}[hide]
 open import Categories.Category renaming (Category to Cat)
 open import Categories.Functor.Coalgebra
 open import Categories.Category.Construction.F-Coalgebras
@@ -21,7 +22,6 @@ open F-Coalgebra
 open import Categories.Object.Terminal
 open import agda.funct.funext
 open import agda.funct.endo
-open import Codata.Guarded.M using (head; tail) renaming (M to ν; unfold to A⟦_⟧) public
 \end{code}
 A shorthand for the Category of F-Coalgebras:
 \begin{code}
@@ -46,7 +46,8 @@ univ-to _ refl = refl
 \end{code}
 Injectivity of the \tt{out} constructor is postulated, I have not found a way to prove this, yet.
 \begin{code}
-postulate out-injective : {F : Container 0ℓ 0ℓ}{x y : ν F} → out x ≡ out y → x ≡ y
+postulate out-injective : {F : Container 0ℓ 0ℓ}{x y : ν F} →
+                          out x ≡ out y → x ≡ y
 --out-injective eq = funext ?
 \end{code}
 It is shown that any other valid F-Coalgebra homomorphism from \tt{out} to \tt{a} is equal to the $\anam{\_}$ defined;

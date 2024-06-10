@@ -19,7 +19,7 @@ import GHC.Base
 \subsection{Lists}
 In this section further replication of \cite{Harper2011}'s work is described, but Lists are implemented instead of Leaf trees.
 
-This was done to see how the descriptions in \cite{Harper2011}'s work generalize and to have a simpler datastructure on which to perform analysis; seeing how and when the fusion works and when it doesn't.
+This was done to see how the descriptions in Harper's work generalize and to have a simpler datastructure on which to perform analysis; seeing how and when the fusion works and when it doesn't.
 
 We again start with the datatype descriptions. We use \tt{List'} instead of \tt{List} as there is a namespace collision with GHC's \tt{List} datatype:
 \begin{code}
@@ -256,7 +256,7 @@ pipeline11 = sum11 . map10 (+2) . filter10 trodd . between10
 I have moved the discussion for Church and Cochurch encoded Lists down here, as I think it warrants more discussion and illustrates a few interesting points.
 There are multiple ways of implementing it, none of them trivial according to \cite{Harper2011}'s description of how it should be implemented as a natural transformation.
 
-When replicating \cite{Harper2011}'s code for lists, there is one major limitation on natrual transformation functions:
+When replicating Harper's code for lists, there is one major limitation on natrual transformation functions:
 How to represent filter as a natural transformation for both Church and Cochurch encodings?
 In his work he implemented, using Leaf trees, a natural transformation for the filter function in the following manner:
 \begin{spec}

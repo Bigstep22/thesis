@@ -1,6 +1,6 @@
 \paragraph{Endofunctors}
-An endofunctor is defined across the category of agda sets, where the functors are interpretations of containers.
-There is a little bit of unwieldyness as \tt{Sets} defines equality through extensionality, but using an implicit parameter.
+I define an endofunctor across the category of agda sets, where the functors are extensions of containers.
+There is a little bit of unwieldyness as \tt{Sets} defines equality through extensionality but using an implicit parameter.
 In order to combine it with \tt{funext} a little bit of unpacking and repacking of the definitions needs to be done.
 \begin{code}[hide]
 open import Data.Container using (Container; ⟦_⟧; map)

@@ -1,5 +1,5 @@
 \paragraph{Functional Extensionality}
-We postulate functional extensionality.
+I postulate functional extensionality.
 This is done through Agda's builtin Extensionality module:
 \begin{code}[hide]
 module agda.funct.funext where

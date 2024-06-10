@@ -1,6 +1,7 @@
 \subsubsection{Universal properties of catamorphisms and initiality}
-This module defines a function and shows it to be a catamorphism in the category of F-Agebras,
-by module proving some properties of catamorphisms and is showing that \tt{(μ F, in')} is initial.
+This module proves the universal property of folds.
+It takes the definition of \tt{M} types and shows that the \tt{fold} function defined for it is a catamorphism.
+This is done by proving that the fold is an F-algebra homomorphism through a proof of existence and uniqueness.
 \begin{code}
 module agda.init.initial where
 open import Data.W using () renaming (sup to in'; foldr to ⦅_⦆) public
@@ -26,13 +27,13 @@ A shorthand for the Category of F-Algebras.
 C[_]Alg : (F : Container 0ℓ 0ℓ) → Cat (lsuc 0ℓ) 0ℓ 0ℓ
 C[ F ]Alg = F-Algebras F[ F ]
 \end{code}
-A candidate function is defined, this will be proved to be a catamorphism through the proof of initiality:
+A definition of fold, not the one used in the code - the one from Agda's stdlib is used - but included for clarity:
 \begin{code}
 --⦅_⦆ : {F : Container 0ℓ 0ℓ}{X : Set} → (⟦ F ⟧ X → X) → μ F → X
 --⦅ a ⦆ (in' (op , ar)) = a (op , ⦅ a ⦆ ∘ ar)
 \end{code}
-It is shown that any $\catam{\_}$ is a valid F-Algebra homomorphism from \tt{in'} to any other object \tt{a};
-i.e. the forward direction of the \textit{universal property of folds} \citep{Harper2011}.
+It is shown that any $\catam{\_}$ is a valid F-Algebra homomorphism from \tt{in'} to any other object \tt{a}
+i.e., the forward direction of the \textit{universal property of folds} \citep{Harper2011}.
 This constitutes a proof of existence:
 \begin{code}
 univ-to : {F : Container 0ℓ 0ℓ}{X : Set}{a : ⟦ F ⟧ X → X}{h : μ F → X} →
@@ -59,8 +60,6 @@ univ-from a h eq (in' x@(op , ar)) = begin
       (⦅ a ⦆ ∘ in') x
     ∎
 \end{code}
-\begin{code}
-\end{code}
 The two previous proofs, constituting a proof of existence and uniqueness, are combined to show that \tt{(μ F, in')} is initial:
 \begin{code}
 initial-in : {F : Container 0ℓ 0ℓ} → IsInitial C[ F ]Alg (to-Algebra in')
@@ -83,6 +82,8 @@ reflection y@(in' (op , ar)) = begin
    ≡⟨⟩ -- Dfn of ⦅_⦆
      in' (op , ⦅ in' ⦆ ∘ ar)
    ≡⟨ cong (λ x → in' (op , x)) (funext (reflection ∘ ar)) ⟩
+     in' (op , ar)
+   ≡⟨⟩ -- Dfn of y
      y
    ∎
 
