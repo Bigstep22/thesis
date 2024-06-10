@@ -4,7 +4,7 @@ Specifically, it is shown that \tt{($\nu$F, out)} is terminal.
 \begin{code}
 {-# OPTIONS --guardedness #-}
 module agda.term.terminal where
-open import Codata.Guarded.M using (head; tail) renaming (M to ν; unfold to A⟦_⟧) public
+open import Codata.Guarded.M public using (head; tail) renaming (M to ν)
 \end{code}
 \begin{code}[hide]
 open import Agda.Builtin.Sigma public
@@ -30,13 +30,13 @@ C[ F ]CoAlg = F-Coalgebras F[ F ]
 \end{code}
 A candidate terminal datatype and anamorphism function are defined, they will be proved to be so later on this module:
 \begin{code}
+A⟦_⟧ : {F : Container 0ℓ 0ℓ}{X : Set} → (X → ⟦ F ⟧ X) → X → ν F
+head (A⟦ c ⟧ x) = fst (c x)
+tail (A⟦ c ⟧ x) = A⟦ c ⟧ ∘ (snd (c x))
 out : {F : Container 0ℓ 0ℓ} → ν F → ⟦ F ⟧ (ν F)
 out nu = head nu , tail nu
---A⟦_⟧ : {F : Container 0ℓ 0ℓ}{X : Set} → (X → ⟦ F ⟧ X) → X → ν F
---out (A⟦ c ⟧ x) = let (op , ar) = c x in
---                     (op , A⟦ c ⟧ ∘ ar)
 \end{code}
-It is shown that any $\anam{\_}$ is a valid F-Coalgebra homomorphism from \tt{out} to any other object \tt{a};
+It is shown that any A$\anam{\_}$ is a valid F-Coalgebra homomorphism from \tt{out} to any other object \tt{a};
 i.e. the forward direction of the \textit{universal property of unfolds} \cite{Harper2011}.
 This constitutes a proof of existence:
 \begin{code}
@@ -44,11 +44,10 @@ univ-to : {F : Container 0ℓ 0ℓ}{C : Set}(h : C → ν F){c : C → ⟦ F ⟧
                  h ≡ A⟦ c ⟧ → out ∘ h ≡ map h ∘ c
 univ-to _ refl = refl
 \end{code}
-Injectivity of the \tt{out} constructor is postulated, I have not found a way to prove this, yet.
+Injectivity of the \tt{out} constructor is postulated:
 \begin{code}
 postulate out-injective : {F : Container 0ℓ 0ℓ}{x y : ν F} →
                           out x ≡ out y → x ≡ y
---out-injective eq = funext ?
 \end{code}
 It is shown that any other valid F-Coalgebra homomorphism from \tt{out} to \tt{a} is equal to the $\anam{\_}$ defined;
 i.e. the backward direction of the \textit{universal property of unfolds} \cite{Harper2011}.

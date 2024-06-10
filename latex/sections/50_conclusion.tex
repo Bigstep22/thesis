@@ -1,12 +1,36 @@
 \section{Conclusion and Future Work}
+I have presented my work on implementing and formalizing shortcut fusion of (Co)Church encodings as described by \cite{Harper2011}.
+I have replicated Harper's work of Church and Cochurch encoded functions operating on leaf trees: \tt{between}, \tt{map}, \tt{filter}, and \tt{sum}.
+And shown the generalizability of his example by also implementing the functions on lists.
+In doing so I discovered that in Haskell full fusion is not currently possible for the filter function.
+Needing either proper loopification using join points\footnote{\url{https://gitlab.haskell.org/ghc/ghc/-/issues/22227\#note_551000}}, or additional encoding techniques such as those described by \cite{Coutts2007}.
 
+I benchmarked the performance of multiple different variants of the same pipeline: unencoded, hand-fused, Church fused, Cochurch fused, and GHC.List fused; where the (Co)Church fused pipelines had four variants: tail recursive, stream fused, neither, and both.
+I discovered that changing the underlying datatype for Church encodings from List to Stream datatypes gave no performance improvement, for both tail and non-tail recursive implementations. Implementing tail recursion however did offer a speedup.
+For Cochurch encodings it was also faster to implement tail recrusion in addition to modifying the underlying type from List to Stream. This was likely due to the improper loopification of recursive coalgebra.
+The fully fused (fastest) pipelines of both Church and Cochurch encodings were about as fast as the hand-fused and GHC.List fused pipelines; for some inputs the (Co)Church fusion was faster, for others the hand-fused/GHC.List fused.
 
+I implemented Harper's description of Church and Cochurch encodings using Agda's dependent type system, using containers to represent strictly positive functors.
+Before formalizing the proof of the shortcut fusion property, I first formalized all of the needed underlying category theory: the universal property of folds (i.e., initiality of initial algebras), the computation law, the reflection law, and the fusion property.
+Using these, I formalized Harper's proofs of the Church and Cochurch encodings being faithul, showing that they are isomorphic to the datatype that they are encoding.
+This came with one major caveat: The reliance on the free theorems of parametric functions, which was not provable in Agda.
+There is recent work on this \textit{internalized parametricity} by \cite{Muylder2024}, which would make the free theorems provable from within Agda, dubbed Agda --bridges.
 
-\subsection{Future Work}
-\begin{itemize}
-    \item Strengthen Agda's typechecker wrt implicit parameters
-    \item Strengthen Agda's termination checker wrt corecursive datastructures
-    \item Implement (co)church-fused versions of Haskell's library functions.
-    \item Investigate if creating a language that has this fusion built-in natively can be compiled more efficiently
-    \item Look into leveraging parametricity with agda, so no \tt{posulate}'s are needed.
+\subsection*{Future Work}
+The work is not finished and there are many future avenues that could be taken to continue my research:
+\begin{itemize}[noitemsep]
+    \item Implement (Co)Church fused versions of Haskell's library functions.
+    \item See if it is possible to implement warm fusion in Haskell or some other language as described by \cite{Launchbury1995}.
+    \item Investigate if creating a new programming language that has this fusion as a first-class feature can enable fusion to be compiled more efficiently and consistently.
+    \item Use Agda --bridges to see if it is possible to prove the free theorems currently postulated in my work.
+    \item Implement a bisimilarity relation for the coinductive $\nu$ or \tt{M} type in Agda to prove its terminality. After which modifying all the code resting on top of this proof to propertly use this new relation.
+    \item Merge into Agda the Church and Cochurch encodings, as well as the bisimilarity across the guarged \tt{M} type.
+    \item Strengthen Agda's typechecker with respect to implicit parameters. Currently two variants of functional extensionality had to be defined to work around this.
+    \item I have read that the guardedness checker can be limiting. The work for a stronger coinductive termination checker might benefit the continuation/polishing of my work.
 \end{itemize}
+In conclusion, I have explored the implementation and formalization of shortcut fusion for (Co)Church encodings, building on Harper's work.
+Tail-recursion was found to be crucial for performance, with additional performance improvements noted for Cochurch encodings using Stream fusion techniques.
+
+The formalization in Agda, using category theory and containers, proved the equivalence of encoded functions to standard folds, ensuring the correctness and safety of these transformations.
+Some weaknesses remain and highlight avenues for future research.
+These findings highlight the effectiveness and correctness of shortcut fusion techniques and show the promise of shortcut fusion: Reduce the computational overhead associated with functional programming while retaining the nice, compositional properties.

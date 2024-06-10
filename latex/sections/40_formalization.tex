@@ -19,3 +19,51 @@ The Agda code makes use of two libraries:
 \input{sections/44_shortcut_fusion.tex}
 
 \subsection{Discussion of Agda Formalization}
+I formalized that, given parametricity, the fusion of (Co)Church encodings are the same as their non-encoded counterpart as proved by \cite{Harper2011}.
+
+I did this by first proving initality of \tt{W} types (and terminality of \tt{M} types).
+Then I formalized the categorical fusion property, which only ended up being used in the proofs for fusion of Cochurch encodings.
+Then I defined the Church and Cochurch encodings, along with their associated conversion functions.
+After defining all of this, I formalized Harper's proof that shortcut fusion is possible for both Church and Cochurch encodings.
+
+Building on this, I implemented a \tt{List} datastructure using containers.
+Across this datastructure I implemented normal and (Co)Church encoded functions across these lists: \tt{between}, \tt{map}, and \tt{sum}.
+
+\paragraph{Remaining Weaknesses}
+There are two main remaining weaknesses in my current work:
+First, the proof of terminality of terminal coalgebras is currently not terminating.
+Second, the free theorems are currently postulated to be true instead of being proven to be true.
+
+\subparagraph{Termination Checking}
+I made a serious attempt to prove the terminality of \tt{M} types in agda through the use of a bisimilation relation, but at the cutoff moment for the work there was still too much work remaining to warrant continuing it:
+\begin{itemize}
+  \item The reflection law was proven (as a bisimilarity)
+  \item The computation law was proven (as a propositional equality)
+  \item The termination of the `proof of uniqueness' part of the proof of terminality (also as a bisimilarity)
+  \item The plan and execution of restructuring the further code that rests on the above proofs.
+  Propositional equalities need to instead use some combination of the bisimilaity and propositional equality in Agda.
+\end{itemize}
+Instead the functions are now proved using a postulate called \tt{out-injective} that postulates that the coinductive datatype is injective.
+The above three functions are now non-terminating in the final state of the code.
+Furthermore, the implementation of the Cochurch encoded list \tt{sum} function also was set to be non-terminating.
+
+\subparagraph{Postulates}
+There are currently four postulates in the codebase.
+I'll go through them in increasing order of noteworthiness:
+\begin{itemize}
+  \item Functional extensionality.
+  I used functional extensionality extensively throughout the repository.
+  Its use is well-understood and is provable within cubical Agda.
+  \item \tt{out}-injectivity.
+  Injectivity of coinductive datatypes is likely not supported out-of-the-box in Agda for good reason.
+  It is needed for the type checking of the proofs of terminality.
+  It exists to patch over the larger problem of termination checking above.
+  If a bisimilarity relation were to be introduced, it can be removed.
+  \item Two free theorems.
+  The postulating of the free theorems was needed as it is currently not possible to prove the correctness of free theorems from within Agda.
+  New research does exist by \cite{Muylder2024} that would enable the proving of the two free theorems.
+  Doing so falls outside the scope of this research and is left to future work.
+\end{itemize}
+
+\paragraph{Future work}
+

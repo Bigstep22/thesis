@@ -1,6 +1,4 @@
 \section{Related Works}\label{sec:related}
-
-\subsection{Fusion}
 Initial work, done by \cite{Wadler1984,Wadler1986,Wadler1990} was dubbed `deforestation', referring to the removal of intermediate trees (or lists).
 The details of the original deforestation work are not relevant to this thesis, but \cite{Gill1993} described the weaknesses of the work and proposed an alternative technique.
 This so-called foldr/build fusion technique can, when employed, eliminate the runtime generation of intermediate lists.
@@ -12,3 +10,8 @@ A further generalization of this technique, dubbed \textit{stream fusion} by \ci
 \paragraph{(Co)Church encodings}
 Finally, \cite{Harper2011} combined all of these concepts into one paper, called ``The Library Writer's Guide to Shortcut Fusion''.
 In it the concept he describes (Co)Church encodings and, pragmatically, how to implement them in Haskell.
+
+\paragraph{Other approaches}
+Other approaches exist such as `Warm fusion' by \cite{Launchbury1995}, who attempt to derive fold and build combinators for a data type and automatically rewrite explicitly recursive functions.
+
+Before \cite{Gill1993} published his work on shortcut fusion, there was existing work by \cite{Meijer1991}, describing the fusion properties of catamorphisms and anamorphisms, called ``Functional programming with bananas, lenses, envelopes and barbed wire''.
