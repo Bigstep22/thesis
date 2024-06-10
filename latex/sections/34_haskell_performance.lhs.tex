@@ -55,8 +55,8 @@ su h s = loopt s 0
           Nil_ -> sum
                           Cons_ x xs -> loopt xs (x + sum)
     \end{spec}
-    For Church encodings, it is a little more tricky to get the resultant function to be tail-recursive, it is possible, however.
-    Taking the algebra for sum again:
+For Church encodings, it is a little more tricky to get the resultant function to be tail-recursive, it is possible, however.
+Taking the algebra for sum again:
     \begin{spec}
 sum2 :: List' Int -> Int
 sum2 = sumCh . toCh
@@ -66,7 +66,7 @@ sum2 = sumCh . toCh
         su Nil_ = 0
         su (Cons_ x y) = x + y
 \end{spec}
-    The type of the recursive part of list can be modified to be a function instead of just a simple function (\tt{Int -> Int} instead of \tt{Int}):
+We can modify the type of the recursive part of list and the return type to be a function instead of just a simple datatype (\tt{Int -> Int} instead of \tt{Int}):
 \begin{spec}
 sum7 :: List' Int -> Int
 sum7 = flip sumCh 0 . toCh
@@ -77,11 +77,11 @@ sum7 = flip sumCh 0 . toCh
         su (Cons_ x y) s = y (s + x)
     \end{spec}
 
-    This is technique similar to the one described by \cite{Breitner2018}.
-    \item Ensure that the fused result is a single recursive function (so no helper functions such as \tt{go}).
+This is technique similar to the one described by \cite{Breitner2018}.
+\item Ensure that the fused result is a single recursive function (so no helper functions such as \tt{go}).
 
-    % Cue story about haskell's optimizer and that it is only willing to inline non-recursive functions. You only can recurse once... (Maybe something, something joing points?)
-    % Adding a Skip constructor can make a big difference to enabling the avoidance of additionally needed recursive functions.
+% Cue story about haskell's optimizer and that it is only willing to inline non-recursive functions. You only can recurse once... (Maybe something, something joing points?)
+% Adding a Skip constructor can make a big difference to enabling the avoidance of additionally needed recursive functions.
 \end{itemize}
 
 For the testing I ensured that the first two of the above points were satisfied, partially through analysis of the GHC\footnote{\url{https://downloads.haskell.org/ghc/latest/docs/users_guide/debugging.html\#core-representation-and-simplification}} generated Core representation.

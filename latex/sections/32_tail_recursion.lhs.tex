@@ -1,7 +1,7 @@
 
 \subsubsection{Tail Recursion}\label{sec:tail}
 \paragraph{Definition}
-We call a recursive function tail-recursive, if all its recursive calls are returned immediately upon completion i.e., they don't do any additional calculations upon the result of the recursive call before returning a result.
+We call a recursive function tail-recursive, if all its recursive calls return immediately upon completion i.e., they don't do any additional calculations upon the result of the recursive call before returning a result.
 
 When a function is tail-recursive, it is possible to reuse the stack frame of the current function call, reducing a lot of memory overhead.
 Haskell is able to identify tail-recursive functions and optimize the compiled byte code accordingly.

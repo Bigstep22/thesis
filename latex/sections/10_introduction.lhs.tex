@@ -46,7 +46,7 @@ My thesis focuses on a specific form of fusion called shortcut fusion through th
 \begin{enumerate}
   \item To implement (Co)Church encodings, what is necessary to make the code reliably fuse? This leads to the following sub-questions:
   \begin{itemize}
-    \item What transformations can be used within Haskell to enable fusion to work?
+    \item What optimizations are present in Haskell that enable fusion to work?
     \item What tools and techniques are available to get Haskell's compiler to cooperate and trigger fusion?
   \end{itemize}
   \item Are the transformations used to enable fusion safe? Meaning:
@@ -60,7 +60,7 @@ My thesis focuses on a specific form of fusion called shortcut fusion through th
 My thesis centers on formalizing, replicating, and expanding upon \cite{Harper2011}'s work and makes two crucial contributions, answering the two questions above:
 \begin{enumerate}
     \item The Church and Cochurch encodings' implementation in Haskell, as described by \cite{Harper2011} are replicated and investigated further as to their performance characteristics.
-    In this process, a weakness is found in Haskell's optimizer, and further practical insights are gleaned as to how to get these encodings to properly fuse as well (especially for Cochurch encodings) and what optimizations enable shortcut fusion to do its work.
+    In this process, I find a weakness in Haskell's optimizer, and glean further practical insights as to how to get these encodings to properly fuse as well (especially for Cochurch encodings) and what optimizations enable shortcut fusion to do its work.
 
     This is important as \cite{Harper2011} gave a good pragmatic explanation as to how to implement the (Co)Church encodings in Haskell, gave an example implementation, and benchmarked that implementation.
     He did not, however, dive into too much detail as to \textit{why} they work stating: ``Interestingly, however, we note that Cochurch encodings consistently outperform Church encodings, sometimes by a significant margin. While we do consider these results conclusive, we think that these results merit further investigation.'' \citep{Harper2011}.
