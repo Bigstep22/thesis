@@ -18,7 +18,6 @@ import GHC.Base
 }
 \subsection{Lists}
 In this section further replication of \cite{Harper2011}'s work is described, but Lists are implemented instead of Leaf trees.
-
 This was done to see how the descriptions in Harper's work generalize and to have a simpler datastructure on which to perform analysis; seeing how and when the fusion works and when it doesn't.
 
 We again start with the datatype descriptions. We use \tt{List'} instead of \tt{List} as there is a namespace collision with GHC's \tt{List} datatype:
@@ -45,12 +44,11 @@ We introduce three important pragmas.
 One is the actual fusion rule, taking two functions and removing them from the compilation process.
 The second and third are to make sure that the \tt{toCh} and \tt{fromCh} functions are inlined as late as possible; maximising the time that they can be fused during the compilation process:
 \begin{code}
-{-# RULES "toCh/fromCh fusion"
-   forall x. toCh (fromCh x) = x #-}
+{-# RULES "toCh/fromCh fusion" forall x. toCh (fromCh x) = x #-}
 {-# INLINE [0] toCh #-}
 {-# INLINE [0] fromCh #-}
 \end{code}
-A generalized natural transformation function is defined:
+A generalized natural transformation function is defined to standardize and ease later implementations of transformation functions:
 \begin{code}
 natCh :: (forall c . List_ a c -> List_ b c) -> ListCh a -> ListCh b
 natCh f (ListCh g) = ListCh (\a -> g (a . f))
@@ -69,12 +67,11 @@ fromCoCh (ListCoCh h s) = unfold h s
         unfold h s = case h s of
           Nil_ -> Nil
           Cons_ x xs -> Cons x (unfold h xs)
-{-# RULES "toCh/fromCh fusion"
-   forall x. toCoCh (fromCoCh x) = x #-}
+{-# RULES "toCh/fromCh fusion" forall x. toCoCh (fromCoCh x) = x #-}
 {-# INLINE [0] toCoCh #-}
 {-# INLINE [0] fromCoCh #-}
 \end{code}
-A generalized natural transformation function is defined:
+A generalized natural transformation function is defined to standardize and ease later implementations of transformation functions:
 \begin{code}
 natCoCh :: (forall c . List_ a c -> List_ b c) -> ListCoCh a -> ListCoCh b
 natCoCh f (ListCoCh h s) = ListCoCh (f . h) s
@@ -128,7 +125,7 @@ filter1 p (Cons x xs) = if p x then Cons x (filter1 p xs) else filter1 p xs
 For the Church and Cochurch encoding see the extended discussion in \autoref{sec:filter_prob}.
 
 \paragraph{Map}
-Contrary to filter, it is possible to implement the map function as a natural transformation. Again three implementations, the latter two of which leverage the defined natural transformation \tt{m}:
+Contrary to filter, it is possible to implement the \tt{map} function using a natural transformation. Again three implementations, the latter two of which leverage the defined natural transformation \tt{m}:
 \begin{code}
 map1 :: (a -> b) -> List' a -> List' b
 map1 _ Nil = Nil
@@ -253,10 +250,10 @@ pipeline11 = sum11 . map10 (+2) . filter10 trodd . between10
 
 
 \subsubsection{The Filter Problem}\label{sec:filter_prob}
-I have moved the discussion for Church and Cochurch encoded Lists down here, as I think it warrants more discussion and illustrates a few interesting points.
-There are multiple ways of implementing it, none of them trivial according to \cite{Harper2011}'s description of how it should be implemented as a natural transformation.
+I have moved the discussion for Church and Cochurch encoded filter functions down here, as I think it warrants more discussion and illustrates a few interesting points.
+There are multiple ways of implementing them, none of them trivial according to \cite{Harper2011}'s description of how it should be implemented as a natural transformation.
 
-When replicating Harper's code for lists, there is one major limitation on natrual transformation functions:
+When replicating Harper's code for lists, there is one major limitation on natural transformation functions:
 How to represent filter as a natural transformation for both Church and Cochurch encodings?
 In his work he implemented, using Leaf trees, a natural transformation for the filter function in the following manner:
 \begin{spec}
@@ -280,7 +277,7 @@ The question is, what should be in the place of the \tt{?} above?
 Initially you might say \tt{xs}, as the \tt{Cons\_ x} part should be filtered away, and this would be conceptually correct except for the fact that \tt{xs} is of type \tt{c}, and not of type \tt{List\_ a c}.
 Filling in \tt{xs} gives a type error.
 Let's change the type annotation then, right?
-Well no, if we did that we wouldn't have the type of a transformation anymore, so we can't do that either.
+Well no, if we did that we wouldn't have the type of a natural transformation anymore, so we can't do that either.
 
 There are two solutions:
 One that modifies the definition of \tt{filter2} and \tt{filter3}, such that the definition is still possible, without leveraging transformations.
@@ -312,8 +309,8 @@ filter2 p = fromCh . filterCh p . toCh
 {-# INLINE filter2 #-}
 \end{code}
 Notice how we do not apply \tt{a} to \tt{xs}, and, in doing so, can put \tt{xs} in the place where wanted to.
-The definition of \tt{filterCh} was too restrictive in always postcomposing \tt{a}.
-Instead a new algebra is made that selectively postcomposes \tt{a}.
+Before we were limited because the \tt{natCh} function forced a postcomposition of \tt{a} in all cases.
+Instead a new algebra from an existing one, \tt{a}, that selectively postcomposes it.
 
 % I was just reading this: https://link.springer.com/chapter/10.1007/978-3-540-30477-7_22
 % This is one of the fusion rules that is leveraged in GHC.List fusion.
@@ -326,7 +323,7 @@ Whereas before we wanted to implement our \tt{filter} function in the following 
 filter3 :: (a -> Bool) -> List a -> List a
 filter3 p = fromCoCh . natCoCh (filt p) . toCoCh
 \end{spec}
-For the cochurch-encoding, a natural transformation can be defined, but it is not a simple algebra, instead it is a recursive function.\footnote{And not necessarily guaranteed to terminate, the seed could generate an infinite structure.}
+For the cochurch-encoding, a natural transformation can be defined, but it is not a simple coalgebra, instead it is a recursive function.\footnote{And not necessarily guaranteed to terminate, the seed could generate an infinite structure.}
 The core idea is: we combine the natural transformation and postcomposition again, but this time we make the function recursively grab elements from the seed until we find one that satisfies the predicate.
 \begin{code}
 filt :: (a -> Bool) -> (s -> List_ a s) -> s -> List_ a s
@@ -350,6 +347,7 @@ It is possible to implement filter using a natural transformation, but this requ
 We can add a new constructor to the datatype that allows us to null out the value of our datatype: \tt{ConsN'\_ xs}.
 This way we can write the \tt{filt} function in the following fashion:
 \begin{code}
+data List'_ a b = Nil'_ | Cons'_ a b | ConsN'_ b
 filt' :: (a -> Bool) -> List'_ a c -> List'_ a c
 filt' p Nil'_ = Nil'_
 filt' p (ConsN'_ xs) = ConsN'_ xs
@@ -361,9 +359,9 @@ The \tt{ConsN\_} constructor is analogous to the \tt{Skip} constructor.
 Therefore, this is a known and understood technique, motivated by the limitations of the techniques described by Harper.
 
 So why was it possible to implement \tt{filt} without modifying the datatype of leaf trees?
-Because leaf trees already have this consideration of being able to null the datatype in-place by chaining a \tt{Leaf\_ x} into an \tt{Empty\_}.
+Because leaf trees already have this consideration of being able to null the datatype in-place by changing a \tt{Leaf\_ x} into an \tt{Empty\_}.
 \tt{filt} is able to remove a value from the datastructure without changing the structure of the data. I.e. it is still a natural transformation.
-By chaning the list datatype such that this nullability is also possible, we can also write \tt{filt} as a natural transformation.
+By changing the list datatype such that this nullability is also possible, we can now write \tt{filt} as a natural transformation.
 
 This technique could be broader than a modification to just lists.
 By modifying (making nullable) any datatype, it might be possible to broaden the class of functions that can be represented as a natural transformation.
@@ -382,7 +380,6 @@ I will leave the following question to future work: Is this generalizable?
 
 \ignore{
 \begin{code}
-data List'_ a b = Nil'_ | Cons'_ a b | ConsN'_ b
 data ListCoCh' a = forall s . ListCoCh' (s -> List'_ a s) s
 toCoCh' :: List' a -> ListCoCh' a
 toCoCh' = ListCoCh' out

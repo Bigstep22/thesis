@@ -20,11 +20,11 @@ f = sum1 . map1 (+1) . filter1 odd . between1
 
 f' :: (Int, Int) -> Int
 f' (x, y) = loop x
-  where
-    loop x | x > y = 0
-           |otherwise = if odd x
-                        then (x + 1) + loop (x + 1)
-                        else loop (x + 1)
+  where loop x = if x > y
+                 then 0
+                 else if odd x
+                      then (x + 1) + loop (x + 1)
+                      else loop (x + 1)
 \end{code}
 \paragraph{Datatypes} In his paper Harper implemented his example functions using leaf trees, this is defined as \tt{Tree} below.
 Furthermore, the base functor of \tt{Tree} was defined, as \tt{Tree\_}, with the recursive positions of the functor turned into a paramater of the datatype:
@@ -32,7 +32,7 @@ Furthermore, the base functor of \tt{Tree} was defined, as \tt{Tree\_}, with the
 data Tree a = Empty | Leaf a | Fork (Tree a) (Tree a)
 data Tree_ a b = Empty_ | Leaf_ a | Fork_ b b
 \end{code}
-\paragraph{Church-encoding} The Church encoding of the \tt{Tree} datatype is defined, using the base functor:
+\paragraph{Church-encoding} The Church encoding of the \tt{Tree} datatype is defined using the base functor:
 \begin{code}
 data TreeCh a = TreeCh (forall b . (Tree_ a b -> b) -> b)
 \end{code}
@@ -55,12 +55,11 @@ in' (Fork_ l r) = Fork l r
 From here, the fusion rule is defined using a \tt{RULES} pragma. Along with a couple of other rules, this core construct is responsible for doing the actual `fusion'.
 The \tt{INLINE} pragmas are also included, to delay any inlining of the \tt{toCh/fromCh} functions to the latest possible moment, maximising the opportunity for fusion throughout the compilation process:
 \begin{code}
-{-# RULES "toCh/fromCh fusion"
-   forall x. toCh (fromCh x) = x #-}
+{-# RULES "toCh/fromCh fusion" forall x. toCh (fromCh x) = x #-}
 {-# INLINE [0] toCh #-}
 {-# INLINE [0] fromCh #-}
 \end{code}
-A generalized natural transformation function is defined:
+A generalized natural transformation function is defined to standardize and ease later implementations of transformation functions:
 \begin{code}
 natCh :: (forall c . Tree_ a c -> Tree_ b c) -> TreeCh a -> TreeCh b
 natCh f (TreeCh g) = TreeCh (\a -> g (a . f))
@@ -85,20 +84,19 @@ unfold h s = case h s of
 \end{code}
 Similar to Church-encodings, the proper pragmas are included to enable fusion:
 \begin{code}
-{-# RULES "toCh/fromCh fusion"
-   forall x. toCoCh (fromCoCh x) = x #-}
+{-# RULES "toCh/fromCh fusion" forall x. toCoCh (fromCoCh x) = x #-}
 {-# INLINE [0] toCoCh #-}
 {-# INLINE [0] fromCoCh #-}
 \end{code}
-A generalized natural transformation function is defined:
+A generalized natural transformation function is defined to standardize and ease later implementations of transformation functions:
 \begin{code}
 natCoCh :: (forall c . Tree_ a c -> Tree_ b c) -> TreeCoCh a -> TreeCoCh b
 natCoCh f (TreeCoCh h s) = TreeCoCh (f . h) s
 \end{code}
 \paragraph{Between} Three between functions are implemented:
-One regular, one church-encoded, and one cochurch encoded.
+One regular, one Church encoded, and one Cochurch encoded.
 Note how all three final functions are accompanied by an \tt{INLINE} pragma. This inlining enables pairs of \tt{toCh $\circ$ fromCh} to be revealed to the compiler for fusion.
-The regular one is implemented recursively in a fashion appropriate for leaf trees:
+The non-encoded function is implemented recursively in a fashion appropriate for leaf trees:
 \begin{code}
 between1 :: (Int, Int) -> Tree Int
 between1 (x, y) = case compare x y of
@@ -182,8 +180,8 @@ filter1 p Empty = Empty
 filter1 p (Leaf a) = if p a then Leaf a else Empty
 filter1 p (Fork l r) = append1 (filter1 p l) (filter1 p r)
 \end{code}
-While for the (co)church-encoded versions a natural transformation \tt{filt} is constructured.
-This is used to both implement both the church and cochurch-encoded function:
+While for the (Co)Church encoded versions, a natural transformation \tt{filt} is constructured.
+This is used to both implement both the Church and Cochurch encoded function:
 \begin{code}
 filt :: (a -> Bool) -> Tree_ a c -> Tree_ a c
 filt p Empty_ = Empty_
@@ -248,13 +246,15 @@ sum3 = sumCoCh . toCoCh
 \end{code}
 \paragraph{Pipelines} Finally the pipelines, whose performance can be measure or Core representation inspected, are defined below:
 \begin{code}
+pipeline1 :: (Int, Int) -> Int
 pipeline1 = sum1 . map1 (+2) . filter1 odd . between1
-pipeline2 = sum2 . map2 (+2) . filter2 odd . between2
-pipeline3 = sum3 . map3 (+2) . filter3 odd . between3
 \end{code}
 \ignore{
+\begin{code}
+pipeline2 = sum2 . map2 (+2) . filter2 odd . between2
+pipeline3 = sum3 . map3 (+2) . filter3 odd . between3
 input = (1, 10000)
-main = print (pipeline3 input)
+--main = print (pipeline3 input)
 sumApp1 (x, y)  = sum1 (append1 (between1 (x, y)) (between1 (x, y)))
 sumApp2 (x, y)  = sum2 (append2 (between2 (x, y)) (between2 (x, y)))
 sumApp3 (x, y)  = sum3 (append3 (between3 (x, y)) (between3 (x, y)))
@@ -353,4 +353,5 @@ $wloop
       }
 end Rec }
 -}
+\end{code}
 }

@@ -1,17 +1,16 @@
 \subsubsection{Proof obligations}
-As with Church encodings, in \cite{Harper2011}'s work, five proof obligations needed to
-be satisfied. These are formalized in this module.
+As with Church encodings, in \cite{Harper2011}'s work, five proof obligations needed to be satisfied.
+These are formalized here.
 \begin{code}[hide]
 {-# OPTIONS --guardedness #-}
 open import agda.term.terminal
 open import agda.term.cofusion
 open import agda.funct.funext
 open import agda.cochurch.defs
-\end{code}
-\begin{code}
 module agda.cochurch.proofs where
 \end{code}
-The first proof proves that \tt{fromCoCh $\circ$ toCh = id}, using the reflection law:
+The first proof proves that \tt{fromCoCh $\circ$ toCh = id}, using the reflection law.
+This corresponds to the first proof obligation mentioned in \autoref{sec:obligations}:
 \begin{code}
 from-to-id : {F : Container 0ℓ 0ℓ} → fromCoCh ∘ toCoCh {F} ≡ id
 from-to-id {F} = funext λ x → begin
@@ -29,8 +28,9 @@ from-to-id {F} = funext λ x → begin
 The second proof proof is similar to the first, but it proves the composition in the other direction
 \tt{toCoCh $\circ$ fromCoCh = id}.
 This proof leverages the parametricity as described by \cite{Wadler1989}.
-It postulates the free theorem of the function g for a fixed Y \tt{f : $\forall$ X → (X → F X) → X → Y},
-to prove that ``unfolding a Cochurch-encoded structure and then re-encoding it yields an equivalent structure'' \cite{Harper2011}:
+It postulates the free theorem of the function g for a fixed Y: \tt{f :$\forall$ X → (X → F X) → X → Y},
+to prove that ``unfolding a Cochurch-encoded structure and then re-encoding it yields an equivalent structure'' \citep{Harper2011}.
+This together with the first proof shows that Cochurch encodings are isomorphic to the datatypes they are encoding:
 \begin{code}
 postulate free : {F : Container 0ℓ 0ℓ}
                  {C D : Set}{Y : Set₁}{c : C → ⟦ F ⟧ C}{d : D → ⟦ F ⟧ D}
@@ -56,7 +56,8 @@ to-from-id = funext λ where
     ∎
 \end{code}
 The third proof shows that cochurch-encoded functions constitute an implementation for the producing functions being replaced.
-The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness:
+The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness.
+This corresponds to the third proof obligation (second diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
 prod-pres : {F : Container 0ℓ 0ℓ}{X : Set}(c : X → ⟦ F ⟧ X) →
             fromCoCh ∘ prodCoCh c ≡ A⟦ c ⟧
@@ -69,7 +70,8 @@ prod-pres c = funext λ x → begin
   ∎
 \end{code}
 The fourth proof shows that cochurch-encoded functions constitute an implementation for the consuming functions being replaced.
-The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness:
+The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness.
+This corresponds to the fourth proof obligation (third diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
 cons-pres : {F : Container 0ℓ 0ℓ}{X : Set} → (f : {Y : Set} → (Y → ⟦ F ⟧ Y) → Y → X) →
             consCoCh f ∘ toCoCh ≡ f out
@@ -82,9 +84,9 @@ cons-pres f = funext λ x → begin
   ∎
 \end{code}
 The fifth, and final proof shows that cochurch-encoded functions constitute an implementation for the consuming functions being replaced.
-The proof leverages the categorical fusion property and the naturality of \tt{f}:
+The proof leverages the categorical fusion property and the naturality of \tt{f}.
+This corresponds to the second proof obligation (first diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
--- PAGE 52 - Proof 5
 valid-hom : {F G : Container 0ℓ 0ℓ}{X : Set}(h : X → ⟦ F ⟧ X)
             (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)(nat : ∀ {X : Set}
             (g : X → ν F) → map g ∘ f ≡ f ∘ map g) →
@@ -122,8 +124,7 @@ to one single natural transformation:
 natfuse : {F G H : Container 0ℓ 0ℓ}
           (nat1 : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
           (nat2 : {X : Set} → ⟦ G ⟧ X → ⟦ H ⟧ X) →
-          natTransCoCh nat2 ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat1 ≡
-          natTransCoCh (nat2 ∘ nat1)
+          natTransCoCh nat2 ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat1 ≡ natTransCoCh (nat2 ∘ nat1)
 natfuse nat1 nat2 = begin
             natTransCoCh nat2 ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat1
           ≡⟨ cong (λ f → natTransCoCh nat2 ∘ f ∘ natTransCoCh nat1) to-from-id ⟩

@@ -4,7 +4,7 @@
 In his paper, he uses the trick of reading types as relations (instead of sets) in order to derive a lemma called \textit{parametricity}.
 
 From this it is possible to derive a theorem that a type satisfies, without looking at its definition.
-These free theorems can be used to make claims about polymorphic functions.
+These free theorems can be used to state truths about polymorphic functions.
 This is also done in \cite{Harper2011}'s work; namely a theorem about the polymorphic induction principle and coinduction principle function types.
 
 For example the free theorem of the following polymorphic function \citep{Harper2011}:
@@ -18,7 +18,7 @@ h . b = c . F h => h (g b) = g c
 For functions \tt{b : F B -> B}, \tt{c : F C -> C}, \tt{h : B -> C}.
 
 
-Within Agda, proving that the free theorems of the polymorphic function types are correct is something that is currently not possible without extensions.
+Within Agda, proving that the free theorems of the polymorphic function types are correct is something that is currently not possible without internalized parametricity.
 Recent work by \cite{Muylder2024} does exist, that extends cubical Agda with a \tt{--bridges} extension that makes it possible to derive free theorems from within Agda.
 While it might be possible to leverage this implementation, the work is very new, having come out after the start of this thesis project.
-Instead, I have opted to postulate the free theorems needed, which is only on two locations.
+Instead, I have opted to postulate the free theorems needed on two locations.

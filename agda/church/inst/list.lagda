@@ -1,5 +1,5 @@
 \subsubsection{Example: List fusion}\label{sec:agda_church_list}
-In order to clearly see how the Church encodings allows functions to fuse, a datatype was selected such
+In order to clearly see how the Church encodings allows functions to fuse, a datatype was selected such that
 the abstracted function, which have so far been used to prove the needed properties, can be instantiated
 to demonstrate how the fusion works for functions across a cocrete datatype.
 \begin{code}[hide]
@@ -12,17 +12,16 @@ open import agda.church.defs renaming (cons to consu)
 open import agda.church.proofs
 open import agda.funct.funext
 open import agda.init.initial
+module agda.church.inst.list where
 \end{code}
-In this module is defined: the container, whose interpretation represents the base functor for lists,
+In this section is defined: the container, whose interpretation represents the base functor for lists,
 some convenience functions to make type annotations more readable, a producer function \tt{between},
 a transformation function \tt{map}, a consumer function \tt{sum}, and a proof that non-church and church-encoded
 implementations are equal.
-\begin{code}
-module agda.church.inst.list where
-\end{code}
+
 \subparagraph{Datatypes}
 The index set for the container, as well as the container whose interpretation represents the base funtor for list.
-Note how ListOp is isomorphis to the datatype \tt{1 + A}, I use ListOp instead to make the code more readable:
+Note how ListOp is isomorphic to the datatype \tt{$\top$ + const A}, I use ListOp instead to make the code more readable:
 \begin{code}
 data ListOp (A : Set) : Set where
   nil : ListOp A
@@ -52,7 +51,7 @@ fold' {A}{X} n c = ⦅ (λ{(nil , _) → n; (cons n , g) → c n (g zero)}) ⦆
 \end{code}
 \subparagraph{between}
 The recursion principle \tt{b}, which when used, represents the between function.
-It uses \tt{b'} to assist termination checking:
+It uses \tt{b'} to assist in termination checking:
 \begin{code}
 b' : {B : Set} → (a : List' ℕ B → B) → ℕ → ℕ → B
 b' a x zero = a (nil , λ())
@@ -62,7 +61,7 @@ b a (x , y) = b' a x (suc (y - x))
 \end{code}
 The functions \tt{between1} and \tt{between2}.
 The former is defined without a church-encoding, the latter with.
-A reflexive proof and sanity check is included to show equality:
+A reflexive proof of equality and sanity check is included to show equality:
 \begin{code}
 between1 : ℕ × ℕ → List ℕ
 between1 xy = b in' xy
@@ -74,7 +73,7 @@ checkbetween : 2 :: 3 :: 4 :: 5 :: 6 :: [] ≡ between2 (2 , 6)
 checkbetween = refl
 \end{code}
 \subparagraph{map}
-The algebra \tt{m}, which when used in an algebra, represents the map function:
+The natural transformation \tt{m}, which when used in a transformation function, represents the map function:
 \begin{code}
 m : {A B C : Set}(f : A → B) → List' A C → List' B C
 m f (nil , _) = (nil , λ())
@@ -82,7 +81,7 @@ m f (cons n , l) = (cons (f n) , l)
 \end{code}
 The functions \tt{map1} and \tt{map2}.
 The former is defined without a church-encoding, the latter with.
-A reflexive proof and sanity check is included to show equality:
+A reflexive proof of equality and sanity check is included to show equality:
 \begin{code}
 map1 : {A B : Set}(f : A → B) → List A → List B
 map1 f = ⦅ in' ∘ m f ⦆
@@ -94,7 +93,7 @@ checkmap : (map1 (_+_ 2) (3 :: 6 :: [])) ≡ 5 :: 8 :: []
 checkmap = refl
 \end{code}
 \subparagraph{sum}
-The algebra \tt{s}, which when used in an algebra, represents the sum function:
+The algebra \tt{s}, which when used in a consumer function, represents the sum function:
 \begin{code}
 s' : List' ℕ (ℕ → ℕ) → (ℕ → ℕ)
 s' (nil , fn) s = s
@@ -105,7 +104,7 @@ s (cons n , f) = n + f zero
 \end{code}
 The functions \tt{sum1} and \tt{sum2}.
 The former is defined without a church-encoding, the latter with.
-A reflexive proof and sanity check is included to show equality:
+A reflexive proof of equality and sanity check is included to show equality:
 \begin{code}
 sum1 : List ℕ → ℕ
 sum1 = ⦅ s ⦆
@@ -135,8 +134,8 @@ eq {f} = begin
   ≡⟨⟩
     consu s ∘ natTrans (m f) ∘ prod b
   ∎
-
-
+\end{code}
+\begin{code}[hide]
 
 -- Bonus functions
 count : (ℕ → Bool) → μ (F ℕ) → ℕ

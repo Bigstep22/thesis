@@ -1,17 +1,15 @@
+\subsection{Library Writer's Guide to Shortcut Fusion}\label{sec:libfusion}
+Now that the sufficient category theory has been explained, it is possible to describe \cite{Harper2011}'s work, which my thesis centers on called ``A Library Writer's Guide to Shortcut Fusion''.
 
-%%%%% Dive into description of library writer's guide to shortcut fusion
-\subsection{Library Writer's Guide to Shortcut Fusion}
-Now that the sufficient category theory has been explained, it is possible to describe \cite{Harper2011}'s paper, which my thesis centers on called ``A Library Writer's Guide to Shortcut Fusion''.
-
-In the work, \cite{Harper2011} explain the concept of Church and Cochurch encodings in four steps:
+In his work, Harper explains the concept of Church and Cochurch encodings in four steps:
 The necessary underlying category theory, the concepts of encodings and the proof obligations necessary for ensuring correctness of the encodings, the concepts of (Co)Church encodings with the proof of correctness, and finally an example implementation for leaf trees.
 I will now go through each step briefly.
 
 \subsubsection{Category Theory}
-For the full overview of the category theory, see \autoref{sec:catetgory_theory}.
-The main concepts that \cite{Harper2011} explains are the \textit{universal property of (un)folds}, the \textit{fusion law}, and the \textit{reflection law}; all of which can be derived from the category theory already described earlier.
+For the full overview of the category theory, see \autoref{sec:cat_theory}.
+The main concepts that Harper explains are the \textit{universal property of (un)folds}, the \textit{fusion law}, and the \textit{reflection law}; all of which can be derived from the category theory described earlier.
 \begin{alignat*}{3}
-\text{The universal property of folds is as follows:} \\
+\text{The universal property of folds is}&\text{ as follows:} \\
 h &= \catam{a} \iff && h \circ in &&= a \circ F h \\
 \text{The fusion law as:} \\
 h \circ \catam{a} &= \catam{b}~\Longleftarrow && h \circ a &&= b \circ F h \\
@@ -23,8 +21,8 @@ It is also interesting to note that, for the universal property of unfolds, the 
 Converse definitions exist for terminal coalgebras, but I will not cover them in this section.
 They do exist in my formalization.
 
-\subsubsection{Encodings}
-The purpose of the encodings is to encode recursive functions, which are not inlined by Haskell's optimizer, into ones that are capable of being inlined and therefore fused:
+\subsubsection{Encodings}\label{sec:obligations}
+The purpose of the encodings is to encode recursive functions, which are not inlined by Haskell's optimizer, into nonrecursive ones that are capable of being inlined and therefore fused:
 ``For example, assume that we want to convert values of the recursive datatype \tt{$\mu$F} to values of a type \tt{F}.  The idea is that \tt{C} can faithfully represent values of \tt{$\mu$F}, but composed functions over \tt{C} can be fused automatically'' \citep{Harper2011}.
 
 Now, instead of writing functions over \tt{$\mu$F}, we write functions over \tt{C}, along with two conversion functions \tt{con: $\mu$F $\to$ C} (concrete) and \tt{abs : C $\to$ $\mu$F} (abstract).
@@ -87,7 +85,7 @@ fromCoCh (CoCh h x) = unfold h x
 \end{code}
 Similarly to his description of Church encodings, Harper proves the four proof obligations as well as the additional fifth one.
 The \tt{con $\circ$ abs = id} proof, leverages the free theorem for the corecursion principle of the type \tt{CoChurch}.
-The proof for natural transformations, however, does not use the free theorem and instead uses the fusion property for unfolds.
+The proof for natural transformations uses the free theorem and, in addition, the fusion property for unfolds.
 
 \subsubsection{Example implementation}
 To tie it all together, Harper gives an example implementation of how one would implement the encodings described so far.

@@ -1,12 +1,10 @@
 \subsubsection{Definition of Church encodings}
 \begin{code}[hide]
 open import agda.init.initial
-\end{code}
-This module defines Church encodings and the two conversions \tt{con} and \tt{abs}, called \tt{toCh} and \tt{fromCh} here, respectively.
-It also defines the generalized producing, transformation, and consuming functions, as described by \cite{Harper2011}.
-\begin{code}
 module agda.church.defs where
 \end{code}
+This section defines Church encodings and the two conversions \tt{con} and \tt{abs}, called \tt{toCh} and \tt{fromCh} here, respectively.
+It also defines the generalized producing, transformation, and consuming functions, as described by \cite{Harper2011}.
 The church encoding, leveraging containers:
 \begin{code}
 data Church (F : Container 0ℓ 0ℓ) : Set₁ where
@@ -32,8 +30,8 @@ prod   : {ℓ : Level}{F : Container _ _}{Y : Set ℓ}
          (g : {X : Set} → (⟦ F ⟧ X → X) → Y → X)(y : Y) → μ F
 prod g = fromCh ∘ prodCh g
 
-eqProd : {F : Container _ _}{Y : Set}
-         {g : {X : Set} → (⟦ F ⟧ X → X) → Y → X} → prod g ≡ g in'
+eqProd : {F : Container _ _}{Y : Set}{g : {X : Set} → (⟦ F ⟧ X → X) → Y → X} →
+         prod g ≡ g in'
 eqProd = refl
 \end{code}
 Second, the natural transformation function:
@@ -61,7 +59,7 @@ cons   : {F : Container _ _}{X : Set}
          (c : ⟦ F ⟧ X → X) → μ F → X
 cons c = consCh c ∘ toCh
 
-eqCons : {F : Container _ _}{X : Set}
-         {c : ⟦ F ⟧ X → X} → cons c ≡ ⦅ c ⦆
+eqCons : {F : Container _ _}{X : Set}{c : ⟦ F ⟧ X → X} →
+         cons c ≡ ⦅ c ⦆
 eqCons = refl
 \end{code}

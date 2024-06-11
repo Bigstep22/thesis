@@ -9,8 +9,8 @@ open import agda.init.initial
 open import agda.funct.endo
 open import Categories.Category renaming (Category to Cat)
 \end{code}
-This module proves the fusion property (see \autoref{sec:fusion_prop}).
-From it, it extracts the `fusion law' as it was described by \cite{Harper2011}; which uses non-categorical type definitions.\\
+This section proves the fusion property (see \autoref{sec:fusion_prop}).
+From it, it extracts the `fusion law' as it was described by \cite{Harper2011}; which uses non-categorical type definitions.
 The categorical fusion property:
 \begin{code}
 fusionprop : {F : Container 0ℓ 0ℓ}{A B μ : Set}{ϕ : ⟦ F ⟧ A → A}{ψ : ⟦ F ⟧ B → B}

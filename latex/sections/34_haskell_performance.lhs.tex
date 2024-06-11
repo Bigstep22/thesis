@@ -1,7 +1,7 @@
 \subsection{Performance Comparison}
-I tested the performance of the following pipelines:
+I tested the performance of the following pipeline:
 \begin{spec}
-f = sumCoCh . mapCoCh (+2) . filterCoCh odd . ListCoCh betweenCoCh
+f = sum . map (+2) . filter odd . between
 \end{spec}
 I defined 11 different variants of the above functions which can be categorized into the following five groups:
 \begin{itemize}[noitemsep]
@@ -12,8 +12,7 @@ I defined 11 different variants of the above functions which can be categorized 
 \item Cochurch fused (normally, with tail recursion, with skip constructor, and both)
 \end{itemize}
 
-I'll discuss the results after first describing what goes into writings fusible functions.
-For the implementation of all the functions, see the source code in the artifacts.
+I'll discuss the results after first describing what is important when writings fusible functions.  For the implementation of all the functions, see the source code in the artifacts.
 
 In order to make sure a pipeline of functions fuses in Haskell, there are several things that need to be taken into consideration.
 \begin{itemize}[noitemsep]
@@ -39,13 +38,13 @@ b a (x, y) = loop x
     \end{spec}
     \item Ensure that the fused result is tail recursive.
     For consumer functions, it is often possible to make the function tail recursive.
-    For corecursion principle for sum \tt{su}:
+    For the corecursion principle of sum \tt{su}:
     \begin{spec}
 su :: (s -> List_ Int s) -> s -> Int
 su h s = loop s
   where loop s' = case h s' of
           Nil_ -> 0
-                          Cons_ x xs -> x + loop xs
+          Cons_ x xs -> x + loop xs
     \end{spec}
     It is possible to modify the definition of the corecursion \tt{loop} such that it is tail-recursive:
     \begin{spec}
@@ -53,7 +52,7 @@ su :: (s -> List_ Int s) -> s -> Int
 su h s = loopt s 0
   where loopt s' sum = case h s' of
           Nil_ -> sum
-                          Cons_ x xs -> loopt xs (x + sum)
+          Cons_ x xs -> loopt xs (x + sum)
     \end{spec}
 For Church encodings, it is a little more tricky to get the resultant function to be tail-recursive, it is possible, however.
 Taking the algebra for sum again:
@@ -91,7 +90,7 @@ I measured the performance using tasty-bench\footnote{\url{https://hackage.haske
 \subsubsection{Performance differences}
 There are two main results figures, which can be seen at \autoref{fig:results1} and \autoref{fig:results2}.
 However, their y axes are logarithmic, due to the nature of the input sizes provided from \tt{(1,100)} to \tt{(1,10000000)} in powers of 10.
-It is more illustrative to look a linear scale, and that is easiest when zooming in on one specific input.
+It is more illustrative to look at a linear scale, and that is easiest when zooming in on one specific input.
 For the illustration, I will choose \tt{(1,10000)} as input, as it is relatively representative.
 There are specific variations when changing scale, but those will be discussed in \autoref{sec:scale_var}.
 
@@ -116,7 +115,7 @@ In general, as the scale increases (see \autoref{fig:all_exec} and \autoref{fig:
     \item The factor speedup between the unfused and three fully fused pipelines increases, most notably between \tt{(1, 10000)} and \tt{(1,100000)}, going from 25.4x to 31.5x.
     This likely has to do with the increased volume of data that needs to be stored in random access memory.
     \item All the non tail-recursive encoding implementations get slower relative to the tail-recursive implementations.
-    This is likely due to extra time spend allocating to and retrieving from memory.
+    This is likely due to extra time spent allocating to and retrieving from memory.
     \item Most importantly for all fully fused pipelines: The speedup that fusion offers only seems to increase as the order of magnitude of the calculation grows.
 \end{itemize}
 

@@ -1,6 +1,6 @@
 \subsection{Haskell's optimization pipeline}
 In order to understand how fusion works, it is important to understand a few other concepts that fusion works in tandem with.
-Namely, beta reduction, inlining, case-of-case, and tail call optimization.
+Namely, beta reduction, inlining, case-of-case optimizations, and tail call optimization.
 I will give a brief description of each.
 
 \subsubsection{Beta reduction}
@@ -17,8 +17,8 @@ case (
     B1 -> F1
     B2 -> F2
   ) of
-    A1 -> E1
-    A2 -> E2
+  A1 -> E1
+  A2 -> E2
 \end{spec}
 To the following\footnote{This specific example I retrieved from: \url{https://stackoverflow.com/questions/35815503/what-ghc-optimization-is-responsible-for-duplicating-case-expressions}}:
 \begin{spec}
@@ -37,7 +37,7 @@ case V of
   V -> Expr
   ...
 \end{spec}
-Can be simplified by case-of-known-constructor optimization:
+Can be simplified by case-of-known-constructor optimization to:
 \begin{spec}
 Expr
 \end{spec}
@@ -71,7 +71,6 @@ case x of
   False -> E1
 \end{spec}
 No more runtime evaluation of not!
-
 To see an example of these optimizations in action, see \autoref{app:cochurch_stream}.
 
 

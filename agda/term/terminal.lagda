@@ -1,5 +1,5 @@
 \subsubsection{Terminal coalgebras and anamorphisms}
-This module defines a datatype and shows it to be terminal; and a function and shows it to be an anamorphism in the category of F-Coalgebras.
+This section defines a datatype and shows it to be terminal; and a function and shows it to be an anamorphism in the category of F-Coalgebras.
 Specifically, it is shown that \tt{($\nu$F, out)} is terminal.
 \begin{code}
 {-# OPTIONS --guardedness #-}
@@ -28,7 +28,8 @@ A shorthand for the Category of F-Coalgebras:
 C[_]CoAlg : (F : Container 0ℓ 0ℓ) → Cat (lsuc 0ℓ) 0ℓ 0ℓ
 C[ F ]CoAlg = F-Coalgebras F[ F ]
 \end{code}
-A candidate terminal datatype and anamorphism function are defined, they will be proved to be so later on this module:
+A candidate anamorphism function is defined, they will be proved to be so later on this module,
+Agda's stdlib \tt{unfold} could used but is not for clarity
 \begin{code}
 A⟦_⟧ : {F : Container 0ℓ 0ℓ}{X : Set} → (X → ⟦ F ⟧ X) → X → ν F
 head (A⟦ c ⟧ x) = fst (c x)
@@ -53,7 +54,8 @@ It is shown that any other valid F-Coalgebra homomorphism from \tt{out} to \tt{a
 i.e. the backward direction of the \textit{universal property of unfolds} \cite{Harper2011}.
 This constitutes a proof of uniqueness.
 This uses \tt{out} injectivity.
-Currently, Agda's termination checker does not seem to notice that the proof in question terminates:
+Currently, Agda's termination checker does not seem to notice that the proof in question terminates,
+it needs to be rewritten to properly use guardedness:
 \begin{code}
 {-# NON_TERMINATING #-}
 univ-from : {F : Container _ _}{C : Set}(h : C → ν F){c : C → ⟦ F ⟧ C} →
@@ -62,10 +64,6 @@ univ-from h {c} eq x = let (op , ar) = c x in
   out-injective (begin
       (out ∘ h) x
     ≡⟨ cong (λ f → f x) eq ⟩
-      (map h ∘ c) x
-    ≡⟨⟩
-      map h (op , ar)
-    ≡⟨⟩
       (op , h ∘ ar)
     ≡⟨ cong (λ f → op , f) (funext $ univ-from h eq ∘ ar) ⟩ -- induction
       (op , A⟦ c ⟧ ∘ ar)
@@ -89,10 +87,10 @@ computation-law : {F : Container 0ℓ 0ℓ}{C : Set}(c : C → ⟦ F ⟧ C) →
 computation-law c = refl
 \end{code}
 The \textit{reflection law} \cite{Harper2011}:
-SOMETHING ABOUT TERMINATION.
 \begin{code}
 {-# NON_TERMINATING #-}
-reflection : {F : Container 0ℓ 0ℓ}(x : ν F) → A⟦ out ⟧ x ≡ x
+reflection : {F : Container 0ℓ 0ℓ}(x : ν F) →
+             A⟦ out ⟧ x ≡ x
 reflection x = let (op , ar) = out x in
   out-injective (begin
     out (A⟦ out ⟧ x)

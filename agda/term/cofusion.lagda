@@ -1,12 +1,10 @@
 \subsubsection{Terminal F-Coalgebra fusion}
-This module proves the categorical fusion property.
-From it, it extracts a `fusion law' as it was defined by \cite{Harper2011}; which is easier to work with.
-This shows that the fusion law does follow from the fusion property.
-\begin{code}
+This section proves the categorical fusion property.
+From it, it extracts the `fusion law' as it was described by \cite{Harper2011}; which uses non-categorical type definitions.
+The categorical fusion property:
+\begin{code}[hide]
 {-# OPTIONS --guardedness #-}
 module agda.term.cofusion  where
-\end{code}
-\begin{code}[hide]
 open import agda.term.terminal
 open import agda.funct.funext
 open import agda.funct.endo
@@ -15,7 +13,6 @@ open import Categories.Functor.Coalgebra
 open import Categories.Object.Terminal
 open IsTerminal
 \end{code}
-The categorical fusion property:
 \begin{code}
 fusionprop : {F : Container 0ℓ 0ℓ}{C D ν : Set}
              {ϕ : C → ⟦ F ⟧ C}{ψ : D → ⟦ F ⟧ D}{term : ν → ⟦ F ⟧ ν}

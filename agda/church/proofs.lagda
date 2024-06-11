@@ -1,15 +1,14 @@
 \subsubsection{Proof obligations}
-In \cite{Harper2011}'s work, five proofs proofs are given for Church encodings.
-These are formalized in this module.
+In \cite{Harper2011}'s work, five proofs are given for Church encodings.
+These are formalized here.
 \begin{code}[hide]
 open import agda.init.initial
 open import agda.funct.funext
 open import agda.church.defs
-\end{code}
-\begin{code}
 module agda.church.proofs where
 \end{code}
-The first proof proves that \tt{fromCh $\circ$ toCh = id}, using the reflection law:
+The first proof shows that \tt{fromCh $\circ$ toCh = id}, using the reflection law.
+This corresponds to the first proof obligation mentioned in \autoref{sec:obligations}:
 \begin{code}
 from-to-id : {F : Container 0ℓ 0ℓ} → fromCh ∘ toCh {F} ≡ id
 from-to-id {F} = funext λ x → begin
@@ -26,9 +25,10 @@ from-to-id {F} = funext λ x → begin
 \end{code}
 The second proof is similar to the first, but it proves the composition in the other direction \tt{toCh $\circ$ fromCh = id}.
 This proofs leverages parametricity as described by \cite{Wadler1989}.
-It postulates the free theorem of the function \tt{g : $forall$ A . (F A -> A) -> A},
+It postulates the free theorem of the function \tt{g :$\forall$ A . (F A -> A) -> A},
 to prove that ``applying \tt{g} to \tt{b} and then passing the result to \tt{h},
-is the same as just folding \tt{c} over the datatype'' \citep{Harper2011}:
+is the same as just folding \tt{c} over the datatype'' \citep{Harper2011}.
+This together with the first proof shows that Church encodings are isomorphic to the datatypes they are encoding:
 \begin{code}
 postulate free : {F : Container 0ℓ 0ℓ}{B C : Set}{b : ⟦ F ⟧ B → B} {c : ⟦ F ⟧ C → C}
                  (h : B → C)(g : {X : Set} → (⟦ F ⟧ X → X) → X) →
@@ -51,11 +51,12 @@ to-from-id {F} = funext λ where
     ∎
 \end{code}
 The third proof shows church-encoded functions constitute an implementation for the consumer functions being replaced.
-The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness:
+The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness.
+This corresponds to the third proof obligation (second diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
 cons-pres : {F : Container 0ℓ 0ℓ}{X : Set}(b : ⟦ F ⟧ X → X) →
             consCh b ∘ toCh ≡ ⦅ b ⦆
-cons-pres {F} b = funext λ (x : μ F) → begin
+cons-pres {F} b = funext λ x → begin
     consCh b (toCh x)
   ≡⟨⟩ -- definition of toCh
     consCh b (Ch (λ a → ⦅ a ⦆ x))
@@ -66,11 +67,12 @@ cons-pres {F} b = funext λ (x : μ F) → begin
   ∎
 \end{code}
 The fourth proof shows that church-encoded functions constitute an implementation for the producing functions being replaced.
-The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness:
+The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness.
+This corresponds to the fourth proof obligation (third diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
 prod-pres : {F : Container 0ℓ 0ℓ}{X : Set}(f : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y) →
             fromCh ∘ prodCh f ≡ f in'
-prod-pres {F}{X} f = funext λ (s : X) → begin
+prod-pres {F}{X} f = funext λ s → begin
     fromCh ((λ (x : X) → Ch (λ a → f a x)) s)
   ≡⟨⟩ -- function application
     fromCh (Ch (λ a → f a s))
@@ -81,7 +83,8 @@ prod-pres {F}{X} f = funext λ (s : X) → begin
   ∎
 \end{code}
 The fifth, and final proof shows that church-encoded functions constitute an implementation for the conversion functions being replaced.
-The proof again leverages the free theorem defined earlier:
+The proof again leverages the free theorem defined earlier.
+This corresponds to the second proof obligation (first diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
 trans-pres : {F G : Container 0ℓ 0ℓ} (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
              fromCh ∘ natTransCh f ≡ ⦅ in' ∘ f ⦆ ∘ fromCh
@@ -100,7 +103,7 @@ trans-pres f = funext λ where
       ⦅ in' ∘ f ⦆ (fromCh (Ch g))
     ∎
 \end{code}
-Finally two additional proofs were made to clearly show that any pipeline made using church
+Finally, two additional proofs were made to clearly show that any pipeline made using church
 encodings will fuse down to a simple function application.
 The first of these two proofs shows that any two composed natural transformation fuse down
 to one single natural transformation:

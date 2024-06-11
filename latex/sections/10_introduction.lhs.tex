@@ -3,21 +3,22 @@ When writing functional code, we often use lists (or other data structures) to `
 Take, as an example, the following function in the programming language Haskell, as introduced by \cite{Gill1993}: %TODO: Cite
 \begin{code}
 all :: (a -> Bool) -> [a] -> Bool
-all p = and . map p
+all p xs = and (map p xs)
 \end{code}
 The function \tt{map p} traverses across the input list, applying the predicate \tt{p} to each element, resulting in a new boolean list.
 Then, the function \tt{and} takes this resulting, intermediate, boolean list and consumes it by `and-ing' together all the boolean values.
 
 Being able to compose functions in this fashion is part of what makes functional programming so attractive, but it comes at the cost of computational overhead:
-Each time allocating a list cell, only to subsequently deallocate it once the value has been read.
+Each time allocating a list cell, only for the following function to subsequently deallocate it once the value has been read.
 We could instead rewrite \tt{all} in the following fashion:
 \begin{code}
+all :: (a -> Bool) -> [a] -> Bool
 all p xs = h xs
   where h []     = True
         h (x:xs) = p x && h xs
 \end{code}
-This function, instead of traversing the input list, producing a new list, and then subsequently traversing that intermediate list, traverses the input list only once; immediately producing a new answer.
-Writing code in this fashion is far more performant, at the cost of read- and write-ability.
+This function, instead of traversing the input list, producing a new list, and then subsequently traversing that intermediate list; traverses the input list only once, immediately producing a new answer.
+Writing code in this fashion is far more performant, at the cost of readability, writability, and composability.
 Can you write a high-performance, single-traversal, version of the following function \citep{Harper2011}?
 \begin{code}
 f :: (Int, Int) -> Int
@@ -27,10 +28,11 @@ With some (more) effort and optimization, one could arrive at the following solu
 \begin{code}
 f :: (Int, Int) -> Int
 f (x, y) = loop x
-  where loop x | x > y    = 0
-               |otherwise = if odd x
-                             then (x+1) + loop (x+1)
-                             else loop (x+1)
+  where loop x = if x > y
+                 then 0
+                 else if odd x
+                      then (x+1) + loop (x+1)
+                      else loop (x+1)
 \end{code}
 Doing this by hand every time, to get from the nice, elegant, compositional style of programming to the higher-performance, single-traversal style, gets old very quick.
 Especially if this needs to be done, by hand, every single time you compose any two functions.
@@ -60,14 +62,15 @@ My thesis focuses on a specific form of fusion called shortcut fusion through th
 My thesis centers on formalizing, replicating, and expanding upon \cite{Harper2011}'s work and makes two crucial contributions, answering the two questions above:
 \begin{enumerate}
     \item The Church and Cochurch encodings' implementation in Haskell, as described by \cite{Harper2011} are replicated and investigated further as to their performance characteristics.
-    In this process, I find a weakness in Haskell's optimizer, and glean further practical insights as to how to get these encodings to properly fuse as well (especially for Cochurch encodings) and what optimizations enable shortcut fusion to do its work.
+    In this process, I find a weakness in Haskell's optimizer, glean further practical insights as to how to get these encodings to properly fuse, (especially for Cochurch encodings) and what optimizations enable shortcut fusion to do its work.
 
     This is important as \cite{Harper2011} gave a good pragmatic explanation as to how to implement the (Co)Church encodings in Haskell, gave an example implementation, and benchmarked that implementation.
     He did not, however, dive into too much detail as to \textit{why} they work stating: ``Interestingly, however, we note that Cochurch encodings consistently outperform Church encodings, sometimes by a significant margin. While we do consider these results conclusive, we think that these results merit further investigation.'' \citep{Harper2011}.
-    This is what my research has (partially) set out to look into.
+    This is what my research has set out to look into.
     This is discussed in detail in \autoref{sec:haskell}.
-    \item The Church and Cochurch encodings described are formalized and implemented, including the relevant category theory, in Agda, in as a general fashion as possible, leveraging containers \citep{Abbott2005} to represent strictly positive functors.
+    \item (Co)Church encodings are formalized and implemented, including the relevant category theory, in Agda, in as a general fashion as possible, leveraging containers \citep{Abbott2005} to represent strictly positive functors.
     Furthermore, the functions that are described (producing, transforming, and consuming) are also implemented in a general fashion and shown to be equal to regular folds (i.e., catamorphisms and anamorphisms).
+    Furthermore, I apply the general proofs to an example \tt{List} instance.
 
     This is important because there currently does not seem to exist a formalization of the work.
     Formally verifying the mathematics will strengthen the work done by \cite{Harper2011}, perhaps also aiding in understanding in how the different pieces of mathematics relate.

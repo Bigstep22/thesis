@@ -1,83 +1,93 @@
 \subsection{Foldr/build fusion (on lists)}\label{sec:foldr/build}
 Starting with the basics of fusion.
-\cite{Gill1993}'s described the original 'shortcut deforestation' technique.
+\cite{Gill1993} describes the original `shortcut fusion' technique.
 The core idea is as follows:
 
-In functional programming, lists are (often) used to store the output of one function such that it can then be consumed by another function. To co-opt \cite{Gill1993}'s example:
+In functional programming, lists are (often) used to store the output of one function such that it can then be consumed by another function. To co-opt Gill's example:
 \begin{code}
-    all p xs = and (map p xs)
+all :: (a -> Bool) -> [a] -> Bool
+all p xs = and (map p xs)
 \end{code}
 
 \tt{map p xs} applies \tt{p} to all the elements, producing a boolean list, and \tt{and} takes that new list and `ands' all of them together to produce a resulting boolean value. ``The intermediate list is discarded, and eventually recovered by the garbage collector'' \citep{Gill1993}.
 
-This generation and immediate consumption of an intermediate datastructure introduces a lot of computation overhead. Allocating memory for each \tt{cons} cell, storing the data inside that instance, and then reading back that data, all take time. One could instead write the above function like this:
+This generation and immediate consumption of an intermediate datastructure introduces a lot of computational overhead. Allocating memory for each \tt{cons} cell, storing the data inside that instance, and then reading back that data, all take time. One could instead write the above function like this:
 \begin{code}
-    all' p xs = h xs
-       where h []     = True
-             h (x:xs) = p x && h xs
+all :: (a -> Bool) -> [a] -> Bool
+all p xs = h xs
+  where h []     = True
+        h (x:xs) = p x && h xs
 \end{code}
 Now no intermediate datastructure is generated at the cost of more programmer involvement. We've made a custom, specialized version of \tt{and~.~map~p}. The compositional style of programming that function programming languages enable (such as Haskell) would be made a lot more difficult if, for every composition, the programmer had to write a specialized function. Can this be automated?
 
-\cite{Gill1993}'s key insight was to note that when using a \tt{foldr k z xs} across a list, the effect of its application ``is to replace each \tt{cons} in the list \tt{xs} with k and replace the \tt{nil} in \tt{xs} with \tt{z}. By abstracting list-producing functions with respect to their connective datatype (\tt{cons} and \tt{nil}), we can define a function \tt{build}:
+Gill's key insight was to note that when using a \tt{foldr k z xs} across a list, the effect of its application: 
+
+\begin{quotation}
+    Is to replace each \tt{cons} in the list \tt{xs} with k and replace the \tt{nil} in \tt{xs} with \tt{z}. By abstracting list-producing functions with respect to their connective datatype (\tt{cons} and \tt{nil}), we can define a function \tt{build}:
 \begin{code}
-    build g = g (:) []
+build :: (forall b. (a -> b -> b) -> b -> b) -> [a] 
+build g = g (:) []
 \end{code}
 Such that:
 \begin{code}
-    foldr k z (build g) = g k z
+foldr k z (build g) = g k z
 \end{code}
-\cite{Gill1993}.''
+\cite{Gill1993}.
+\end{quotation}
 
-\cite{Gill1993} dubbed this the \tt{foldr/build} rule. For its validity \tt{g} needs to be of type:
+Gill dubbed this the \tt{foldr/build} rule. For its validity \tt{g} needs to be of type:
 \begin{code}
-    g : forall beta : (A -> beta -> beta) -> beta -> beta
+g : forall beta : (A -> beta -> beta) -> beta -> beta
 \end{code}
-Which can be proved to be true through the use of g's free theorem \`a la \cite{Wadler1989}. For more information on free theorems see \autoref{sec:free}.
+Which is true by g's free theorem \`a la \cite{Wadler1989}. For more information on free theorems see \autoref{sec:free}.
 
 \subsubsection{An example}
-Take the function from, that takes two numbers and produces a list of all the numbers from the first to the second:
+Take as an example the function \tt{from}, that takes two numbers and produces a list of all the numbers from the first to the second:
 \begin{code}
-    from a b = if a > b
-               then []
-               else a : from (a + 1) b
+from :: Int -> Int -> [Int]
+from a b = if a > b
+           then []
+           else a : from (a + 1) b
 \end{code}
 To arrive at a suitable \tt{g} we must abstract over the connective datatypes:
 \begin{code}
-    from' a b = \ c n  -> if a > b
-                          then n
-                          else c a (from (a + 1) b c n)
+from' a b = \ c n  -> if a > b
+                      then n
+                      else c a (from (a + 1) b c n)
 \end{code}
 This is obviously a different function, we now redefine \tt{from} in terms of \tt{build} \citep{Gill1993}:
 \begin{code}
-    from a b = build (from' a b)
+from :: Int -> Int -> [Int]
+from a b = build (from' a b)
 \end{code}
-With some inlining and $\beta$ reduction, one can see that this definition is identical to the original \tt{from} definition. Now for the killer feature \citep{Gill1993}:
+With some inlining and $\beta$ reduction, one can see that this definition is identical to the original \tt{from} definition.
+Now for the actual fusion \citep{Gill1993}:
 \begin{code}
-    sum (from a b)
-      = foldr (+) 0 (build (from' a b))
-      = from' a b (+) 0
+sum (from a b)
+  = foldr (+) 0 (build (from' a b))
+  = from' a b (+) 0
 \end{code}
-Notice how we can apply the \tt{foldr/build} rule here to prevent the generation of an intermediate list.
-Any adjacent \tt{foldr/build} pair ``cancel away''.
+Notice how we can apply the \tt{foldr/build} from step two to three to prevent the generation of an intermediate list.
+Any adjacent \tt{foldr/build} pair `cancels away'.
 This is an example of shortcut fusion.
 
-One can rewrite many functions in terms of \tt{foldr} and \tt{build} such that this fusion can be applied. This can be seen in Figure \ref{fig:foldr/build_ex}.
+One can rewrite many functions in terms of \tt{foldr} and \tt{build} such that this fusion can be applied. This can be seen in \autoref{fig:foldr/build_ex}.
 See \cite{Gill1993}'s work, specifically the end of section 3.3 (\tt{unlines}) for a more expansive example of how fusion, $\beta$ reduction, and inlining can combine to fuse a pipeline of functions down an as efficient minimum as can be expected.
 \begin{figure}[ht]
     \centering
     \begin{code}
-    map f xs    = build (\ c n -> foldr (\ a b -> c (f a) b) n xs)
-    filter f xs = build (\ c n -> foldr (\ a b -> if f a then c a b else b) n xs)
-    xs ++ ys    = build (\ c n -> foldr c (foldr c n ys) xs)
-    concat xs   = build (\ c n -> foldr (\ x Y -> foldr c y x) n xs)
-    
-    repeat x    = build (\ c n -> let r = c x r in r)
-    zip xs ys   = build (\ c n -> let zip' (x:xs) (y:ys) = c (x,y) (zip' xs ys)
-                                      zip' _      _      = n
-                                      in zip' xs ys)
+map f xs    = build (\ c n -> foldr (\ a b -> c (f a) b) n xs)
+filter f xs = build (\ c n -> foldr (\ a b -> if f a then c a b else b) n xs)
+xs ++ ys    = build (\ c n -> foldr c (foldr c n ys) xs)
+concat xs   = build (\ c n -> foldr (\ x Y -> foldr c y x) n xs)
 
-    []         = build (\ c n -> n)
-    x:xs       = build (\ c n -> c x (foldr c n xs))
+repeat x    = build (\ c n -> let r = c x r in r)
+zip xs ys   = build (\ c n -> let zip' (x:xs) (y:ys) = c (x,y) (zip' xs ys)
+                                  zip' _      _      = n
+                                  in zip' xs ys)
+
+[]         = build (\ c n -> n)
+x:xs       = build (\ c n -> c x (foldr c n xs))
     \end{code}
     \caption{Examples of functions rewritten in terms of \tt{foldr/build}. \citep{Gill1993}}
     \label{fig:foldr/build_ex}
@@ -87,11 +97,11 @@ See \cite{Gill1993}'s work, specifically the end of section 3.3 (\tt{unlines}) f
 
 \subsubsection{Generalization to recursive datastructures}
 This foldr/build fusion works for lists, but it has several limitations.
-One is that it only works on lists, this is alleviated using Church encodings and is described by \cite{Harper2011}.
-Secondly, the functions that we are writing need to be expressible in terms of compositions of foldr's and builds. What if we want to implement to converse approach?
+One is that it only works on lists, which can be alleviated using Church encodings and is described by \cite{Harper2011}.
+Secondly, the functions that we are writing need to be expressible in terms of compositions of foldr's and builds. What if we want to implement the converse approach using an unfoldr?
 This exists and is destroy/unfoldr fusion and is described by \cite{Coutts2007}.
 This work generalized by Cochurch encodings, also described by \cite{Harper2011}.
 
 The generalization by Harper leverages (Co)Church, which uses definitions from category such as F-algebras and initiality.
-Don't know what they are? Read on in the next section, where I give these category theory definitions.
+Don't know what they are? Read on to \autoref{sec:cat_theory}, where I give these category theory definitions.
 

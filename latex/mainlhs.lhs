@@ -36,6 +36,8 @@
   \setcounter{tocdepth}{#1}%
 }
 
+\def\subsectionautorefname{section}
+\def\subsubsectionautorefname{section}
 
 
 \begin{document}
@@ -54,10 +56,11 @@
 \changelocaltocdepth{3}
 %include sections/30_haskell_optimizations.lhs.tex
 \input{sections/40_formalization}
-\input{sections/45_related_works}
+\input{sections/48_related_works}
 \input{sections/50_conclusion}
 \bibliographystyle{apacite}
 \bibliography{references.bib}
+\changelocaltocdepth{1}
 \appendix
 %include sections/90_appendix.lhs.tex
 

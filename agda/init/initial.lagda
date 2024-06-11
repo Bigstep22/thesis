@@ -1,10 +1,10 @@
 \subsubsection{Universal properties of catamorphisms and initiality}
-This module proves the universal property of folds.
+This section proves the universal property of folds.
 It takes the definition of \tt{M} types and shows that the \tt{fold} function defined for it is a catamorphism.
 This is done by proving that the fold is an F-algebra homomorphism through a proof of existence and uniqueness.
 \begin{code}
 module agda.init.initial where
-open import Data.W using () renaming (sup to in'; foldr to ⦅_⦆) public
+open import Data.W using () renaming (sup to in') public
 \end{code}
 \begin{code}[hide]
 open import Level using (0ℓ; Level) renaming (suc to lsuc) public
@@ -27,10 +27,11 @@ A shorthand for the Category of F-Algebras.
 C[_]Alg : (F : Container 0ℓ 0ℓ) → Cat (lsuc 0ℓ) 0ℓ 0ℓ
 C[ F ]Alg = F-Algebras F[ F ]
 \end{code}
-A definition of fold, not the one used in the code - the one from Agda's stdlib is used - but included for clarity:
+A candidate catamorphism function is defined, they will be proved to be so later on this module,
+Agda's stdlib \tt{fold} could be used but is not for clarity:
 \begin{code}
---⦅_⦆ : {F : Container 0ℓ 0ℓ}{X : Set} → (⟦ F ⟧ X → X) → μ F → X
---⦅ a ⦆ (in' (op , ar)) = a (op , ⦅ a ⦆ ∘ ar)
+⦅_⦆ : {F : Container 0ℓ 0ℓ}{X : Set} → (⟦ F ⟧ X → X) → μ F → X
+⦅ a ⦆ (in' (op , ar)) = a (op , ⦅ a ⦆ ∘ ar)
 \end{code}
 It is shown that any $\catam{\_}$ is a valid F-Algebra homomorphism from \tt{in'} to any other object \tt{a}
 i.e., the forward direction of the \textit{universal property of folds} \citep{Harper2011}.
@@ -49,13 +50,9 @@ univ-from : {F : Container 0ℓ 0ℓ}{X : Set}(a : ⟦ F ⟧ X → X)(h : μ F �
 univ-from a h eq (in' x@(op , ar)) = begin
       (h ∘ in') x
     ≡⟨ cong-app eq x ⟩
-      (a ∘ map h) x
-    ≡⟨⟩
       a (op , h ∘ ar)
     ≡⟨ cong (λ f → a (op , f)) (funext $ univ-from a h eq ∘ ar) ⟩
       a (op , ⦅ a ⦆ ∘ ar)
-    ≡⟨⟩
-      (a ∘ map ⦅ a ⦆) x
     ≡⟨⟩
       (⦅ a ⦆ ∘ in') x
     ∎
@@ -71,12 +68,14 @@ initial-in = record { ! = λ {A} →
 \end{code}
 The \textit{computation law} \citep{Harper2011}:
 \begin{code}
-comp-law : {F : Container 0ℓ 0ℓ}{A : Set}(a : ⟦ F ⟧ A → A) → ⦅ a ⦆ ∘ in' ≡ a ∘ map ⦅ a ⦆
+comp-law : {F : Container 0ℓ 0ℓ}{A : Set}(a : ⟦ F ⟧ A → A) →
+           ⦅ a ⦆ ∘ in' ≡ a ∘ map ⦅ a ⦆
 comp-law a = refl
 \end{code}
 The \textit{reflection law} \citep{Harper2011}:
 \begin{code}
-reflection : {F : Container 0ℓ 0ℓ}(y : μ F) → ⦅ in' ⦆ y ≡ y
+reflection : {F : Container 0ℓ 0ℓ}(y : μ F) →
+             ⦅ in' ⦆ y ≡ y
 reflection y@(in' (op , ar)) = begin
      ⦅ in' ⦆ y
    ≡⟨⟩ -- Dfn of ⦅_⦆
@@ -87,6 +86,7 @@ reflection y@(in' (op , ar)) = begin
      y
    ∎
 
-reflection-law : {F : Container 0ℓ 0ℓ} → ⦅ in' ⦆ ≡ id
+reflection-law : {F : Container 0ℓ 0ℓ} →
+                 ⦅ in' ⦆ ≡ id
 reflection-law {F} = funext (reflection {F})
 \end{code}

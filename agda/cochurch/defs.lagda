@@ -1,14 +1,12 @@
 \subsubsection{Definition of Cochurch encodings}
-This module defines Cochurch encodings and the two conversion functions \tt{con} and \tt{abs}, called \tt{toCoCh} and \tt{fromCoCh} here, respectively.
+This section defines Cochurch encodings and the two conversion functions \tt{con} and \tt{abs}, called \tt{toCoCh} and \tt{fromCoCh} here, respectively.
 It also defines the generalized producing, transformation, and consuming functions, as described by \cite{Harper2011}.
 The definition of the CoChurch datatypes is defined slightly differently to how it is initially defined by \cite{Harper2011}.
 Instead an Isomorphic definition is used, whose type is described later on on the same page.
 The original definition is included as \tt{CoChurch'}.
-\begin{code}
+\begin{code}[hide]
 {-# OPTIONS --guardedness #-}
 module agda.cochurch.defs where
-\end{code}
-\begin{code}[hide]
 open import agda.term.terminal
 open import agda.funct.funext
 open import Data.Product using (∃; _×_)
@@ -52,7 +50,7 @@ natTrans : {F G : Container 0ℓ 0ℓ}(nat : {X : Set} → ⟦ F ⟧ X → ⟦ G
 natTrans nat = fromCoCh ∘ natTransCoCh nat ∘ toCoCh
 
 eqNatTrans : {F G : Container 0ℓ 0ℓ}{nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X} →
-          natTrans nat ≡ A⟦ nat ∘ out ⟧
+             natTrans nat ≡ A⟦ nat ∘ out ⟧
 eqNatTrans = refl
 \end{code}
 Third the consuming function, note that this a is a generalized version of \cite{Svenningsson2002}'s \tt{destroy} function:
@@ -69,13 +67,13 @@ eqcons : {F : Container 0ℓ 0ℓ}{X : Set}{c : {S : Set} → (S → ⟦ F ⟧ S
          cons c ≡ c out
 eqcons = refl
 \end{code}
-The original CoChurch definition is included here for completeness' sake, but it is note used elsewhere in the code.
+The original CoChurch definition is included here for completeness' sake, but it is not used elsewhere in the code.
 \begin{code}
 data CoChurch' (F : Container 0ℓ 0ℓ) : Set₁ where
   cochurch : (∃ λ S → (S → ⟦ F ⟧ S) × S) → CoChurch' F
 \end{code}
 A mapping from \tt{CoChurch'} to \tt{CoChurch} and back is provided
-as well as a proof that their compositions are equal to the identity function, thereby proving isomorphism:
+as well as a proof that their compositions are equal to the identity function, thereby constructing an isomorphism:
 \begin{code}
 toConv : {F : Container _ _} → CoChurch' F → CoChurch F
 toConv (cochurch (S , (h , x))) = CoCh {_}{S} h x
