@@ -1,4 +1,4 @@
-\subsection{Performance Comparison}
+\subsection{Performance Comparison}\label{sec:hask_perf}
 I tested the performance of the following pipeline:
 \begin{spec}
 f = sum . map (+2) . filter odd . between
@@ -78,14 +78,25 @@ sum7 = flip sumCh 0 . toCh
 
 This is technique similar to the one described by \cite{Breitner2018}.
 \item Ensure that the fused result is a single recursive function (so no helper functions such as \tt{go}).
+This was a problem when writing the filter function in Cochurch encoded fashion.
+This is only possible if a recursive natural transformation function is used, but it unfortunately does not currently fuse.
+
+The current workaround for this is Stream fusion as described by \cite{Coutts2007}.
+This workaround is part of my performance analysis.
 
 % Cue story about haskell's optimizer and that it is only willing to inline non-recursive functions. You only can recurse once... (Maybe something, something joing points?)
 % Adding a Skip constructor can make a big difference to enabling the avoidance of additionally needed recursive functions.
 \end{itemize}
 
+
 For the testing I ensured that the first two of the above points were satisfied, partially through analysis of the GHC\footnote{\url{https://downloads.haskell.org/ghc/latest/docs/users_guide/debugging.html\#core-representation-and-simplification}} generated Core representation.
 The latter two points became part of the testing setup.
 I measured the performance using tasty-bench\footnote{\url{https://hackage.haskell.org/package/tasty-bench}}.
+I tested all of the piplines with an input going from \tt{(1, 100)} to \tt{(1, 10000000)},
+running tastybench five times for each input, setting a maximum standard deviation of 2\% of the mean result.
+For the presentation of the data I took the mean of these five runs.
+Tastybench keeps running tests until the standard deviation becomes small enough; each time running doubling the amount of runs before checking the new standard deviation.
+Tastybench measured time using CPU time.
 
 \subsubsection{Performance differences}
 There are two main results figures, which can be seen at \autoref{fig:results1} and \autoref{fig:results2}.

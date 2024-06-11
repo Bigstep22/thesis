@@ -10,22 +10,7 @@ The code can be presented in roughly 2 parts:
 
 The Agda code makes use of two libraries: agda-stdlib\footnote{\url{https://github.com/agda/agda-stdlib}} v2.0 and agda-categories\footnote{\url{https://github.com/agda/agda-categories}} v0.2.0
 
-Before diving into the formalization, it is prudent to clearly show the correspondence between category theory terms and functional programming terms that I use interchangeably.
-This can be seen in \autoref{tab:trans_table}
-\begin{table}[h]
-  \centering
-  \begin{tabular}{|l|l|}\hline
-    \textbf{category theory} & \textbf{functional programming} \\\hline
-    catamorphism             & fold                            \\
-    anamorphism              & unfold                          \\
-    F-algebra                & algebra                         \\
-    F-coalgebra              & coalgebra                       \\
-    F-algebra initiality     & universal property of folds     \\
-    F-coalgebra terminality  & universal property of unfolds   \\\hline
-  \end{tabular}
-  \caption{The above tables matches category theoretical terms to functional programming terms.}
-  \label{tab:trans_table}
-\end{table}
+
 The discussion about my implementation can be found in \autoref{sec:agda_form_disc}
 
 \input{sections/42_category_theory.tex}

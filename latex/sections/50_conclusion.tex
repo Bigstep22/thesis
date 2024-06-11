@@ -1,4 +1,4 @@
-\section{Conclusion and Future Work}
+\section{Conclusion and Future Work}\label{sec:conclusion}
 I have presented my work on implementing and formalizing shortcut fusion of (Co)Church encodings as described by \cite{Harper2011}.
 I have replicated Harper's work of Church and Cochurch encoded functions operating on leaf trees: \tt{between}, \tt{map}, \tt{filter}, and \tt{sum}.
 And shown the generalizability of his example by also implementing the functions on lists.
@@ -23,12 +23,12 @@ The work is not finished and there are many future avenues that could be taken t
     \item Implement (Co)Church fused versions of Haskell's library functions.
     \item See if it is possible to implement warm fusion in Haskell or some other language as described by \cite{Launchbury1995}.
     \item Investigate if creating a new programming language that has this fusion as a first-class feature can enable fusion to be compiled more efficiently and consistently.
-    \item GENERALIZABILITY OF STREAM FUSION?
+    \item It may be possible to generalize the work of \cite{Coutts2007} to more datastrcutures, with a motivating example being Leaf Trees.
     \item Use Agda --bridges to see if it is possible to prove the free theorems currently postulated in my work.
     \item Implement a bisimilarity relation for the coinductive \tt{M}/$\nu$  type in Agda to prove its terminality. After which modifying all the code resting on top of this proof to properly use this new relation.
     \item Merge into Agda the Church and Cochurch encodings, as well as the bisimilarity across the guarged \tt{M} type.
     \item Strengthen Agda's typechecker with respect to implicit parameters. Currently two variants of functional extensionality had to be defined to work around this.
-    \item I have read that the guardedness checker can be limiting. The work for a stronger coinductive termination checker might benefit the continuation/polishing of my work.
+    \item I have read that the guardedness checker can be limiting\footnote{See: \url{https://github.com/agda/agda/issues/4418}}. The work for a stronger coinductive termination checker might benefit the continuation/polishing of my work.
 \end{itemize}
 In conclusion, I have explored the implementation and formalization of shortcut fusion for (Co)Church encodings, building on Harper's work.
 Tail-recursion was found to be crucial for performance, with additional performance improvements noted for Cochurch encodings using Stream fusion techniques.

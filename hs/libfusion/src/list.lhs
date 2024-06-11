@@ -170,7 +170,9 @@ sum7 = flip sumCh 0 . toCh
         su (Cons_ x y) s = y (s + x)
 {-# INLINE sum7 #-}
 \end{code}
-A second recursion principle is also implemented that modifies the type of the recursion element in the base functor. Leveraging techniques as described by \cite{Breitner2018} to obtain a tail recursive implementation of sum for Church-encodings.
+A second recursion principle is also implemented that modifies the type of the recursion element in the base functor.
+Leveraging techniques as described by \cite{Breitner2018} to obtain a tail recursive implementation of sum for Church-encodings.
+For more detail and a motivated example see \autoref{sec:hask_perf}. 
 
 The cochurch-encoded function implements a corecursion principle and applies the existing coalgebra (and input) to it:
 \begin{code}
@@ -310,7 +312,7 @@ filter2 p = fromCh . filterCh p . toCh
 \end{code}
 Notice how we do not apply \tt{a} to \tt{xs}, and, in doing so, can put \tt{xs} in the place where wanted to.
 Before we were limited because the \tt{natCh} function forced a postcomposition of \tt{a} in all cases.
-Instead a new algebra from an existing one, \tt{a}, that selectively postcomposes it.
+Instead we can create a new algebra from an existing one, \tt{a}, that selectively postcomposes \tt{a}.
 
 % I was just reading this: https://link.springer.com/chapter/10.1007/978-3-540-30477-7_22
 % This is one of the fusion rules that is leveraged in GHC.List fusion.

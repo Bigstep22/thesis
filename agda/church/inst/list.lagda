@@ -135,7 +135,7 @@ eq {f} = begin
     consu s ∘ natTrans (m f) ∘ prod b
   ∎
 \end{code}
-\begin{code}[hide]
+\begin{code}
 
 -- Bonus functions
 count : (ℕ → Bool) → μ (F ℕ) → ℕ
@@ -153,11 +153,6 @@ odd = not ∘ even
 countworks : count even (5 :: 6 :: 7 :: 8 :: []) ≡ 2
 countworks = refl
 
-build : {F : Container _ _}{X : Set} → ({Y : Set} →
-        (⟦ F ⟧ Y → Y) → X → Y) → (x : X) → μ F
-build g = fromCh ∘ prodCh g
-foldr' : {F : Container _ _}{X : Set} → (⟦ F ⟧ X → X) → μ F → X
-foldr' c = consCh c ∘ toCh
 filter : {A : Set} → (A → Bool) → List A → List A
 filter p = fromCh ∘ prodCh (λ f → consCh (λ where
    (nil , l) → f (nil , l)

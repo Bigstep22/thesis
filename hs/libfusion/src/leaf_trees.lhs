@@ -40,17 +40,17 @@ Next, the conversion functions \tt{toCh} and \tt{fromCh} are defined, using two 
 \begin{code}
 toCh :: Tree a -> TreeCh a
 toCh t = TreeCh (\a -> fold a t)
-fold :: (Tree_ a b -> b) -> Tree a -> b
-fold a Empty      = a Empty_
-fold a (Leaf x)   = a (Leaf_ x)
-fold a (Fork l r) = a (Fork_ (fold a l)
+  where fold :: (Tree_ a b -> b) -> Tree a -> b
+        fold a Empty      = a Empty_
+        fold a (Leaf x)   = a (Leaf_ x)
+        fold a (Fork l r) = a (Fork_ (fold a l)
                              (fold a r))
 fromCh :: TreeCh a -> Tree a
 fromCh (TreeCh fold) = fold in'
-in' :: Tree_ a (Tree a) -> Tree a
-in' Empty_ = Empty
-in' (Leaf_ x) = Leaf x
-in' (Fork_ l r) = Fork l r
+  where in' :: Tree_ a (Tree a) -> Tree a
+        in' Empty_ = Empty
+        in' (Leaf_ x) = Leaf x
+        in' (Fork_ l r) = Fork l r
 \end{code}
 From here, the fusion rule is defined using a \tt{RULES} pragma. Along with a couple of other rules, this core construct is responsible for doing the actual `fusion'.
 The \tt{INLINE} pragmas are also included, to delay any inlining of the \tt{toCh/fromCh} functions to the latest possible moment, maximising the opportunity for fusion throughout the compilation process:
@@ -72,15 +72,15 @@ Next, the conversion functions \tt{toCoCh} and \tt{fromCoCh} are again defined, 
 \begin{code}
 toCoCh :: Tree a -> TreeCoCh a
 toCoCh = TreeCoCh out
-out Empty = Empty_
-out (Leaf a) = Leaf_ a
-out (Fork l r) = Fork_ l r
+  where out Empty = Empty_
+        out (Leaf a) = Leaf_ a
+        out (Fork l r) = Fork_ l r
 fromCoCh :: TreeCoCh a -> Tree a
 fromCoCh (TreeCoCh h s) = unfold h s
-unfold h s = case h s of
-  Empty_ -> Empty
-  Leaf_ a -> Leaf a
-  Fork_ sl sr -> Fork (unfold h sl) (unfold h sr)
+  where unfold h s = case h s of
+          Empty_ -> Empty
+          Leaf_ a -> Leaf a
+          Fork_ sl sr -> Fork (unfold h sl) (unfold h sr)
 \end{code}
 Similar to Church-encodings, the proper pragmas are included to enable fusion:
 \begin{code}
@@ -108,29 +108,29 @@ between1 (x, y) = case compare x y of
 \end{code}
 The church-encoded version leverages the implementation of a recursion principle \tt{b} for the between function of leaf trees:
 \begin{code}
-b :: (Tree_ Int b -> b) -> (Int, Int) -> b
-b a (x, y) = case compare x y of
-  GT -> a Empty_
-  EQ -> a (Leaf_ x)
-  LT -> a (Fork_ (b a (x, mid))
-                 (b a (mid + 1, y)))
-  where mid = (x + y) `div` 2
-betweenCh :: (Int, Int) -> TreeCh Int
-betweenCh (x, y) = TreeCh (\a -> b a (x, y))
 between2 :: (Int, Int) -> Tree Int
 between2 = fromCh . betweenCh
+  where betweenCh :: (Int, Int) -> TreeCh Int
+        betweenCh (x, y) = TreeCh (\a -> b a (x, y))
+        b :: (Tree_ Int b -> b) -> (Int, Int) -> b
+        b a (x, y) = case compare x y of
+          GT -> a Empty_
+          EQ -> a (Leaf_ x)
+          LT -> a (Fork_ (b a (x, mid))
+                         (b a (mid + 1, y)))
+          where mid = (x + y) `div` 2
 {-# INLINE between2 #-}
 \end{code}
 The cochurch-encoded version leverages the implementation of a coalgebra \tt{h} for the between function of leaf trees:
 \begin{code}
-h :: (Int, Int) -> Tree_ Int (Int, Int)
-h (x, y) = case compare x y of
-  GT -> Empty_
-  EQ -> Leaf_ x
-  LT -> Fork_ (x, mid) (mid + 1, y)
-  where mid = (x + y) `div` 2
 between3 :: (Int, Int) -> Tree Int
 between3 = fromCoCh . TreeCoCh h
+  where h :: (Int, Int) -> Tree_ Int (Int, Int)
+        h (x, y) = case compare x y of
+          GT -> Empty_
+          EQ -> Leaf_ x
+          LT -> Fork_ (x, mid) (mid + 1, y)
+          where mid = (x + y) `div` 2
 {-# INLINE between3 #-}
 \end{code}
 \ignore{
@@ -221,27 +221,27 @@ sum1 (Fork x y) = sum1 x + sum1 y
 \end{code}
 The church encoded version leverages an alagebra \tt{s}:
 \begin{code}
-s :: Tree_ Int Int -> Int
-s Empty_ = 0
-s (Leaf_ x) = x
-s (Fork_ x y) = x + y
-sumCh :: TreeCh Int -> Int
-sumCh (TreeCh g) = g s
 sum2 :: Tree Int -> Int
 sum2 = sumCh . toCh
+  where sumCh :: TreeCh Int -> Int
+        sumCh (TreeCh g) = g s
+        s :: Tree_ Int Int -> Int
+        s Empty_ = 0
+        s (Leaf_ x) = x
+        s (Fork_ x y) = x + y
 {-# INLINE sum2 #-}
 \end{code}
 The cochurch encoding is defined using a coinduction principle.
 Note that it is possible to implement this function using an accumulator of a list datatype (used like a queue), but it currently does not seem to provide a fused Core AST, for a more expansive discussion on tail-recursive cochurch-encoded pipelines, see \autoref{sec:tail}:
 \begin{code}
-sumCoCh :: TreeCoCh Int -> Int
-sumCoCh (TreeCoCh h s') = loop s'
-  where loop s = case h s of
-          Empty_ -> 0
-          Leaf_ x -> x
-          Fork_ l r -> loop l + loop r
 sum3 :: Tree Int -> Int
 sum3 = sumCoCh . toCoCh
+  where sumCoCh :: TreeCoCh Int -> Int
+        sumCoCh (TreeCoCh h s') = loop s'
+          where loop s = case h s of
+                  Empty_ -> 0
+                  Leaf_ x -> x
+                  Fork_ l r -> loop l + loop r
 {-# INLINE sum3 #-}
 \end{code}
 \paragraph{Pipelines} Finally the pipelines, whose performance can be measure or Core representation inspected, are defined below:

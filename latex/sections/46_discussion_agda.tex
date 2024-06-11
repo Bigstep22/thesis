@@ -27,6 +27,7 @@ I made a serious attempt to prove the terminality of \tt{M} types in agda throug
 Instead the functions are now proved using a postulate called \tt{out-injective} that postulates that the coinductive datatype is injective.
 The above three functions are now non-terminating in the final state of the code.
 Furthermore, the implementation of the Cochurch encoded list \tt{sum} function also was set to be non-terminating.
+The state of the code at the cutoff moment can be seen in \autoref{app:bisim}.
 
 \subparagraph{Postulates}
 There are currently four postulates in the codebase.
@@ -46,3 +47,5 @@ I'll go through them in increasing order of noteworthiness:
   Doing so falls outside the scope of this research and is left to future work.
 \end{itemize}
 
+My Agda formalization has shown that Harper's work is correct, with a couple limitations, namely with respect to the proof of terminality of $\nu$.
+There are multiple of future avenues that this research can take, this is discussed more extensively in \autoref{sec:conclusion}.

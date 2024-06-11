@@ -48,6 +48,15 @@ In total there are four main proof obligations, the one mentioned above, as well
 In the second diagram, \tt{p} is a producer function, generating a recursive data structure from a seed of type \tt{S}.
 In the third diagram, \tt{c} is a consumer function, consuming a recursive data structure to produce a value of type \tt{T}.
 
+A fifth proof can also be made: $cons \circ abs = id_C$.
+Harper mentioned that proving this alongside the converse identity proof would constitute an isomorphism, stating that it is too strong of a condition to require from an encoding.
+However, he did end up proving it later on in his five proofs (per encoding).
+In fact, he uses the fifth proof as the basis for the fusion pragma in Haskell.
+If anything it forms the basis for correctness for the (Co)Church encodings he later ends up presenting in Haskell.
+
+He did end up proving this fifth proof using the free theorems, pulled from the type of the polymorphic functions that the (Co)Church encodings contain.
+This seems a bit inconsistent, but the fact that he did end up proving it and using it for the basis of the fusion he implemented in Haskell indicates that proving this fifth proof \textit{is} important.
+
 \subsubsection{(Co)Church Encodings}
 Next, \cite{Harper2011} proposes two encodings, \tt{Church} and \tt{CoChurch}.
 
@@ -94,6 +103,10 @@ He implements four functions, \tt{between}, \tt{filter}, \tt{concat}, and \tt{su
 
 In doing so, he shows exactly how one goes from using the normal, recursive datatypes and function that are typically used in Haskell, to Church and Cochurch encoded versions.
 To conclude he compares the performance of different compositions of functions to show the performance benefits and differences between the three different variants of functions.
+
+So far I have mentioned the so-called `free theorems' multiple times.
+They are important to Harper's proof as the correctness of the (Co)Church encodings depend on them.
+I will describe how these free theorems of \textit{parametricity} works in \autoref{sec:free}.
 
 \iffalse
 \begin{itemize}

@@ -45,12 +45,15 @@ univ-to : {F : Container 0ℓ 0ℓ}{C : Set}(h : C → ν F){c : C → ⟦ F ⟧
                  h ≡ A⟦ c ⟧ → out ∘ h ≡ map h ∘ c
 univ-to _ refl = refl
 \end{code}
-Injectivity of the \tt{out} constructor is postulated:
+Injectivity of the \tt{out} constructor is postulated.
+I made a serious attempt to prove the terminality of \tt{M} types in agda through the use of a bisimilation relation,
+but at the cutoff moment for the work there was still too much work remaining to warrant continuing it.
+Instead, this postulate is used:
 \begin{code}
 postulate out-injective : {F : Container 0ℓ 0ℓ}{x y : ν F} →
                           out x ≡ out y → x ≡ y
 \end{code}
-It is shown that any other valid F-Coalgebra homomorphism from \tt{out} to \tt{a} is equal to the $\anam{\_}$ defined;
+It is shown that any other valid F-Coalgebra homomorphism from \tt{out} to \tt{a} is equal to the A$\anam{\_}$ defined;
 i.e. the backward direction of the \textit{universal property of unfolds} \cite{Harper2011}.
 This constitutes a proof of uniqueness.
 This uses \tt{out} injectivity.
@@ -99,4 +102,7 @@ reflection x = let (op , ar) = out x in
   ≡⟨ cong (λ f → op , f) (funext $ reflection ∘ ar) ⟩
     out x
   ∎)
+reflection-law : {F : Container 0ℓ 0ℓ} →
+                 A⟦ out ⟧ ≡ id
+reflection-law {F} = funext λ x → reflection {F} x
 \end{code}

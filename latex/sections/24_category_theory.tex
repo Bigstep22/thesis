@@ -103,15 +103,37 @@ Given an endofunctor $F:\mathcal{C}\to\mathcal{C}$ and an initial algebra $(\mu^
 In English, if $f$ is an F-Algebra homomorphism, we can know that the composition of f and the catamorphism of $\phi$ equals the catamorphism of $\psi$ ($f\circ\catam{\phi}=\catam{\psi}$). We can fuse two functions into one! This is summarized in the following diagram:
 \begin{figure}[H]\vspace{-1em}\hfill
 \begin{tikzcd}
-    F\mu^F \arrow[r,"in"] \arrow[d,"F \catam{\phi}",swap] \arrow[dd,"F\catam{\psi}",swap, bend right=70] & \mu^F \arrow[d, "\catam{\phi}"] \arrow[dd, "\catam{\psi}", bend left=70] \\
-    FC \arrow[r,"\phi"] \arrow[d,"F f",swap] & C \arrow[d, "f"] \\
+    F\mu^F \arrow[r,"in"]
+           \arrow[d,"F \catam{\phi}",swap]
+           \arrow[dd,"F\catam{\psi}",swap, bend right=70]
+   & \mu^F \arrow[d, "\catam{\phi}"]
+           \arrow[dd, "\catam{\psi}", bend left=70] \\
+    FC \arrow[r,"\phi"]
+       \arrow[d,"F f",swap]
+   & C \arrow[d, "f"] \\
     FD \arrow[r,"\psi"] & D
 \end{tikzcd}\hfill\null
 \end{figure}\vspace{-2em}~\\
+The top square commutes by initiality of \tt{($\mu$F, in)}. The bottom one is the precondition, and the right triangle is the fusion.
+
 A converse definition of fusion can be made for terminal object in $\coalg{F}$.
 
 Having described all of this category theory, you might have a natural question: How does this relate to foldr/build fusion?
 To tie all this together, I will describe \cite{Harper2011}'s work in \autoref{sec:libfusion}, who discusses a more generalized form of foldr/build list fusion, allowing for a much broader class of datastructures through Church encodings. As well as a generalized form of destroy/unfoldr fusion through Cochurch encodings.
 
-
-
+Before describing Harper's work, it is prudent to clearly show the correspondence between category theory terms and functional programming terms that I use interchangeably.
+This can be seen in \autoref{tab:trans_table}
+\begin{table}[h]
+  \centering
+  \begin{tabular}{|l|l|}\hline
+    \textbf{category theory} & \textbf{functional programming} \\\hline
+    catamorphism             & fold                            \\
+    anamorphism              & unfold                          \\
+    F-algebra                & algebra                         \\
+    F-coalgebra              & coalgebra                       \\
+    F-algebra initiality     & universal property of folds     \\
+    F-coalgebra terminality  & universal property of unfolds   \\\hline
+  \end{tabular}
+  \caption{The above tables matches category theoretical terms to functional programming terms.}
+  \label{tab:trans_table}
+\end{table}

@@ -63,3 +63,16 @@ eqCons : {F : Container _ _}{X : Set}{c : ⟦ F ⟧ X → X} →
          cons c ≡ ⦅ c ⦆
 eqCons = refl
 \end{code}
+The below is left as an excercise to the reader:
+\begin{code}
+foldr : {F : Container _ _}{X : Set} → (⟦ F ⟧ X → X) → μ F → X
+foldr c = consCh c ∘ toCh
+build : {F : Container _ _}{X : Set} →
+        ({Y : Set} → (⟦ F ⟧ Y → Y) → X → Y) →
+        X → μ F
+build g = fromCh ∘ prodCh g
+--foldr-build-rule : {F : Container _ _}{X : Set} → (a : ⟦ F ⟧ X → X) →
+--                   (g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y) →
+--                   foldr a ∘ build g ≡ g a
+--foldr-build-rule a g =
+\end{code}

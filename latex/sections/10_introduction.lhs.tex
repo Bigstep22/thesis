@@ -61,10 +61,10 @@ My thesis focuses on a specific form of fusion called shortcut fusion through th
 \paragraph{Contributions}
 My thesis centers on formalizing, replicating, and expanding upon \cite{Harper2011}'s work and makes two crucial contributions, answering the two questions above:
 \begin{enumerate}
-    \item The Church and Cochurch encodings' implementation in Haskell, as described by \cite{Harper2011} are replicated and investigated further as to their performance characteristics.
+    \item The Church and Cochurch encodings' implementation in Haskell, as described by Harper are replicated and investigated further as to their performance characteristics.
     In this process, I find a weakness in Haskell's optimizer, glean further practical insights as to how to get these encodings to properly fuse, (especially for Cochurch encodings) and what optimizations enable shortcut fusion to do its work.
 
-    This is important as \cite{Harper2011} gave a good pragmatic explanation as to how to implement the (Co)Church encodings in Haskell, gave an example implementation, and benchmarked that implementation.
+    This is important as Harper gave a good pragmatic explanation as to how to implement the (Co)Church encodings in Haskell, gave an example implementation, and benchmarked that implementation.
     He did not, however, dive into too much detail as to \textit{why} they work stating: ``Interestingly, however, we note that Cochurch encodings consistently outperform Church encodings, sometimes by a significant margin. While we do consider these results conclusive, we think that these results merit further investigation.'' \citep{Harper2011}.
     This is what my research has set out to look into.
     This is discussed in detail in \autoref{sec:haskell}.
@@ -73,7 +73,7 @@ My thesis centers on formalizing, replicating, and expanding upon \cite{Harper20
     Furthermore, I apply the general proofs to an example \tt{List} instance.
 
     This is important because there currently does not seem to exist a formalization of the work.
-    Formally verifying the mathematics will strengthen the work done by \cite{Harper2011}, perhaps also aiding in understanding in how the different pieces of mathematics relate.
+    Formally verifying the mathematics will strengthen the work done by Harper, perhaps also aiding in understanding in how the different pieces of mathematics relate.
     This is discussed in detail in \autoref{sec:formalization}.
 \end{enumerate}
 

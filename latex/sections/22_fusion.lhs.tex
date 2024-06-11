@@ -51,6 +51,7 @@ from a b = if a > b
 \end{code}
 To arrive at a suitable \tt{g} we must abstract over the connective datatypes:
 \begin{code}
+from' :: Int -> Int -> (forall b. (Int -> b -> b) -> b -> b) -> [Int] 
 from' a b = \ c n  -> if a > b
                       then n
                       else c a (from (a + 1) b c n)
