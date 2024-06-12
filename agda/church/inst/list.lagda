@@ -10,7 +10,6 @@ open import Data.Fin using (Fin; zero)
 open import Data.Bool
 open import agda.church.defs renaming (cons to consu)
 open import agda.church.proofs
-open import agda.funct.funext
 open import agda.init.initial
 module agda.church.inst.list where
 \end{code}
@@ -119,20 +118,20 @@ checksum = refl
 The below proof shows the equality between the non-church-endcoded pipeline and
 the church-encoded pipeline:
 \begin{code}
-eq : {f : ℕ → ℕ} → sum1 ∘ map1 f ∘ between1 ≡ sum2 ∘ map2 f ∘ between2
-eq {f} = begin
-    ⦅ s ⦆ ∘ ⦅ in' ∘ m f ⦆ ∘ b in'
-  ≡⟨ cong (λ g → ⦅ s ⦆ ∘ ⦅ in' ∘ m f ⦆ ∘ g) (prod-pres b) ⟩ -- refl
-    ⦅ s ⦆ ∘ ⦅ in' ∘ m f ⦆ ∘ fromCh ∘ prodCh b
-  ≡⟨ cong (λ f → ⦅ s ⦆ ∘ f ∘ prodCh b) (sym $ trans-pres (m f)) ⟩
-    ⦅ s ⦆ ∘ fromCh ∘ natTransCh (m f) ∘ prodCh b
-  ≡⟨ cong (λ g → g ∘ fromCh ∘ natTransCh (m f) ∘ prodCh b) (cons-pres s) ⟩ -- refl
-    consCh s ∘ toCh ∘ fromCh ∘ natTransCh (m f) ∘ prodCh b
-  ≡⟨ cong (λ g → consCh s ∘ toCh ∘ fromCh ∘ natTransCh (m f) ∘ g ∘ prodCh b)
-          (sym to-from-id) ⟩
-    consCh s ∘ toCh ∘ fromCh ∘ natTransCh (m f) ∘ toCh ∘ fromCh ∘ prodCh b
+eq : {f : ℕ → ℕ}{x : ℕ × ℕ} → (sum1 ∘ map1 f ∘ between1) x ≡ (sum2 ∘ map2 f ∘ between2) x
+eq {f}{x} = begin
+    (⦅ s ⦆ ∘ ⦅ in' ∘ m f ⦆ ∘ b in') x
+  ≡⟨ cong (⦅ s ⦆ ∘ ⦅ in' ∘ m f ⦆) (prod-pres b x) ⟩ -- refl
+    (⦅ s ⦆ ∘ ⦅ in' ∘ m f ⦆ ∘ fromCh ∘ prodCh b) x
+  ≡⟨ cong ⦅ s ⦆ (sym $ trans-pres (m f) (prodCh b x)) ⟩
+    (⦅ s ⦆ ∘ fromCh ∘ natTransCh (m f) ∘ prodCh b) x
+  ≡⟨ cons-pres s ((fromCh ∘ natTransCh (m f) ∘ prodCh b) x) ⟩ -- refl
+    (consCh s ∘ toCh ∘ fromCh ∘ natTransCh (m f) ∘ prodCh b) x
+  ≡⟨ cong (consCh s ∘ toCh ∘ fromCh ∘ natTransCh (m f))
+          (sym $ to-from-id (prodCh b x)) ⟩
+    (consCh s ∘ toCh ∘ fromCh ∘ natTransCh (m f) ∘ toCh ∘ fromCh ∘ prodCh b) x
   ≡⟨⟩
-    consu s ∘ natTrans (m f) ∘ prod b
+    (consu s ∘ natTrans (m f) ∘ prod b) x
   ∎
 \end{code}
 \begin{code}
@@ -158,7 +157,7 @@ filter p = fromCh ∘ prodCh (λ f → consCh (λ where
    (nil , l) → f (nil , l)
    (cons a , l) → if (p a) then f (cons a , l) else l zero)) ∘ toCh
 filter' : {A : Set} → (A → Bool) → List A → List A
-filter' p = build (λ f → foldr' (λ where
+filter' p = build (λ f → foldr (λ where
    (nil , l) → f (nil , l)
    (cons a , l) → if (p a) then f (cons a , l) else l zero))
 \end{code}

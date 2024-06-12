@@ -102,7 +102,4 @@ reflection x = let (op , ar) = out x in
   ≡⟨ cong (λ f → op , f) (funext $ reflection ∘ ar) ⟩
     out x
   ∎)
-reflection-law : {F : Container 0ℓ 0ℓ} →
-                 A⟦ out ⟧ ≡ id
-reflection-law {F} = funext λ x → reflection {F} x
 \end{code}

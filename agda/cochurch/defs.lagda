@@ -8,7 +8,6 @@ The original definition is included as \tt{CoChurch'}.
 {-# OPTIONS --guardedness #-}
 module agda.cochurch.defs where
 open import agda.term.terminal
-open import agda.funct.funext
 open import Data.Product using (∃; _×_)
 \end{code}
 The Cochurch encoding, agian leveraging containers:
@@ -81,11 +80,9 @@ toConv (cochurch (S , (h , x))) = CoCh {_}{S} h x
 fromConv : {F : Container _ _} → CoChurch F → CoChurch' F
 fromConv (CoCh {X} h x) = cochurch ((X , h , x))
 
-to-from-conv-id : {F : Container 0ℓ 0ℓ} → toConv ∘ fromConv {F} ≡ id
-to-from-conv-id = funext λ where
-    (CoCh {X} h x) → refl
+to-from-conv-id : {F : Container 0ℓ 0ℓ}(x : CoChurch F) → (toConv ∘ fromConv) x ≡ id x
+to-from-conv-id (CoCh h x) = refl
 
-from-to-conv-id : {F : Container 0ℓ 0ℓ} → fromConv ∘ toConv {F} ≡ id
-from-to-conv-id = funext λ where
-    (cochurch (S , (h , x))) → refl
+from-to-conv-id : {F : Container 0ℓ 0ℓ}(x : CoChurch' F) → (fromConv ∘ toConv) x ≡ id x
+from-to-conv-id (cochurch (S , (h , x))) = refl
 \end{code}

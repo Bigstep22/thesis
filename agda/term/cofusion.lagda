@@ -6,7 +6,6 @@ The categorical fusion property:
 {-# OPTIONS --guardedness #-}
 module agda.term.cofusion  where
 open import agda.term.terminal
-open import agda.funct.funext
 open import agda.funct.endo
 open import Categories.Category renaming (Category to Cat)
 open import Categories.Functor.Coalgebra
@@ -25,8 +24,9 @@ The `fusion law':
 \begin{code}
 fusion : {F : Container 0ℓ 0ℓ}{C D : Set}
          {c : C → ⟦ F ⟧ C}{d : D → ⟦ F ⟧ D}(h : C → D) →
-         d ∘ h ≡ map h ∘ c → A⟦ c ⟧ ≡ A⟦ d ⟧ ∘ h
-fusion h comm = funext λ x → fusionprop terminal-out (
-                  record {f = h ; commutes = λ {y} → cong-app comm y}
-                ) {x}
+         ({x : C} → (d ∘ h) x ≡ (map h ∘ c) x) →
+         (x : C) → A⟦ c ⟧ x ≡ (A⟦ d ⟧ ∘ h) x
+fusion h comm x = fusionprop terminal-out (
+                    record {f = h ; commutes = comm}
+                  ) {x}
 \end{code}

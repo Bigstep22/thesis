@@ -10,8 +10,9 @@ module agda.church.proofs where
 The first proof shows that \tt{fromCh $\circ$ toCh = id}, using the reflection law.
 This corresponds to the first proof obligation mentioned in \autoref{sec:obligations}:
 \begin{code}
-from-to-id : {F : Container 0ℓ 0ℓ} → fromCh ∘ toCh {F} ≡ id
-from-to-id {F} = funext λ x → begin
+from-to-id : {F : Container 0ℓ 0ℓ}(x : μ F) →
+             (fromCh ∘ toCh) x ≡ id x
+from-to-id x = begin
     fromCh (toCh x)
   ≡⟨⟩ -- Definition of toCh
      fromCh (Ch (λ {X}a → ⦅ a ⦆ x))
@@ -38,9 +39,9 @@ fold-invariance : {F : Container 0ℓ 0ℓ}{Y : Set}
                   ⦅ a ⦆ (g in') ≡ g a
 fold-invariance g a = free ⦅ a ⦆ g refl
 
-to-from-id : {F : Container 0ℓ 0ℓ} → toCh ∘ fromCh {F} ≡ id
-to-from-id {F} = funext λ where
-  (Ch g) → begin
+to-from-id : {F : Container 0ℓ 0ℓ}(x : Church F) →
+             (toCh ∘ fromCh) x ≡ id x
+to-from-id (Ch g) = begin
       toCh (fromCh (Ch g))
     ≡⟨⟩ -- definition of fromCh
       toCh (g in')
@@ -55,8 +56,8 @@ The proof is proved via reflexivity, but \cite{Harper2011}'s original proof step
 This corresponds to the third proof obligation (second diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
 cons-pres : {F : Container 0ℓ 0ℓ}{X : Set}(b : ⟦ F ⟧ X → X) →
-            consCh b ∘ toCh ≡ ⦅ b ⦆
-cons-pres {F} b = funext λ x → begin
+            (x : μ F) → (consCh b ∘ toCh) x ≡ ⦅ b ⦆ x
+cons-pres b x = begin
     consCh b (toCh x)
   ≡⟨⟩ -- definition of toCh
     consCh b (Ch (λ a → ⦅ a ⦆ x))
@@ -71,8 +72,8 @@ The proof is proved via reflexivity, but \cite{Harper2011}'s original proof step
 This corresponds to the fourth proof obligation (third diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
 prod-pres : {F : Container 0ℓ 0ℓ}{X : Set}(f : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y) →
-            fromCh ∘ prodCh f ≡ f in'
-prod-pres {F}{X} f = funext λ s → begin
+            (s : X) → (fromCh ∘ prodCh f) s ≡ f in' s
+prod-pres {F}{X} f s = begin
     fromCh ((λ (x : X) → Ch (λ a → f a x)) s)
   ≡⟨⟩ -- function application
     fromCh (Ch (λ a → f a s))
@@ -86,10 +87,9 @@ The fifth, and final proof shows that church-encoded functions constitute an imp
 The proof again leverages the free theorem defined earlier.
 This corresponds to the second proof obligation (first diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
-trans-pres : {F G : Container 0ℓ 0ℓ} (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
-             fromCh ∘ natTransCh f ≡ ⦅ in' ∘ f ⦆ ∘ fromCh
-trans-pres f = funext λ where
-  (Ch g) → begin
+trans-pres : {F G : Container 0ℓ 0ℓ}(f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
+             (x : Church F) → (fromCh ∘ natTransCh f) x ≡ (⦅ in' ∘ f ⦆ ∘ fromCh) x
+trans-pres f (Ch g) = begin
       fromCh (natTransCh f (Ch g))
     ≡⟨⟩ -- Function application
       fromCh (Ch (λ a → g (a ∘ f)))
@@ -110,14 +110,14 @@ to one single natural transformation:
 \begin{code}
 natfuse : {F G H : Container 0ℓ 0ℓ}
           (nat1 : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
-          (nat2 : {X : Set} → ⟦ G ⟧ X → ⟦ H ⟧ X) →
-          natTransCh nat2 ∘ toCh ∘ fromCh ∘ natTransCh nat1 ≡ natTransCh (nat2 ∘ nat1)
-natfuse nat1 nat2 = begin
-            natTransCh nat2 ∘ toCh ∘ fromCh ∘ natTransCh nat1
-          ≡⟨ cong (λ f → natTransCh nat2 ∘ f ∘ natTransCh nat1) to-from-id ⟩
-            natTransCh nat2 ∘ natTransCh nat1
-          ≡⟨ funext (λ where (Ch g) → refl) ⟩
-            natTransCh (nat2 ∘ nat1)
+          (nat2 : {X : Set} → ⟦ G ⟧ X → ⟦ H ⟧ X) → (x : Church F) →
+          (natTransCh nat2 ∘ toCh ∘ fromCh ∘ natTransCh nat1) x ≡ natTransCh (nat2 ∘ nat1) x
+natfuse {F}{G}{H} nat1 nat2 x@(Ch g) = begin
+            (natTransCh nat2 ∘ toCh ∘ fromCh ∘ natTransCh nat1) x
+          ≡⟨ cong (natTransCh nat2) (to-from-id (natTransCh nat1 x)) ⟩
+            (natTransCh nat2 ∘ natTransCh nat1) x
+          ≡⟨ refl ⟩
+            natTransCh (nat2 ∘ nat1) x
           ∎
 \end{code}
 The second of these two proofs shows that any pipeline, consisting of a producer, transformer,
@@ -125,14 +125,14 @@ and consumer function, fuse down to a single function application:
 \begin{code}
 pipefuse : {F G : Container 0ℓ 0ℓ}{X : Set}(g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y)
           (nat : {Y : Set} → ⟦ F ⟧ Y → ⟦ G ⟧ Y)(c : (⟦ G ⟧ X → X)) →
-          cons c ∘ natTrans nat ∘ prod g ≡ g (c ∘ nat)
-pipefuse g nat c = begin
-    consCh c ∘ toCh ∘ fromCh ∘ natTransCh nat ∘ toCh ∘ fromCh ∘ prodCh g
-  ≡⟨ cong (λ f → consCh c ∘ f ∘ natTransCh nat ∘ toCh ∘ fromCh ∘ prodCh g) to-from-id ⟩
-    consCh c ∘ natTransCh nat ∘ toCh ∘ fromCh ∘ prodCh g
-  ≡⟨ cong (λ f → consCh c ∘ natTransCh nat ∘ f ∘ prodCh g) to-from-id ⟩
-    consCh c ∘ natTransCh nat ∘ prodCh g
+          (x : X) → (cons c ∘ natTrans nat ∘ prod g) x ≡ g (c ∘ nat) x
+pipefuse {F}{G} g nat c x = begin
+    (consCh c ∘ toCh ∘ fromCh ∘ natTransCh nat ∘ toCh ∘ fromCh ∘ prodCh g) x
+  ≡⟨ cong (consCh c ∘ toCh ∘ fromCh ∘ natTransCh nat) (to-from-id (prodCh g x)) ⟩
+     (consCh c ∘ toCh ∘ fromCh ∘ natTransCh nat ∘ prodCh g) x
+  ≡⟨ cong (consCh c) (to-from-id (natTransCh nat (prodCh g x))) ⟩
+    (consCh c ∘ natTransCh nat ∘ prodCh g) x
   ≡⟨⟩
-    g (c ∘ nat)
+    g (c ∘ nat) x
   ∎
 \end{code}

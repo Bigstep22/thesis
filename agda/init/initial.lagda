@@ -46,12 +46,12 @@ i.e. the backwards direction of the \textit{universal property of folds} \citep{
 This constitutes a proof of uniqueness:
 \begin{code}
 univ-from : {F : Container 0ℓ 0ℓ}{X : Set}(a : ⟦ F ⟧ X → X)(h : μ F → X) →
-                            h ∘ in' ≡ a ∘ map h → (x : μ F) → h x ≡ ⦅ a ⦆ x
-univ-from a h eq (in' x@(op , ar)) = begin
+            ({x : ⟦ F ⟧ (μ F)} → (h ∘ in') x ≡ (a ∘ map h) x) → {x : μ F} → h x ≡ ⦅ a ⦆ x
+univ-from a h eq {in' x@(op , ar)} = begin
       (h ∘ in') x
-    ≡⟨ cong-app eq x ⟩
+    ≡⟨ eq ⟩
       a (op , h ∘ ar)
-    ≡⟨ cong (λ f → a (op , f)) (funext $ univ-from a h eq ∘ ar) ⟩
+    ≡⟨ cong (λ f → a (op , f)) (funext $ λ x → univ-from a h eq {ar x}) ⟩
       a (op , ⦅ a ⦆ ∘ ar)
     ≡⟨⟩
       (⦅ a ⦆ ∘ in') x
@@ -64,7 +64,7 @@ initial-in = record { ! = λ {A} →
                  record { f = ⦅ α A ⦆
                    ; commutes = λ {x} → cong-app (univ-to {_}{_}{α A} refl) x  }
                ; !-unique = λ {A} fhom {x} → sym $
-                   univ-from (α A) (f fhom) (funext (λ y → commutes fhom {y})) x }
+                   univ-from (α A) (f fhom) (commutes fhom) }
 \end{code}
 The \textit{computation law} \citep{Harper2011}:
 \begin{code}
@@ -85,8 +85,4 @@ reflection y@(in' (op , ar)) = begin
    ≡⟨⟩ -- Dfn of y
      y
    ∎
-
-reflection-law : {F : Container 0ℓ 0ℓ} →
-                 ⦅ in' ⦆ ≡ id
-reflection-law {F} = funext (reflection {F})
 \end{code}

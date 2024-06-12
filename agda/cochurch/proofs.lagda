@@ -5,15 +5,14 @@ These are formalized here.
 {-# OPTIONS --guardedness #-}
 open import agda.term.terminal
 open import agda.term.cofusion
-open import agda.funct.funext
 open import agda.cochurch.defs
 module agda.cochurch.proofs where
 \end{code}
 The first proof proves that \tt{fromCoCh $\circ$ toCh = id}, using the reflection law.
 This corresponds to the first proof obligation mentioned in \autoref{sec:obligations}:
 \begin{code}
-from-to-id : {F : Container 0ℓ 0ℓ} → fromCoCh ∘ toCoCh {F} ≡ id
-from-to-id {F} = funext λ x → begin
+from-to-id : {F : Container 0ℓ 0ℓ}(x : ν F) → (fromCoCh ∘ toCoCh) x ≡ id x
+from-to-id {F} x = begin
     fromCoCh (toCoCh x)
   ≡⟨⟩ -- Definition of toCh
      fromCoCh (CoCh out x)
@@ -41,9 +40,8 @@ unfold-invariance : {F : Container 0ℓ 0ℓ}{Y : Set}
                     CoCh c ≡ CoCh out ∘ A⟦ c ⟧
 unfold-invariance c = free A⟦ c ⟧ CoCh refl
 
-to-from-id : {F : Container 0ℓ 0ℓ} → toCoCh ∘ fromCoCh {F} ≡ id
-to-from-id = funext λ where
-  (CoCh c x) → begin
+to-from-id : {F : Container 0ℓ 0ℓ}(x : CoChurch F) → (toCoCh ∘ fromCoCh) x ≡ id x
+to-from-id (CoCh c x) = begin
       toCoCh (fromCoCh (CoCh c x))
     ≡⟨⟩ -- definition of fromCh
       toCoCh (A⟦ c ⟧ x)
@@ -60,8 +58,8 @@ The proof is proved via reflexivity, but \cite{Harper2011}'s original proof step
 This corresponds to the third proof obligation (second diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
 prod-pres : {F : Container 0ℓ 0ℓ}{X : Set}(c : X → ⟦ F ⟧ X) →
-            fromCoCh ∘ prodCoCh c ≡ A⟦ c ⟧
-prod-pres c = funext λ x → begin
+            (x : X) → (fromCoCh ∘ prodCoCh c) x ≡ A⟦ c ⟧ x
+prod-pres c x = begin
     fromCoCh ((λ s → CoCh c s) x)
   ≡⟨⟩ -- function application
     fromCoCh (CoCh c x)
@@ -74,8 +72,8 @@ The proof is proved via reflexivity, but \cite{Harper2011}'s original proof step
 This corresponds to the fourth proof obligation (third diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
 cons-pres : {F : Container 0ℓ 0ℓ}{X : Set} → (f : {Y : Set} → (Y → ⟦ F ⟧ Y) → Y → X) →
-            consCoCh f ∘ toCoCh ≡ f out
-cons-pres f = funext λ x → begin
+            (x : ν F) → (consCoCh f ∘ toCoCh) x ≡ f out x
+cons-pres f x = begin
     consCoCh f (toCoCh x)
   ≡⟨⟩ -- definition of toCoCh
     consCoCh f (CoCh out x)
@@ -88,29 +86,27 @@ The proof leverages the categorical fusion property and the naturality of \tt{f}
 This corresponds to the second proof obligation (first diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
 valid-hom : {F G : Container 0ℓ 0ℓ}{X : Set}(h : X → ⟦ F ⟧ X)
-            (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)(nat : ∀ {X : Set}
-            (g : X → ν F) → map g ∘ f ≡ f ∘ map g) →
-            map A⟦ h ⟧ ∘ f ∘ h ≡ f ∘ out ∘ A⟦ h ⟧
-valid-hom h f nat = begin
-    (map A⟦ h ⟧ ∘ f) ∘ h
-  ≡⟨ cong (λ f → f ∘ h) (nat A⟦ h ⟧) ⟩
-    (f ∘ map A⟦ h ⟧) ∘ h
+            (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)
+            (nat : ∀ {X : Set}(g : X → ν F)(x : ⟦ F ⟧ X) → (map g ∘ f) x ≡ (f ∘ map g) x) →
+            {x : X} → (map A⟦ h ⟧ ∘ f ∘ h) x ≡ (f ∘ out ∘ A⟦ h ⟧) x
+valid-hom h f nat {x} = begin
+    (map A⟦ h ⟧ ∘ f ∘ h) x
+  ≡⟨ nat A⟦ h ⟧ (h x) ⟩
+    (f ∘ map A⟦ h ⟧ ∘ h) x
   ≡⟨⟩ -- dfn of A⟦_⟧
-    f ∘ out ∘ A⟦ h ⟧
+    (f ∘ out ∘ A⟦ h ⟧) x
   ∎
 
-trans-pres : {F G : Container 0ℓ 0ℓ}{X : Set}(h : X → ⟦ F ⟧ X)
-             (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)(nat : {X : Set}
-             (g : X → ν F) → map g ∘ f ≡ f ∘ map g) →
-             fromCoCh ∘ natTransCoCh f ≡ A⟦ f ∘ out ⟧ ∘ fromCoCh
-trans-pres h f nat = funext λ where
-  (CoCh h x) → begin
+trans-pres : {F G : Container 0ℓ 0ℓ}(f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)
+             (nat : {X : Set}(g : X → ν F)(x : ⟦ F ⟧ X) → (map g ∘ f) x ≡ (f ∘ map g) x)
+             (x : CoChurch F) → (fromCoCh ∘ natTransCoCh f) x ≡ (A⟦ f ∘ out ⟧ ∘ fromCoCh) x
+trans-pres f nat (CoCh h x) = begin
       fromCoCh (natTransCoCh f (CoCh h x))
     ≡⟨⟩ -- Function application
       fromCoCh (CoCh (f ∘ h) x)
     ≡⟨⟩ -- Definition of fromCh
       A⟦ f ∘ h ⟧ x
-    ≡⟨ cong-app (fusion A⟦ h ⟧ (sym (valid-hom h f nat))) x ⟩
+    ≡⟨ fusion A⟦ h ⟧ (sym $ valid-hom h f nat) x ⟩
       A⟦ f ∘ out ⟧ (A⟦ h ⟧ x)
     ≡⟨⟩ -- This step is not in the paper, but mirrors the one on the Church-side.
       A⟦ f ∘ out ⟧ (fromCoCh (CoCh h x))
@@ -123,14 +119,14 @@ to one single natural transformation:
 \begin{code}
 natfuse : {F G H : Container 0ℓ 0ℓ}
           (nat1 : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
-          (nat2 : {X : Set} → ⟦ G ⟧ X → ⟦ H ⟧ X) →
-          natTransCoCh nat2 ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat1 ≡ natTransCoCh (nat2 ∘ nat1)
-natfuse nat1 nat2 = begin
-            natTransCoCh nat2 ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat1
-          ≡⟨ cong (λ f → natTransCoCh nat2 ∘ f ∘ natTransCoCh nat1) to-from-id ⟩
-            natTransCoCh nat2 ∘ natTransCoCh nat1
-          ≡⟨ funext (λ where (CoCh g s) → refl) ⟩
-            natTransCoCh (nat2 ∘ nat1)
+          (nat2 : {X : Set} → ⟦ G ⟧ X → ⟦ H ⟧ X)(x : CoChurch F) →
+          (natTransCoCh nat2 ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat1) x ≡ natTransCoCh (nat2 ∘ nat1) x
+natfuse nat1 nat2 x@(CoCh g s) = begin
+            (natTransCoCh nat2 ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat1) x
+          ≡⟨ cong (natTransCoCh nat2) (to-from-id (natTransCoCh nat1 x)) ⟩
+            (natTransCoCh nat2 ∘ natTransCoCh nat1) x
+          ≡⟨⟩
+            natTransCoCh (nat2 ∘ nat1) x
           ∎
 \end{code}
 The second of these two proofs shows that any pipeline, consisting of a producer, transformer,
@@ -138,16 +134,15 @@ and consumer function, fuse down to a single function application:
 \begin{code}
 pipefuse : {F G : Container 0ℓ 0ℓ}{X : Set}(c : X → ⟦ F ⟧ X)
            (nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
-           (f : {Y : Set} → (Y → ⟦ G ⟧ Y) → Y → X) →
-          cons f ∘ natTrans nat ∘ prod c ≡ f (nat ∘ c)
-pipefuse c nat f = begin
-    consCoCh f ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat ∘ toCoCh ∘ fromCoCh ∘ prodCoCh c
-  ≡⟨ cong (λ g → consCoCh f ∘ g ∘ natTransCoCh nat ∘ toCoCh ∘ fromCoCh ∘ prodCoCh c)
-          to-from-id ⟩
-    consCoCh f ∘ natTransCoCh nat ∘ toCoCh ∘ fromCoCh ∘ prodCoCh c
-  ≡⟨ cong (λ g → consCoCh f ∘ natTransCoCh nat ∘ g ∘ prodCoCh c) to-from-id ⟩
-    consCoCh f ∘ natTransCoCh nat ∘ prodCoCh c
+           (f : {Y : Set} → (Y → ⟦ G ⟧ Y) → Y → X)(x : X) →
+          (cons f ∘ natTrans nat ∘ prod c) x ≡ f (nat ∘ c) x
+pipefuse c nat f x = begin
+    (consCoCh f ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat ∘ toCoCh ∘ fromCoCh ∘ prodCoCh c) x
+  ≡⟨ cong (consCoCh f ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat) (to-from-id (prodCoCh c x)) ⟩
+    (consCoCh f ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat ∘ prodCoCh c) x
+  ≡⟨ cong (consCoCh f) (to-from-id ((natTransCoCh nat ∘ prodCoCh c) x)) ⟩
+    (consCoCh f ∘ natTransCoCh nat ∘ prodCoCh c) x
   ≡⟨⟩
-    f (nat ∘ c)
+    f (nat ∘ c) x
   ∎
 \end{code}

@@ -14,7 +14,6 @@ open import Data.Product using (_×_)
 open import Data.Sum hiding (map)
 open import Data.Nat
 open import Agda.Builtin.Nat
-open import agda.funct.funext
 \end{code}
 In this section is defined: the container, whose interpretation represents the base functor for lists,
 some convenience functions to make type annotations more readable, a producer function \tt{between},
@@ -119,20 +118,20 @@ eqsum = refl
 \subparagraph{equality}
 The below proof shows the equality between the non-cochurch-endcoded pipeline and the cochurch-encoded pipeline:
 \begin{code}
-eq : {f : ℕ → ℕ} → sum1 ∘ map1 f ∘ between1 ≡ sum2 ∘ map2 f ∘ between2
-eq {f} = begin
-    s out ∘ A⟦ m f ∘ out ⟧ ∘ A⟦ b ⟧
-  ≡⟨ cong (λ g → s out ∘ A⟦ m f ∘ out ⟧ ∘ g) (prod-pres b) ⟩ -- refl
-    s out ∘ A⟦ m f ∘ out ⟧ ∘ fromCoCh ∘ prodCoCh b
-  ≡⟨ cong (λ g → s out ∘ g ∘ prodCoCh b) (sym (trans-pres b (m f)
-      (λ _ → funext (λ {(nil , l) → refl; (cons n , l) → refl})))) ⟩
-    s out ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b
-  ≡⟨ cong (λ g → g ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b) (cons-pres s) ⟩ -- refl
-    consCoCh s ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b
-  ≡⟨ cong (λ g → consCoCh s ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ g ∘ prodCoCh b)
-          (sym to-from-id) ⟩
-  consCoCh s ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ toCoCh ∘ fromCoCh ∘ prodCoCh b
+eq : {f : ℕ → ℕ}(x : ℕ × ℕ) → (sum1 ∘ map1 f ∘ between1) x ≡ (sum2 ∘ map2 f ∘ between2) x
+eq {f} x = begin
+    (s out ∘ A⟦ m f ∘ out ⟧ ∘ A⟦ b ⟧) x
+  ≡⟨ cong (s out ∘ A⟦ m f ∘ out ⟧) (prod-pres b x) ⟩ -- refl
+    (s out ∘ A⟦ m f ∘ out ⟧ ∘ fromCoCh ∘ prodCoCh b) x
+  ≡⟨ cong (s out) (sym $ trans-pres (m f)
+      (λ _ → (λ { (nil , l) → refl ; (cons n , l) → refl })) (prodCoCh b x)) ⟩
+    (s out ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b) x
+  ≡⟨ (cons-pres s ((fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b) x)) ⟩ -- refl
+    (consCoCh s ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ prodCoCh b) x
+  ≡⟨ cong (consCoCh s ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f))
+          (sym $ to-from-id (prodCoCh b x)) ⟩
+  (consCoCh s ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ toCoCh ∘ fromCoCh ∘ prodCoCh b) x
   ≡⟨⟩
-    consu s ∘ natTrans (m f) ∘ prod b
+    (consu s ∘ natTrans (m f) ∘ prod b) x
   ∎
 \end{code}
