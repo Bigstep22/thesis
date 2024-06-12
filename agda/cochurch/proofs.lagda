@@ -120,7 +120,8 @@ to one single natural transformation:
 natfuse : {F G H : Container 0ℓ 0ℓ}
           (nat1 : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
           (nat2 : {X : Set} → ⟦ G ⟧ X → ⟦ H ⟧ X)(x : CoChurch F) →
-          (natTransCoCh nat2 ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat1) x ≡ natTransCoCh (nat2 ∘ nat1) x
+          (natTransCoCh nat2 ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat1) x ≡
+          natTransCoCh (nat2 ∘ nat1) x
 natfuse nat1 nat2 x@(CoCh g s) = begin
             (natTransCoCh nat2 ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat1) x
           ≡⟨ cong (natTransCoCh nat2) (to-from-id (natTransCoCh nat1 x)) ⟩

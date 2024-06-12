@@ -16,7 +16,8 @@ First, the proof of terminality of terminal coalgebras is currently not terminat
 Second, the free theorems are currently postulated to be true instead of being proven to be true.
 
 \subparagraph{Termination Checking}
-I made a serious attempt to prove the terminality of \tt{M} types in agda through the use of a bisimilation relation, but at the cutoff moment for the work there was still too much work remaining to warrant continuing it:
+I made a serious attempt to prove the terminality of \tt{M} types in agda through the use of a bisimilation relation, but due to time constraints I reverted to a version of the code that type checked, but did not terminate for a few proofs.
+Before reverting to the previous state, the state of the code was as follows:
 \begin{itemize}[noitemsep]
   \item The reflection law was proven (as a bisimilarity)
   \item The computation law was proven (as a propositional equality)
@@ -24,10 +25,10 @@ I made a serious attempt to prove the terminality of \tt{M} types in agda throug
   \item The plan and execution of restructuring the further code that rests on the above proofs.
   Most likely the use of propositional equalities throughout the following proofs need to be modified to instead use some combination of the bisimilarity and propositional equality in Agda.
 \end{itemize}
-Instead the functions are now proved using a postulate called \tt{out-injective} that postulates that the coinductive datatype is injective.
+The functions are currently proved using a postulate called \tt{out-injective} that postulates that the coinductive datatype is injective.
 The above three functions are now non-terminating in the final state of the code.
 Furthermore, the implementation of the Cochurch encoded list \tt{sum} function also was set to be non-terminating.
-The state of the code at the cutoff moment can be seen in \autoref{app:bisim}.
+The state of the code before reverting can be seen in \autoref{app:bisim}.
 
 \subparagraph{Postulates}
 There are currently four postulates in the codebase.

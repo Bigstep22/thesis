@@ -13,7 +13,7 @@ open import agda.church.proofs
 open import agda.init.initial
 module agda.church.inst.list where
 \end{code}
-In this section is defined: the container, whose interpretation represents the base functor for lists,
+This section defines: the container, whose interpretation represents the base functor for lists,
 some convenience functions to make type annotations more readable, a producer function \tt{between},
 a transformation function \tt{map}, a consumer function \tt{sum}, and a proof that non-church and church-encoded
 implementations are equal.

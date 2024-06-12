@@ -1,6 +1,6 @@
 \section{Introduction}
 When writing functional code, we often use lists (or other data structures) to `glue' multiple pieces of data together.
-Take, as an example, the following function in the programming language Haskell, as introduced by \cite{Gill1993}: %TODO: Cite
+For example, the following function in the programming language Haskell, as introduced by \cite{Gill1993}: %TODO: Cite
 \begin{code}
 all :: (a -> Bool) -> [a] -> Bool
 all p xs = and (map p xs)
@@ -9,7 +9,7 @@ The function \tt{map p} traverses across the input list, applying the predicate 
 Then, the function \tt{and} takes this resulting, intermediate, boolean list and consumes it by `and-ing' together all the boolean values.
 
 Being able to compose functions in this fashion is part of what makes functional programming so attractive, but it comes at the cost of computational overhead:
-Each time allocating a list cell, only for the following function to subsequently deallocate it once the value has been read.
+Each time list a cell is allocated, only for the following function to subsequently deallocate it once the value has been read.
 We could instead rewrite \tt{all} in the following fashion:
 \begin{code}
 all :: (a -> Bool) -> [a] -> Bool
@@ -34,11 +34,11 @@ f (x, y) = loop x
                       then (x+1) + loop (x+1)
                       else loop (x+1)
 \end{code}
-Doing this by hand every time, to get from the nice, elegant, compositional style of programming to the higher-performance, single-traversal style, gets old very quick.
-Especially if this needs to be done, by hand, every single time you compose any two functions.
+Doing this by hand every time, to get from the nice, elegant, compositional style of programming to the higher-performance, single-traversal style, if repetitive and error-prone.
+Especially if this needs to be done, by hand, every single time any two functions are composed.
 Is there some way to automate this process?
 
-The answer is yes*, but it comes with an asterisk attached, namely: *The functions that we are working with need to be folds or unfolds.
+The answer is yes*, but it comes with an asterisk attached, namely: *The functions that are being fused need to be folds or unfolds.
 The form of optimization that we are looking for is called fusion:
 The process of taking multiple list producing/consuming functions and turning (or fusing) them into one that traverses the datastructure just once.
 
@@ -64,8 +64,8 @@ My thesis centers on formalizing, replicating, and expanding upon \cite{Harper20
     \item The Church and Cochurch encodings' implementation in Haskell, as described by Harper are replicated and investigated further as to their performance characteristics.
     In this process, I find a weakness in Haskell's optimizer, glean further practical insights as to how to get these encodings to properly fuse, (especially for Cochurch encodings) and what optimizations enable shortcut fusion to do its work.
 
-    This is important as Harper gave a good pragmatic explanation as to how to implement the (Co)Church encodings in Haskell, gave an example implementation, and benchmarked that implementation.
-    He did not, however, dive into too much detail as to \textit{why} they work stating: ``Interestingly, however, we note that Cochurch encodings consistently outperform Church encodings, sometimes by a significant margin. While we do consider these results conclusive, we think that these results merit further investigation.'' \citep{Harper2011}.
+    This is important as Harper gave a good pragmatic explanation of how to implement the (Co)Church encodings in Haskell, gave an example implementation, and benchmarked that implementation.
+    He did not, however, provide much detail as to \textit{why} they work stating: ``Interestingly, however, we note that Cochurch encodings consistently outperform Church encodings, sometimes by a significant margin. While we do consider these results conclusive, we think that these results merit further investigation.'' \citep{Harper2011}.
     This is what my research has set out to look into.
     This is discussed in detail in \autoref{sec:haskell}.
     \item (Co)Church encodings are formalized and implemented, including the relevant category theory, in Agda, in as a general fashion as possible, leveraging containers \citep{Abbott2005} to represent strictly positive functors.
@@ -73,7 +73,7 @@ My thesis centers on formalizing, replicating, and expanding upon \cite{Harper20
     Furthermore, I apply the general proofs to an example \tt{List} instance.
 
     This is important because there currently does not seem to exist a formalization of the work.
-    Formally verifying the mathematics will strengthen the work done by Harper, perhaps also aiding in understanding in how the different pieces of mathematics relate.
+    Formally verifying the mathematics will strengthen the work done by Harper, aiding in understanding in how the different pieces of mathematics relate.
     This is discussed in detail in \autoref{sec:formalization}.
 \end{enumerate}
 

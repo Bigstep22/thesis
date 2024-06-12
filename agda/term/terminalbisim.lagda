@@ -88,7 +88,8 @@ invnueq : {F : Container 0ℓ 0ℓ}{a b : ν F}(_ : a ≡ b) → a ≣ b
 invnueq Eq.refl = refl
 postulate nueq : {F : Container 0ℓ 0ℓ}{a b : ν F}(eq : a ≣ b) → a ≡ b
 --nueq' : {F : Container 0ℓ 0ℓ}{a b : ν F}
---        (eq : head a ≡ head b)(eq' : ∀{x} → tail a x ≣ tail b (subst (Position F) eq x)) → a ≡ b
+--        (eq : head a ≡ head b)(eq' : ∀{x} →
+--        tail a x ≣ tail b (subst (Position F) eq x)) → a ≡ b
 --nueq' outfst outsnd = {!!}
 \end{code}
 It is shown that any A$\anam{\_}$ is a valid F-Coalgebra homomorphism from \tt{out} to any other object \tt{a};
@@ -130,14 +131,16 @@ The two previous proofs, constituting a proof of existence and uniqueness, are c
 \begin{code}
 terminal-out : {F : Container 0ℓ 0ℓ} → IsTerminal C[ F ]CoAlg (to-Coalgebra out)
 terminal-out = record { ! = λ {A} → record {
-                                    f = A⟦ α A ⟧
-                                    ; commutes = λ {x} → Σ-≡,≡→≡ (univ-to A⟦ α A ⟧ {α A} refl x , Eq.refl ) }
-                      ; !-unique = λ {A} fhom {x} →
-                        Eq.sym $ nueq (univ-from (f fhom) (α A) (conv (f fhom) (commutes fhom)) (conv' (f fhom) (commutes fhom))) }
+                 f = A⟦ α A ⟧
+                 ; commutes = λ {x} → Σ-≡,≡→≡ (univ-to A⟦ α A ⟧ {α A} refl x , Eq.refl ) }
+               ; !-unique = λ {A} fhom {x} →
+                 Eq.sym $ nueq (univ-from (f fhom) (α A)
+                   (conv (f fhom) (commutes fhom)) (conv' (f fhom) (commutes fhom))) }
 \end{code}
 The \textit{computation law} \cite{Harper2011}:
 \begin{code}
-computation-law : {F : Container 0ℓ 0ℓ}{C : Set}{c : C → ⟦ F ⟧ C} → out ∘ A⟦ c ⟧ ≡ map A⟦ c ⟧ ∘ c
+computation-law : {F : Container 0ℓ 0ℓ}{C : Set}{c : C → ⟦ F ⟧ C} →
+                  out ∘ A⟦ c ⟧ ≡ map A⟦ c ⟧ ∘ c
 computation-law = Eq.refl
 \end{code}
 The \textit{reflection law} \cite{Harper2011}:

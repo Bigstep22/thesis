@@ -18,7 +18,10 @@ all p xs = h xs
   where h []     = True
         h (x:xs) = p x && h xs
 \end{code}
-Now no intermediate datastructure is generated at the cost of more programmer involvement. We've made a custom, specialized version of \tt{and~.~map~p}. The compositional style of programming that function programming languages enable (such as Haskell) would be made a lot more difficult if, for every composition, the programmer had to write a specialized function. Can this be automated?
+In this case no intermediate datastructure is generated at the cost of more programmer involvement.
+We've made a custom, specialized version of \tt{and~.~map~p}.
+The compositional style of programming that function programming languages enable (such as Haskell) would be made a lot more difficult if, for every composition, the programmer had to write a specialized function.
+Can this be automated?
 
 Gill's key insight was to note that when using a \tt{foldr k z xs} across a list, the effect of its application: 
 
