@@ -282,7 +282,7 @@ Filling in \tt{xs} gives a type error.
 We could try to modify the type to allow this change, but if we did that we wouldn't have the type of a natural transformation anymore, so we can't do that either.
 
 There are two solutions:
-One that modifies the definition of \tt{filter2} and \tt{filter3}, such that the definition is still possible, without leveraging transformations.
+One that modifies the definition of \tt{filter2} and \tt{filter3}, such that the definition is still possible, without leveraging natural transformations, instead creating a new algebra from an existing one.
 The other modifies the definition of the underlying type such that the filter function is still possible to express as a transformation.
     
 \paragraph{Solution 1: Abandoning Natural Transformations}

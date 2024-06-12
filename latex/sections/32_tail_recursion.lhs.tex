@@ -40,3 +40,83 @@ All that has been changed is the recursion principle \tt{su'}.
 
 Cochurch encodings better lend themselves to having fully tail-recursive fused pipelines, as writing a coinduction principle that is tail-recursive is easier than writing a recursion principle that is.
 For a further discussion on this, see \cite{Breitner2018}'s work and \autoref{sec:hask_perf}.
+
+
+\subsubsection{Performance Considerations}\label{sec:hs_perf}
+I discuss many different considerations and details when optimizing the fusible code.
+
+I will summarize them here.
+In order to make sure a pipeline of functions fuses in Haskell, there are several things that need to be taken into consideration:
+\begin{itemize}[noitemsep]
+    \item Make sure you only pass through parameters that change between recursive calls. Instead of writing:
+    \begin{spec}
+b a (x, y) = loop x y
+  where loop x y = if x > y
+                   then a Nil_
+                   else a (Cons_ x (loop (x+1) y))
+    \end{spec}
+    Where the \tt{y} doesn't change between calls of \tt{loop}, modify \tt{loop} such that it doesn't pass through the \tt{y}:
+    \begin{spec}
+b a (x, y) = loop x
+  where loop x = if x > y
+                 then a Nil_
+                 else a (Cons_ x (loop (x+1)))
+    \end{spec}
+    This way, fewer data need to be pushed around in memory for each (recursive) function call.
+    \item Ensure that functions are inlined properly. So for the second example above add a pragma that inlines the function.
+    This ensures that other pragmas, that  do the actual fusion, can fire during the compilation process.
+    \begin{spec}
+        {-# INLINE betweenCh #-}
+    \end{spec}
+    \item Ensure that the fused result is tail recursive.
+    For consumer functions, it is often possible to make the function tail recursive.
+    For the corecursion principle of sum \tt{su}:
+    \begin{spec}
+su :: (s -> List_ Int s) -> s -> Int
+su h s = loop s
+  where loop s' = case h s' of
+          Nil_ -> 0
+          Cons_ x xs -> x + loop xs
+    \end{spec}
+    It is possible to modify the definition of the corecursion \tt{loop} such that it is tail-recursive:
+    \begin{spec}
+su :: (s -> List_ Int s) -> s -> Int
+su h s = loopt s 0
+  where loopt s' sum = case h s' of
+          Nil_ -> sum
+          Cons_ x xs -> loopt xs (x + sum)
+    \end{spec}
+For Church encodings, it is a little more tricky to get the resultant function to be tail-recursive, it is possible, however.
+Taking the algebra for sum again:
+    \begin{spec}
+sum2 :: List' Int -> Int
+sum2 = sumCh . toCh
+  where sumCh :: ListCh Int -> Int
+        sumCh (ListCh g) = g su
+        su :: List_ Int Int -> Int
+        su Nil_ = 0
+        su (Cons_ x y) = x + y
+\end{spec}
+We can modify the type of the recursive part of list and the return type to be a function instead of just a simple datatype (\tt{Int -> Int} instead of \tt{Int}):
+\begin{spec}
+sum7 :: List' Int -> Int
+sum7 = flip sumCh 0 . toCh
+  where sumCh :: ListCh Int -> (Int -> Int)
+        sumCh (ListCh g) = g su
+        su :: List_ Int (Int -> Int) -> (Int -> Int)
+        su Nil_ s = s
+        su (Cons_ x y) s = y (s + x)
+    \end{spec}
+
+\cite{Breitner2018} introduced and subsequently make possible this optimization in Haskell.
+\item Ensure that the fused result is a single recursive function (so no helper functions such as \tt{go}).
+This was a problem when writing the filter function in Cochurch encoded fashion.
+This is only possible if a recursive natural transformation function is used, but it unfortunately does not fuse.
+This is due to \tt{go} being a recursive function, which Haskell does not inline on its own.
+
+The current workaround for this is Stream fusion as described by \cite{Coutts2007}.
+Adding a Skip constructor makes a big difference to enabling the avoidance of recursive functions.
+This workaround is part of my performance analysis.
+\end{itemize}
+
+

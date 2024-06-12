@@ -36,8 +36,9 @@
   \setcounter{tocdepth}{#1}%
 }
 
-\def\subsectionautorefname{section}
-\def\subsubsectionautorefname{section}
+\def\sectionautorefname{Section}
+\def\subsectionautorefname{Section}
+\def\subsubsectionautorefname{Section}
 
 
 \begin{document}
