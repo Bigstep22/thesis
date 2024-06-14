@@ -9,7 +9,7 @@ open import agda.cochurch.defs renaming (cons to consu)
 open import agda.cochurch.proofs
 open import Data.Fin using (Fin; zero)
 open import Data.Unit
-open import agda.term.terminal
+open import agda.cochurch.terminal
 open import Data.Product using (_×_)
 open import Data.Sum hiding (map)
 open import Data.Nat

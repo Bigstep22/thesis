@@ -7,7 +7,7 @@ The original definition is included as \tt{CoChurch'}.
 \begin{code}[hide]
 {-# OPTIONS --guardedness #-}
 module agda.cochurch.defs where
-open import agda.term.terminal
+open import agda.cochurch.terminal
 open import Data.Product using (∃; _×_)
 \end{code}
 The Cochurch encoding, agian leveraging containers:

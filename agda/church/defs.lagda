@@ -1,6 +1,6 @@
 \subsubsection{Definition of Church encodings}
 \begin{code}[hide]
-open import agda.init.initial
+open import agda.church.initial
 module agda.church.defs where
 \end{code}
 This section defines Church encodings and the two conversions \tt{con} and \tt{abs}, called \tt{toCh} and \tt{fromCh} here, respectively.

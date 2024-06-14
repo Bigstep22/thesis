@@ -3,8 +3,7 @@ As with Church encodings, in \cite{Harper2011}'s work, five proof obligations ne
 These are formalized here.
 \begin{code}[hide]
 {-# OPTIONS --guardedness #-}
-open import agda.term.terminal
-open import agda.term.cofusion
+open import agda.cochurch.terminal
 open import agda.cochurch.defs
 module agda.cochurch.proofs where
 \end{code}
@@ -106,7 +105,7 @@ trans-pres f nat (CoCh h x) = begin
       fromCoCh (CoCh (f ∘ h) x)
     ≡⟨⟩ -- Definition of fromCh
       A⟦ f ∘ h ⟧ x
-    ≡⟨ fusion A⟦ h ⟧ (sym $ valid-hom h f nat) x ⟩
+    ≡⟨ sym $ fusion A⟦ h ⟧ (sym $ valid-hom h f nat) x ⟩
       A⟦ f ∘ out ⟧ (A⟦ h ⟧ x)
     ≡⟨⟩ -- This step is not in the paper, but mirrors the one on the Church-side.
       A⟦ f ∘ out ⟧ (fromCoCh (CoCh h x))

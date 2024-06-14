@@ -3,7 +3,7 @@ This section proves the universal property of folds.
 It takes the definition of \tt{M} types and shows that the \tt{fold} function defined for it is a catamorphism.
 This is done by proving that the fold is an F-algebra homomorphism through a proof of existence and uniqueness.
 \begin{code}
-module agda.init.initial where
+module agda.church.initial where
 open import Data.W using () renaming (sup to in') public
 \end{code}
 \begin{code}[hide]
@@ -13,19 +13,7 @@ open import Data.Product using (_,_) public
 open import Data.Container using (Container; μ; ⟦_⟧; map; _▷_) public
 open import Relation.Binary.PropositionalEquality as Eq using (_≡_; refl; sym; cong; cong-app; subst; trans) public
 open Eq.≡-Reasoning public
-open import Categories.Category renaming (Category to Cat)
-open import Categories.Functor.Algebra
-open import Categories.Category.Construction.F-Algebras
-open import Categories.Object.Initial
-open F-Algebra-Morphism
-open F-Algebra
 open import agda.funct.funext
-open import agda.funct.endo
-\end{code}
-A shorthand for the Category of F-Algebras.
-\begin{code}
-C[_]Alg : (F : Container 0ℓ 0ℓ) → Cat (lsuc 0ℓ) 0ℓ 0ℓ
-C[ F ]Alg = F-Algebras F[ F ]
 \end{code}
 A candidate catamorphism function is defined, they will be proved to be so later on this module,
 Agda's stdlib \tt{fold} could be used but is not for clarity:
@@ -38,34 +26,36 @@ i.e., the forward direction of the \textit{universal property of folds} \citep{H
 This constitutes a proof of existence:
 \begin{code}
 univ-to : {F : Container 0ℓ 0ℓ}{X : Set}{a : ⟦ F ⟧ X → X}{h : μ F → X} →
-                  h ≡ ⦅ a ⦆ → h ∘ in' ≡ a ∘ map h
-univ-to refl = refl
+                  ({x : μ F} → h x ≡ ⦅ a ⦆ x) → {x : ⟦ F ⟧ (μ F)} → (h ∘ in') x ≡ (a ∘ map h) x
+univ-to {_}{_}{a}{h} eq {x@(op , ar)} = begin
+      h (in' (op , ar))
+    ≡⟨ eq ⟩
+      ⦅ a ⦆ (in' (op , ar))
+    ≡⟨⟩
+      a (op , ⦅ a ⦆ ∘ ar)
+    ≡⟨ cong (λ f → a (op , f)) (funext λ x → sym eq) ⟩
+      a (op , h ∘ ar)
+    ≡⟨⟩
+      a (map h x)
+    ∎
 \end{code}
 It is shown that any other valid F-Algebra homomorphism from \tt{in'} to \tt{a} is equal to the $\catam{\_}$ function defined;
 i.e. the backwards direction of the \textit{universal property of folds} \citep{Harper2011}.
 This constitutes a proof of uniqueness:
 \begin{code}
-univ-from : {F : Container 0ℓ 0ℓ}{X : Set}(a : ⟦ F ⟧ X → X)(h : μ F → X) →
+univ-from : {F : Container 0ℓ 0ℓ}{X : Set}{a : ⟦ F ⟧ X → X}(h : μ F → X) →
             ({x : ⟦ F ⟧ (μ F)} → (h ∘ in') x ≡ (a ∘ map h) x) → {x : μ F} → h x ≡ ⦅ a ⦆ x
-univ-from a h eq {in' x@(op , ar)} = begin
+univ-from {_}{_}{a} h eq {in' x@(op , ar)} = begin
       (h ∘ in') x
     ≡⟨ eq ⟩
       a (op , h ∘ ar)
-    ≡⟨ cong (λ f → a (op , f)) (funext $ λ x → univ-from a h eq {ar x}) ⟩
+    ≡⟨ cong (λ f → a (op , f)) (funext λ x → univ-from h eq {ar x}) ⟩
       a (op , ⦅ a ⦆ ∘ ar)
     ≡⟨⟩
       (⦅ a ⦆ ∘ in') x
     ∎
 \end{code}
-The two previous proofs, constituting a proof of existence and uniqueness, are combined to show that \tt{(μ F, in')} is initial:
-\begin{code}
-initial-in : {F : Container 0ℓ 0ℓ} → IsInitial C[ F ]Alg (to-Algebra in')
-initial-in = record { ! = λ {A} →
-                 record { f = ⦅ α A ⦆
-                   ; commutes = λ {x} → cong-app (univ-to {_}{_}{α A} refl) x  }
-               ; !-unique = λ {A} fhom {x} → sym $
-                   univ-from (α A) (f fhom) (commutes fhom) }
-\end{code}
+The two previous proofs, constituting a proof of existence and uniqueness, together prove initiality of \tt{(μ F, in')}.
 The \textit{computation law} \citep{Harper2011}:
 \begin{code}
 comp-law : {F : Container 0ℓ 0ℓ}{A : Set}(a : ⟦ F ⟧ A → A) →
@@ -85,4 +75,10 @@ reflection y@(in' (op , ar)) = begin
    ≡⟨⟩ -- Dfn of y
      y
    ∎
+\end{code}
+The fusion property, which follows from the backwards direction of the \textit{universal property of folds}:
+\begin{code}
+fusion : {F : Container 0ℓ 0ℓ}{A B : Set}{a : ⟦ F ⟧ A → A}{b : ⟦ F ⟧ B → B}{h : A → B} →
+         ({x : ⟦ F ⟧ A} → (h ∘ a) x ≡ (b ∘ map h) x) → (x : μ F) → (h ∘ ⦅ a ⦆) x ≡ ⦅ b ⦆ x
+fusion {_}{_}{_}{a}{b}{h} eq x = univ-from (h ∘ ⦅ a ⦆) eq {x}
 \end{code}

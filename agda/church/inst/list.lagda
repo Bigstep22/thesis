@@ -10,7 +10,7 @@ open import Data.Fin using (Fin; zero)
 open import Data.Bool
 open import agda.church.defs renaming (cons to consu)
 open import agda.church.proofs
-open import agda.init.initial
+open import agda.church.initial
 module agda.church.inst.list where
 \end{code}
 This section defines: the container, whose interpretation represents the base functor for lists,
