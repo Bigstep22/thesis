@@ -3,7 +3,7 @@ Starting with the basics of fusion.
 \cite{Gill1993} describes the original `shortcut fusion' technique.
 The core idea is as follows:
 
-In functional programming, lists are (often) used to store the output of one function such that it can then be consumed by another function. To co-opt Gill's example:
+In functional programming, lists are (often) used to store the output of one function such that it can then be consumed by another function. To co-opt Gill's example (and repeat a part of my introduction):
 \begin{code}
 all :: (a -> Bool) -> [a] -> Bool
 all p xs = and (map p xs)
@@ -26,7 +26,7 @@ Can this be automated?
 Gill's key insight was to note that when using a \tt{foldr k z xs} across a list, the effect of its application: 
 
 \begin{quotation}
-    Is to replace each \tt{cons} in the list \tt{xs} with k and replace the \tt{nil} in \tt{xs} with \tt{z}. By abstracting list-producing functions with respect to their connective datatype (\tt{cons} and \tt{nil}), we can define a function \tt{build}:
+    ``is to replace each \tt{cons} in the list \tt{xs} with k and replace the \tt{nil} in \tt{xs} with \tt{z}. By abstracting list-producing functions with respect to their connective datatype (\tt{cons} and \tt{nil}), we can define a function \tt{build}:
 \begin{code}
 build :: (forall b. (a -> b -> b) -> b -> b) -> [a] 
 build g = g (:) []
@@ -42,10 +42,10 @@ Gill dubbed this the \tt{foldr/build} rule. For its validity \tt{g} needs to be 
 \begin{code}
 g : forall beta : (A -> beta -> beta) -> beta -> beta
 \end{code}
-Which is true by g's free theorem \`a la \cite{Wadler1989}. For more information on free theorems see \autoref{sec:free}.
+Which is true by \tt{g}'s free theorem \`a la \cite{Wadler1989}. For more information on free theorems see \autoref{sec:free}.
 
 \subsubsection{An example}
-Take as an example the function \tt{from}, that takes two numbers and produces a list of all the numbers from the first to the second:
+Take as an example the function \tt{from}, that takes two numbers and produces a list of all integers between the:
 \begin{code}
 from :: Int -> Int -> [Int]
 from a b = if a > b
@@ -76,7 +76,7 @@ Any adjacent \tt{foldr/build} pair `cancels away'.
 This is an example of shortcut fusion.
 
 One can rewrite many functions in terms of \tt{foldr} and \tt{build} such that this fusion can be applied. This can be seen in \autoref{fig:foldr/build_ex}.
-See \cite{Gill1993}'s work, specifically the end of section 3.3 (\tt{unlines}) for a more expansive example of how fusion, $\beta$ reduction, and inlining can combine to fuse a pipeline of functions down an as efficient minimum as can be expected.
+See \cite{Gill1993}'s work, specifically the end of section 3.3 (\tt{unlines}) for a more expansive example of how fusion, $\beta$ reduction, and inlining can combine to fuse a pipeline of functions down as an efficient minimum as can be expected.
 \begin{figure}[ht]
     \centering
     \begin{code}

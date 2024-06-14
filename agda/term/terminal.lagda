@@ -1,4 +1,4 @@
-\subsubsection{Terminal coalgebras and anamorphisms}
+\subsubsection{Terminal coalgebras and anamorphisms}\label{sec:term}
 This section defines a datatype and shows it to be terminal; and a function and shows it to be an anamorphism in the category of F-Coalgebras.
 Specifically, it is shown that \tt{($\nu$F, out)} is terminal.
 \begin{code}

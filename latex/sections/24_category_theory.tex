@@ -23,23 +23,21 @@ These pieces of data should satisfy the following three properties:
 \subsubsection{Initial/Terminal Objects}
 Categories can contain objects that have certain (useful) properties.
 Two of these properties are as follows:
-\begin{itemize}
-    \item[\textbf{initial}]  Let $\mathcal{C}$ be a category. An object $A\in\mathcal{C}_0$ is \textbf{initial} if there is exactly one morphism from $A$ to any object $B\in\mathcal{C}_0$: 
+\paragraph{initial} Let $\mathcal{C}$ be a category. An object $A\in\mathcal{C}_0$ is \textbf{initial} if there is exactly one morphism from $A$ to any object $B\in\mathcal{C}_0$: 
     \begin{align*}
-        \forall A,B\in\mathcal{C}_0: \exists! \homm{C}{A,B} \Longrightarrow \textbf{initial}(A)
+        \forall A\in\mathcal{C}_0:(\forall B\in\mathcal{C}_0: \exists! \homm{C}{A,B}) \Longrightarrow \textbf{initial}(A)
     \end{align*}
-    \item[\textbf{terminal}]  Let $\mathcal{C}$ be a category. An object $A\in\mathcal{C}_0$ is \textbf{terminal} if there is exactly one morphism from any object $B\in\mathcal{C}_0$ to $A$:
+\paragraph{terminal} Let $\mathcal{C}$ be a category. An object $A\in\mathcal{C}_0$ is \textbf{terminal} if there is exactly one morphism from any object $B\in\mathcal{C}_0$ to $A$:
     \begin{align*}
-        \forall A,B\in\mathcal{C}_0: \exists! \homm{C}{B,A} \Longrightarrow \textbf{terminal}(A)
+        \forall A\in\mathcal{C}_0:(\forall B\in\mathcal{C}_0: \exists! \homm{C}{B,A}) \Longrightarrow \textbf{terminal}(A)
     \end{align*}
-\end{itemize}
 The proofs of initality and terminality require a proof that is split into two steps: A proof of existence (The $\exists$ part of $\exists!$) and a proof of uniqueness (The $!$ part of $\exists!$).
 The former is usually done by construction, giving an example of a function that satisfies the property and the latter is usually done my assuming that another $\homm{C}{A,B}$ (for the initial case) exists and showing that it must be equal to the one constructed.
 
 \subsubsection{Functors}
 For a given category $\mathcal{C}, \mathcal{D}$, a \textbf{functor} from $\mathcal{C}$ to $\mathcal{D}$ consists of two pieces of data satisfying two properties:
 \begin{enumerate}
-    \item A function mapping objects in $\mathcal{C}$ to $\mathcal{D}$: \begin{align*} \mathcal{C}_0 \to \mathcal{D}_0 \end{align*}
+    \item A function $F$ mapping objects in $\mathcal{C}$ to $\mathcal{D}$: \begin{align*} \mathcal{C}_0 \to \mathcal{D}_0 \end{align*}
     \item For each $X,Y\in\mathcal{C}_0$, a function mapping morphisms in $\mathcal{C}$ to morphisms in $\mathcal{D}$: \begin{align*} \homm{C}{X,Y} \to \homm{D}{F(X),F(Y)} \end{align*}
 \end{enumerate}
 These pieces of data should satisfy these two properties:
@@ -98,9 +96,9 @@ A morphism of the form $\catam{\phi}$ is called a \textbf{catamorphism}.
 A converse definition of catamorphisms exists, for terminal objects in $\coalg{F}$ exists, called \textbf{anamorphisms}, denoted by $\anam{\phi}$
 
 \subsubsection{Fusion property}\label{sec:fusion_prop}
-Now for the definition I've been building to, \textbf{fusion}:
+Now for the definition we've been building to, \textbf{fusion}:
 Given an endofunctor $F:\mathcal{C}\to\mathcal{C}$ and an initial algebra $(\mu^F,in)$ in $\alg{F}$. For any two F-Algebras $(C,\phi)$ and $(D,\psi)$ and morphism $f\in\homm{C}{C,D}$ we have a \textbf{fusion property}: \begin{align*} f\circ\phi=\psi\circ F(f) \Longrightarrow f\circ\catam{\phi}=\catam{\psi} \end{align*}
-In English, if $f$ is an F-Algebra homomorphism, we can know that the composition of f and the catamorphism of $\phi$ equals the catamorphism of $\psi$ ($f\circ\catam{\phi}=\catam{\psi}$). We can fuse two functions into one! This is summarized in the following diagram:
+In English, if $f$ is an F-Algebra homomorphism, we know that the composition of $f$ and the catamorphism of $\phi$ equals the catamorphism of $\psi$ ($f\circ\catam{\phi}=\catam{\psi}$). We can fuse two functions into one! This is summarized in the following diagram:
 \begin{figure}[H]\vspace{-1em}\hfill
 \begin{tikzcd}
     F\mu^F \arrow[r,"in"]

@@ -13,7 +13,7 @@ The fully fused (fastest) pipelines of both Church and Cochurch encodings were a
 
 I implemented Harper's description of Church and Cochurch encodings using Agda's dependent type system, using containers to represent strictly positive functors.
 Before formalizing the proof of the shortcut fusion property, I first formalized all of the needed underlying category theory: the universal property of folds (i.e., initiality of initial algebras), the computation law, the reflection law, and the fusion property.
-Using these, I formalized Harper's proofs of the Church and Cochurch encodings being faithul, showing that they are isomorphic to the datatype that they are encoding.
+Using these, I formalized Harper's proofs of the Church and Cochurch encodings being faithful, showing that they are isomorphic to the datatype that they are encoding.
 This came with one major caveat: The reliance on the free theorems of parametric functions, which was not provable in Agda.
 There is recent work on this \textit{internalized parametricity} by \cite{Muylder2024}, which would make the free theorems provable from within Agda, dubbed Agda --bridges.
 

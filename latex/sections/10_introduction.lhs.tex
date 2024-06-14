@@ -1,6 +1,6 @@
 \section{Introduction}
 When writing functional code, we often use lists (or other data structures) to `glue' multiple pieces of data together.
-For example, the following function in the programming language Haskell, as introduced by \cite{Gill1993}: %TODO: Cite
+For example, the following function in the programming language Haskell, as introduced by \cite{Gill1993}:
 \begin{code}
 all :: (a -> Bool) -> [a] -> Bool
 all p xs = and (map p xs)
@@ -76,18 +76,5 @@ My thesis centers on formalizing, replicating, and expanding upon \cite{Harper20
     Formally verifying the mathematics will strengthen the work done by Harper, aiding in understanding in how the different pieces of mathematics relate.
     This is discussed in detail in \autoref{sec:formalization}.
 \end{enumerate}
-
-
-
-
-% Mention certain existing solutions, shortcut deforestation, library shortcut fusion, etc. DO RESEARCH
-
-%% Focus down on the Church encodings and that they are rather general, but seemingly not formalized.
-%%% Agda was used to formalize it, done in section X
-%%%% Haskell implementation of the work was also done, work was continued to investigate why sometimes Co(Church) encodings are faster, done in section X.
-%%%%% Mention that new discoveries were made throughout the Haskell implementation process.
-~
-
-% Fusion, Category theory, Libfusion paper, church encodings, formalization of it, Haskell's suite of optimizations that enable fusion, (theorems for free?).
 
 

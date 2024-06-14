@@ -1,5 +1,5 @@
 \subsection{Library Writer's Guide to Shortcut Fusion}\label{sec:libfusion}
-Now that the sufficient category theory has been explained, it is possible to describe \cite{Harper2011}'s work, which my thesis centers on called ``A Library Writer's Guide to Shortcut Fusion''.
+Now that the sufficient category theory has been explained, it is possible to describe the work of \cite{Harper2011}, which my thesis centers on, called ``A Library Writer's Guide to Shortcut Fusion''.
 
 In his work, Harper explains the concept of Church and Cochurch encodings in four steps:
 The necessary underlying category theory, the concepts of encodings and the proof obligations necessary for ensuring correctness of the encodings, the concepts of (Co)Church encodings with the proof of correctness, and finally an example implementation for leaf trees.
@@ -18,41 +18,50 @@ h \circ \catam{a} &= \catam{b}~\Longleftarrow && h \circ a &&= b \circ F h \\
 \end{alignat*}
 I formalized and proved all of these properties in my Agda formalization.
 It is also interesting to note that, for the universal property of unfolds, the forward direction is the proof of existence and the backward direction the proof of uniqueness, for the proof of initiality of an algebra.
-Converse definitions exist for terminal coalgebras, but I will not cover them in this section.
-They do exist in my formalization.
+Converse definitions exist for terminal coalgebras, and can be found in the formalization in \autoref{sec:term}.
 
 \subsubsection{Encodings}\label{sec:obligations}
-The purpose of the encodings is to encode recursive functions, which are not inlined by Haskell's optimizer, into nonrecursive ones that are capable of being inlined and therefore fused:
+Harper, before describing Church and Cochurch encodings, first discusses what merits a correct encoding of a datatype.
+His reason for creating an encoding is to encode recursive functions, which are not inlined by Haskell's optimizer, into nonrecursive ones that are capable of being inlined and therefore fused:
 ``For example, assume that we want to convert values of the recursive datatype \tt{$\mu$F} to values of a type \tt{F}.  The idea is that \tt{C} can faithfully represent values of \tt{$\mu$F}, but composed functions over \tt{C} can be fused automatically'' \citep{Harper2011}.
 
-Now, instead of writing functions over \tt{$\mu$F}, we write functions over \tt{C}, along with two conversion functions \tt{con: $\mu$F $\to$ C} (concrete) and \tt{abs : C $\to$ $\mu$F} (abstract).
+Now, instead of writing functions over a normal datatype \tt{$\mu$F}, we write functions over an encoded datatype \tt{C}, along with two conversion functions \tt{con: $\mu$F $\to$ C} (concrete) and \tt{abs : C $\to$ $\mu$F} (abstract), which will enable us to convert from one datatype to another.
 In order for the datatype \tt{C} to faithfully represent \tt{$\mu$F}, we need $abs \circ con = id_{\mu F}$ i.e., that \tt{C} can represent all values of \tt{$\mu$F} uniquely.
 
-In total there are four main proof obligations, the one mentioned above, as well as the commutation of the following three diagrams:
+This requirement above is a proof obligation, Harper states three additional ones which are summarized in the following three commutative diagrams:
 
 \begin{figure}[H]\hfill
-\begin{tikzcd}
-    \mu F  \arrow[d,"f",swap] & C \arrow[l,"abs"] \arrow[d, "f_C"] \\
-    \mu F & C \arrow[l,"abs"]
-\end{tikzcd}\hfill\null
-\begin{tikzcd}
-    S  \arrow[d,"p",swap] \arrow[dr,"p_C"] \\
-    \mu F & C \arrow[l,"abs"]
-\end{tikzcd}\hfill\null
-\begin{tikzcd}
-    \mu F  \arrow[d,"c",swap] \arrow[r,"con"] & C \arrow[dl, "c_C"] \\
-    T
-\end{tikzcd}\hfill\null
+    \begin{subfigure}{0.3\textwidth}
+        \hfill\begin{tikzcd}
+            \mu F  \arrow[d,"f",swap] & C \arrow[l,"abs"] \arrow[d, "f_C"] \\
+            \mu F & C \arrow[l,"abs"]
+        \end{tikzcd}\hfill\null
+        \caption{$f\circ abs = abs\circ f_C$}
+    \end{subfigure}
+    \begin{subfigure}{0.3\textwidth}
+        \hfill\begin{tikzcd}
+            S  \arrow[d,"p",swap] \arrow[dr,"p_C"] \\
+            \mu F & C \arrow[l,"abs"]
+        \end{tikzcd}\hfill\null
+        \caption{$p = abs\circ p_C$}
+    \end{subfigure}
+    \begin{subfigure}{0.3\textwidth}
+        \hfill\begin{tikzcd}
+            \mu F  \arrow[d,"c",swap] \arrow[r,"con"] & C \arrow[dl, "c_C"] \\
+            T
+        \end{tikzcd}\hfill\null
+        \caption{$c = c_C\circ con$}
+    \end{subfigure}
 \end{figure}
 
 In the second diagram, \tt{p} is a producer function, generating a recursive data structure from a seed of type \tt{S}.
 In the third diagram, \tt{c} is a consumer function, consuming a recursive data structure to produce a value of type \tt{T}.
 
-A fifth proof can also be made: $cons \circ abs = id_C$.
-Harper mentioned that proving this alongside the converse identity proof would constitute an isomorphism, stating that it is too strong of a condition to require from an encoding.
-However, he did end up proving it later on in his five proofs (per encoding).
+Harper also describes a fifth proof can also be made: $cons \circ abs = id_C$,
+but he initially mentions that this is too strong of a condition to require from an encoding, requiring it to be an isomorphism.
+However, he did end up proving it later on in his proofs, once for Church encodings and once for Cochurch encodings.
 In fact, he uses the fifth proof as the basis for the fusion pragma in Haskell.
-If anything it forms the basis for correctness for the (Co)Church encodings he later ends up presenting in Haskell.
+It seems to form the basis for correctness for the (Co)Church encodings he later ends up presenting in Haskell.
 
 He did end up proving this fifth proof using the free theorems, pulled from the type of the polymorphic functions that the (Co)Church encodings contain.
 This seems a bit inconsistent, but the fact that he did end up proving it and using it for the basis of the fusion he implemented in Haskell indicates that proving this fifth proof \textit{is} important.
@@ -62,7 +71,7 @@ Next, \cite{Harper2011} proposes two encodings, \tt{Church} and \tt{CoChurch}.
 
 \paragraph{Church} \tt{Church} is defined (abstractly) as the following datatype:
 \begin{code}
-data Church F = Ch (forall A => (F A -> A) -> A)
+data Church F = Ch (forall A . (F A -> A) -> A)
 \end{code}
 \tt{Church} contains a recursion principle (often referred to as \tt{g} throughout this thesis).
 With conversion and abstraction functions \tt{toCh} and \tt{fromCh}:
@@ -72,17 +81,18 @@ toCh x = Ch (\ a -> fold a x)
 fromCh :: Church F -> mu F
 fromCh (Ch g) = g in
 \end{code}
-From these definitions, Harper proves the four proof obligations along with a fifth proof, proving the other composition of \tt{con} and \tt{abs} to be equal to \tt{id}, thereby showing isomorphism.
+Where \tt{in} is the initial algebra $in:F(\mu F) \to \mu F$.
+From these definitions, Harper proves the four proof obligations, showing Church encodings to be a faithful encoding; along with a fifth proof, proving the other composition of \tt{con} and \tt{abs} to be equal to \tt{id} and thereby showing isomorphism.
 For the proof of transformers and \tt{con $\circ$ abs = id}, Harper makes use of the free theorem for the polymorphic recursion principle \tt{g}.
 In all the five proofs for Church encodings, Harper does not use the fusion property.
 
 \paragraph{Cochurch} \tt{CoChurch} is defined (abstractly) as the following datatype:
 \begin{code}
-data CoChurch' F = exists S => CoCh (S -> F S) S
+data CoChurch' F = exists S . CoCh (S -> F S) S
 \end{code}
 An isomorphic definition which Harper later uses is the one I end up using in my formalization:
 \begin{code}
-data CoChurch F = forall S => CoCh (S -> F S) S
+data CoChurch F = forall S . CoCh (S -> F S) S
 \end{code}
 The Cochurch encoding encodes a coalgebra and a seed value together.
 The conversion and abstraction functions, \tt{toCoCh} and \tt{fromCoCh}:
@@ -97,8 +107,7 @@ The \tt{con $\circ$ abs = id} proof, leverages the free theorem for the corecurs
 The proof for natural transformations uses the free theorem and, in addition, the fusion property for unfolds.
 
 \subsubsection{Example implementation}
-To tie it all together, Harper gives an example of how one would implement the encodings described so far.
-For this he uses Leaf Trees.
+After describing (Co)Church encodings, Harper goes on to demonstrate how they are used by implementing an example (Co)Church encoding of Leaf Trees.
 He implements four functions, \tt{between}, \tt{filter}, \tt{concat}, and \tt{sum}, as a normal, recursive function, in Church encoded form, and in Cochurch encoded form.
 
 In doing so, he shows exactly how one goes from using the normal, recursive datatypes and function that are typically used in Haskell, to Church and Cochurch encoded versions.
