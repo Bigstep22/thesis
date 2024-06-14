@@ -1,7 +1,7 @@
 \subsection{Haskell's optimization pipeline}
 In order to understand how fusion works, it is important to understand a few other concepts with which fusion works in tandem.
 Namely, beta reduction, inlining, case-of-case optimizations, and tail call optimization.
-I will give a brief description of each.
+We will discuss a brief description of each.
 
 \subsubsection{Beta reduction}
 Beta reduction is simply the rule where an expression of the form \tt{($\lambda$ x . a[x]) y} can get transformed into \tt{a[y]}.
@@ -20,7 +20,7 @@ case (
   A1 -> E1
   A2 -> E2
 \end{spec}
-To the following\footnote{This specific example I retrieved from: \url{https://stackoverflow.com/questions/35815503/what-ghc-optimization-is-responsible-for-duplicating-case-expressions}}:
+To the following\footnote{This specific example was retrieved from: \url{https://stackoverflow.com/questions/35815503/what-ghc-optimization-is-responsible-for-duplicating-case-expressions}}:
 \begin{spec}
 case C of    
   B1 -> case F1 of

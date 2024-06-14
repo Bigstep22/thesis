@@ -3,7 +3,7 @@ Now that the sufficient category theory has been explained, it is possible to de
 
 In his work, Harper explains the concept of Church and Cochurch encodings in four steps:
 The necessary underlying category theory, the concepts of encodings and the proof obligations necessary for ensuring correctness of the encodings, the concepts of (Co)Church encodings with the proof of correctness, and finally an example implementation for leaf trees.
-I will now go through each step briefly.
+We will now go through each step briefly.
 
 \subsubsection{Category Theory}
 For the full overview of the category theory, see \autoref{sec:cat_theory}.
@@ -16,7 +16,7 @@ h \circ \catam{a} &= \catam{b}~\Longleftarrow && h \circ a &&= b \circ F h \\
 \text{And the reflection law as:} \\
 \catam{in} &= id
 \end{alignat*}
-I formalized and proved all of these properties in my Agda formalization.
+We formalized and proved all of these properties in my Agda formalization.
 It is also interesting to note that, for the universal property of unfolds, the forward direction is the proof of existence and the backward direction the proof of uniqueness, for the proof of initiality of an algebra.
 Converse definitions exist for terminal coalgebras, and can be found in the formalization in \autoref{sec:term}.
 
@@ -90,7 +90,7 @@ In all the five proofs for Church encodings, Harper does not use the fusion prop
 \begin{code}
 data CoChurch' F = exists S . CoCh (S -> F S) S
 \end{code}
-An isomorphic definition which Harper later uses is the one I end up using in my formalization:
+An isomorphic definition which Harper later uses is the one we end up using in my formalization:
 \begin{code}
 data CoChurch F = forall S . CoCh (S -> F S) S
 \end{code}
@@ -113,9 +113,9 @@ He implements four functions, \tt{between}, \tt{filter}, \tt{concat}, and \tt{su
 In doing so, he shows exactly how one goes from using the normal, recursive datatypes and function that are typically used in Haskell, to Church and Cochurch encoded versions.
 To conclude he compares the performance of different compositions of functions to show the performance benefits and differences between the three different variants of functions.
 
-So far I have mentioned the so-called `free theorems' multiple times.
+So far we have mentioned the so-called `free theorems' multiple times.
 They are important to Harper's proof as the correctness of the (Co)Church encodings depend on them.
-I will describe how these free theorems of \textit{parametricity} works in \autoref{sec:free}.
+We will describe how these free theorems of \textit{parametricity} works in \autoref{sec:free}.
 
 \iffalse
 \begin{itemize}

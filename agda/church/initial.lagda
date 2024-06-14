@@ -1,7 +1,10 @@
 \subsubsection{Universal properties of catamorphisms and initiality}
 This section proves the universal property of folds.
-It takes the definition of \tt{M} types and shows that the \tt{fold} function defined for it is a catamorphism.
-This is done by proving that the fold is an F-algebra homomorphism through a proof of existence and uniqueness.
+It takes the definition of \tt{W} types and shows that the $\catam{\_}$ function defined for it is a catamorphism.
+This is done by proving that the fold is a unique F-algebra homomorphism to any datatype through a proof of existence and uniqueness:
+\begin{equation*}
+\forall (C,\phi)\in\alg{F}_0: \exists! \catam{\phi}\in \homm{\tt{Alg}(F)}{\mu F,C}, s.t. \catam{\phi}\circ in = \phi\circ F\catam{\phi}
+\end{equation*}
 \begin{code}
 module agda.church.initial where
 open import Data.W using () renaming (sup to in') public
@@ -15,14 +18,19 @@ open import Relation.Binary.PropositionalEquality as Eq using (_≡_; refl; sym;
 open Eq.≡-Reasoning public
 open import agda.funct.funext
 \end{code}
-A candidate catamorphism function is defined, they will be proved to be so later on this module,
-Agda's stdlib \tt{fold} could be used but is not for clarity:
+I define a function below which turns out to be a catamorphism.
+This fact is proved in this section through a proof of existence \tt{univ-to} and a proof of uniqueness \tt{univ-from}.
+The \tt{fold} function for containers in Agda's stdlib is defined identically and could be imported, omitting this definition.
+However, for clarity I'm including the definition here instead of importing it:
 \begin{code}
 ⦅_⦆ : {F : Container 0ℓ 0ℓ}{X : Set} → (⟦ F ⟧ X → X) → μ F → X
 ⦅ a ⦆ (in' (op , ar)) = a (op , ⦅ a ⦆ ∘ ar)
 \end{code}
-It is shown that any $\catam{\_}$ is a valid F-Algebra homomorphism from \tt{in'} to any other object \tt{a}
-i.e., the forward direction of the \textit{universal property of folds} \citep{Harper2011}.
+We show that any $\catam{\_}$ is a valid F-Algebra homomorphism from \tt{in'} to any other object \tt{a}
+i.e., the forward direction of the \textit{universal property of folds} \citep{Harper2011}:
+\begin{equation*}
+h = \catam{a} \iff h \circ in = a \circ F h
+\end{equation*}
 This constitutes a proof of existence:
 \begin{code}
 univ-to : {F : Container 0ℓ 0ℓ}{X : Set}{a : ⟦ F ⟧ X → X}{h : μ F → X} →
@@ -33,13 +41,13 @@ univ-to {_}{_}{a}{h} eq {x@(op , ar)} = begin
       ⦅ a ⦆ (in' (op , ar))
     ≡⟨⟩
       a (op , ⦅ a ⦆ ∘ ar)
-    ≡⟨ cong (λ f → a (op , f)) (funext λ x → sym eq) ⟩
+    ≡⟨ cong (λ f → a (op , f)) (funext λ _ → sym eq) ⟩
       a (op , h ∘ ar)
     ≡⟨⟩
       a (map h x)
     ∎
 \end{code}
-It is shown that any other valid F-Algebra homomorphism from \tt{in'} to \tt{a} is equal to the $\catam{\_}$ function defined;
+We show that any other valid F-Algebra homomorphism from \tt{in'} to \tt{a} is equal to the $\catam{\_}$ function defined;
 i.e. the backwards direction of the \textit{universal property of folds} \citep{Harper2011}.
 This constitutes a proof of uniqueness:
 \begin{code}
@@ -49,7 +57,7 @@ univ-from {_}{_}{a} h eq {in' x@(op , ar)} = begin
       (h ∘ in') x
     ≡⟨ eq ⟩
       a (op , h ∘ ar)
-    ≡⟨ cong (λ f → a (op , f)) (funext λ x → univ-from h eq {ar x}) ⟩
+    ≡⟨ cong (λ f → a (op , f)) (funext λ _ → univ-from h eq) ⟩
       a (op , ⦅ a ⦆ ∘ ar)
     ≡⟨⟩
       (⦅ a ⦆ ∘ in') x
@@ -58,9 +66,9 @@ univ-from {_}{_}{a} h eq {in' x@(op , ar)} = begin
 The two previous proofs, constituting a proof of existence and uniqueness, together prove initiality of \tt{(μ F, in')}.
 The \textit{computation law} \citep{Harper2011}:
 \begin{code}
-comp-law : {F : Container 0ℓ 0ℓ}{A : Set}(a : ⟦ F ⟧ A → A) →
-           ⦅ a ⦆ ∘ in' ≡ a ∘ map ⦅ a ⦆
-comp-law a = refl
+comp-law : {F : Container 0ℓ 0ℓ}{A : Set}{a : ⟦ F ⟧ A → A}{x : ⟦ F ⟧ (μ F)} →
+           (⦅ a ⦆ ∘ in') x ≡ (a ∘ map ⦅ a ⦆) x
+comp-law = refl
 \end{code}
 The \textit{reflection law} \citep{Harper2011}:
 \begin{code}
@@ -70,7 +78,7 @@ reflection {_}{y@(in' (op , ar))} = begin
      ⦅ in' ⦆ y
    ≡⟨⟩ -- Dfn of ⦅_⦆
      in' (op , ⦅ in' ⦆ ∘ ar)
-   ≡⟨ cong (λ x → in' (op , x)) (funext (λ y → reflection {_}{ar y})) ⟩
+   ≡⟨ cong (λ f → in' (op , f)) (funext λ _ → reflection) ⟩
      in' (op , ar)
    ≡⟨⟩ -- Dfn of y
      y

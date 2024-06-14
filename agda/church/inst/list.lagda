@@ -48,7 +48,7 @@ The fold funtion as it would normally be encountered for lists, defined in terms
 fold' : {A X : Set}(n : X)(c : A → X → X) → List A → X
 fold' {A}{X} n c = ⦅ (λ{(nil , _) → n; (cons n , g) → c n (g zero)}) ⦆
 \end{code}
-\subparagraph{between}
+\subparagraph{Between}
 The recursion principle \tt{b}, which when used, represents the between function.
 It uses \tt{b'} to assist in termination checking:
 \begin{code}
@@ -71,7 +71,7 @@ eqbetween = refl
 checkbetween : 2 :: 3 :: 4 :: 5 :: 6 :: [] ≡ between2 (2 , 6)
 checkbetween = refl
 \end{code}
-\subparagraph{map}
+\subparagraph{Map}
 The natural transformation \tt{m}, which when used in a transformation function, represents the map function:
 \begin{code}
 m : {A B C : Set}(f : A → B) → List' A C → List' B C
@@ -91,7 +91,7 @@ eqmap = refl
 checkmap : (map1 (_+_ 2) (3 :: 6 :: [])) ≡ 5 :: 8 :: []
 checkmap = refl
 \end{code}
-\subparagraph{sum}
+\subparagraph{Sum}
 The algebra \tt{s}, which when used in a consumer function, represents the sum function:
 \begin{code}
 s' : List' ℕ (ℕ → ℕ) → (ℕ → ℕ)
@@ -114,7 +114,7 @@ sum2' l = consu s' l 0
 checksum : sum2 (5 :: 6 :: 7 :: []) ≡ 18
 checksum = refl
 \end{code}
-\subparagraph{equality}
+\subparagraph{Equality}
 The below proof shows the equality between the non-church-endcoded pipeline and
 the church-encoded pipeline:
 \begin{code}

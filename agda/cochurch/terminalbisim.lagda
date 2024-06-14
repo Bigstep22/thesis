@@ -46,9 +46,6 @@ module _ {F : Container _ _} where
   outfst (refl) = Eq.refl
   outsnd (refl) = refl
 
---  subst' : {ℓ : Level} →  Substitutive _≣_ ℓ
---  subst' P eq p = subst P {!!} p
-
   tailcong : (y : ν F){x z : Position F (head y)}
              (x≡z : x ≡ z) → tail y x ≣ tail y z
   outfst (tailcong y Eq.refl) = Eq.refl
@@ -92,6 +89,7 @@ univ-to' : {F : Container 0ℓ 0ℓ}{C : Set}{h : C → ν F}
            {c : C → ⟦ F ⟧ C}(eq : ∀ {x} → h x ≣ A⟦ c ⟧ x) → ∀(x : C){y} →
            tail (h x) y ≣ (h ∘ snd (c x) ∘ subst (Position F) (univ-to h eq x)) y
 univ-to' {F}{_}{_}{c} eq x {y} = trans (outsnd eq {y}) (sym $ eq)
+
 conv : {F : Container _ _}{C : Set}(h : C → ν F){c : C → ⟦ F ⟧ C} →
        (eq : ∀{x} → out (h x) ≡ map h (c x)) → {x : C} → head (h x) ≡ proj₁ (c x)
 conv h eq = ,-injectiveˡ eq
@@ -112,7 +110,7 @@ univ-from : {F : Container _ _}{C : Set}(h : C → ν F)(c : C → ⟦ F ⟧ C) 
             (eq2 : ∀{x y} → tail (h x) y ≣ h (snd (c x) (subst (Position F) eq1 y))) →
             {x : C} → h x ≣ A⟦ c ⟧ x
 outfst (univ-from h c eq1 _) = eq1
-outsnd (univ-from {F} h c eq1 eq2 {x}) {y} = {!!}
+outsnd (univ-from {F} h c eq1 eq2 {x}) {y} = trans eq2 $ univ-from h c eq1 eq2
   where open ≡-Reasoning
 \end{code}
 The two previous proofs, constituting a proof of existence and uniqueness, together show terminality of \tt{($\nu$ F, out)}.
@@ -124,9 +122,9 @@ computation-law = Eq.refl
 \end{code}
 The \textit{reflection law} \cite{Harper2011}:
 \begin{code}
-reflection' : {F : Container 0ℓ 0ℓ}(x : ν F) → A⟦ out ⟧ x ≣ x
-outfst (reflection' x) = Eq.refl
-outsnd (reflection' x) {y} = reflection' (snd (out x) y)
-reflection : {F : Container 0ℓ 0ℓ}(x : ν F) → A⟦ out ⟧ x ≡ x
-reflection = nueq ∘ reflection'
+reflection' : {F : Container 0ℓ 0ℓ}{x : ν F} → A⟦ out ⟧ x ≣ x
+outfst (reflection') = Eq.refl
+outsnd (reflection') {y} = reflection'
+reflection : {F : Container 0ℓ 0ℓ}{x : ν F} → A⟦ out ⟧ x ≡ x
+reflection = nueq reflection'
 \end{code}

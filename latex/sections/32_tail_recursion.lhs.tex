@@ -43,9 +43,8 @@ For a further discussion on this, see \cite{Breitner2018}'s work and \autoref{se
 
 
 \subsubsection{Performance Considerations}\label{sec:hs_perf}
-I discuss many different considerations and details when optimizing the fusible code.
-
-I will summarize them here.
+We discuss many different considerations and details when optimizing the fusible code.
+This discussion is summarized here.
 In order to make sure a pipeline of functions fuses in Haskell, there are several things that need to be taken into consideration:
 \begin{itemize}[noitemsep]
     \item Make sure you only pass through parameters that change between recursive calls. Instead of writing:

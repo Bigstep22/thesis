@@ -1,5 +1,10 @@
 \subsubsection{Terminal coalgebras and anamorphisms}\label{sec:term}
 This section defines a datatype and shows it to be terminal; and a function and shows it to be an anamorphism in the category of F-Coalgebras.
+It takes the definition of \tt{M} types and shows that the A$\anam{\_}$ function defined for it is an anamorphism.
+This is done by proving that the A$\anam{\_}$ is a unique F-coalgebra homomorphism from any datatype through a proof of existence and uniqueness:
+\begin{equation*}
+\forall (C,\phi)\in\coalg{F}_0: \exists! \catam{\phi}\in \homm{\tt{CoAlg}(F)}{C,\nu F}, s.t. out \circ A\anam{\phi} = F A\anam{\phi} \circ \phi
+\end{equation*}
 Specifically, it is shown that \tt{($\nu$F, out)} is terminal.
 \begin{code}
 {-# OPTIONS --guardedness #-}
@@ -25,8 +30,11 @@ tail (A⟦ c ⟧ x) = A⟦ c ⟧ ∘ (snd (c x))
 out : {F : Container 0ℓ 0ℓ} → ν F → ⟦ F ⟧ (ν F)
 out nu = head nu , tail nu
 \end{code}
-It is shown that any A$\anam{\_}$ is a valid F-Coalgebra homomorphism from \tt{out} to any other object \tt{a};
-i.e. the forward direction of the \textit{universal property of unfolds} \cite{Harper2011}.
+We show that any A$\anam{\_}$ is a valid F-CoAlgebra homomorphism from any other object to \tt{out};
+i.e. the forward direction of the \textit{universal property of unfolds} \citep{Harper2011}:
+\begin{equation*}
+h = A\anam{a} \iff out \circ h = F h \circ c
+\end{equation*}
 This constitutes a proof of existence:
 \begin{code}
 univ-to : {F : Container 0ℓ 0ℓ}{C : Set}{h : C → ν F}{c : C → ⟦ F ⟧ C} →

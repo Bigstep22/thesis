@@ -17,7 +17,8 @@ import GHC.Base
 \end{code}
 }
 \subsection{Lists}
-In this section I describe my further replication of \cite{Harper2011}'s work, but Lists are implemented instead of Leaf trees.
+In this section we discuss my further replication of \cite{Harper2011}'s work.
+We implement some of the functions and pipelines that Harper described, such as \tt{between}, \tt{filter}, and \tt{sum}, but using the List datatype instead of Leaf Trees.
 This was done to see how the descriptions in Harper's work generalize and to have a simpler datastructure on which to perform analysis; seeing how and when the fusion works and when it doesn't.
 
 We again start with the datatype descriptions. We use \tt{List'} instead of \tt{List} as there is a namespace collision with GHC's \tt{List} datatype:
@@ -26,7 +27,7 @@ import GHC.List
 data List' a = Nil | Cons a (List' a)
 data List_ a b = Nil_ | Cons_ a b
 \end{code}
-\paragraph{(Co)Church encodings} The Church encoding, proper encoding and decoding functions, and fusion pragmas are defined:
+\paragraph{Church encodings} We define the Church encoding and proper encoding and decoding functions:
 \begin{code}
 data ListCh a = ListCh (forall b . (List_ a b -> b) -> b)
 toCh :: List' a -> ListCh a
@@ -34,26 +35,28 @@ toCh t = ListCh (\a -> fold a t)
   where fold :: (List_ a b -> b) -> List' a -> b
         fold a Nil         = a Nil_
         fold a (Cons x xs) = a (Cons_ x (fold a xs))
+
 fromCh :: ListCh a -> List' a
 fromCh (ListCh fold') = fold' in'
   where in' :: List_ a (List' a) -> List' a
         in' Nil_ = Nil
         in' (Cons_ x xs) = Cons x xs
 \end{code}
-We introduce three important pragmas.
-One is the actual fusion rule, taking two functions and removing them from the compilation process.
-The second and third are to make sure that the \tt{toCh} and \tt{fromCh} functions are inlined as late as possible; maximizing the time that they can be fused during the compilation process:
-\begin{code}
+We omit the pragmas defined for \tt{toCh} and \tt{fromCh} as well as the \tt{natCh}, as their definition is identical to the ones defined for Leaf Trees.
+% We introduce three important pragmas.
+% One is the actual fusion rule, taking two functions and removing them from the compilation process.
+% The second and third are to make sure that the \tt{toCh} and \tt{fromCh} functions are inlined as late as possible; maximizing the time that they can be fused during the compilation process:
+\ignore{\begin{code}
 {-# RULES "toCh/fromCh fusion" forall x. toCh (fromCh x) = x #-}
 {-# INLINE [0] toCh #-}
 {-# INLINE [0] fromCh #-}
-\end{code}
-A generalized natural transformation function is defined to standardize and ease later implementations of transformation functions:
-\begin{code}
+\end{code}}
+% A generalized natural transformation function is defined to standardize and ease later implementations of transformation functions:
+\ignore{\begin{code}
 natCh :: (forall c . List_ a c -> List_ b c) -> ListCh a -> ListCh b
 natCh f (ListCh g) = ListCh (\a -> g (a . f))
-\end{code}
-The Cochurch encodings are defined similarly, including pragmas necessary for fusion:
+\end{code}}
+\paragraph{Cochurch encodings} We defined the Cochurch encodings conversely:
 \begin{code}
 data ListCoCh a = forall s . ListCoCh (s -> List_ a s) s
 toCoCh :: List' a -> ListCoCh a
@@ -61,21 +64,24 @@ toCoCh = ListCoCh out
   where out :: List' a -> List_ a (List' a)
         out Nil = Nil_
         out (Cons x xs) = Cons_ x xs
+
 fromCoCh :: ListCoCh a -> List' a
 fromCoCh (ListCoCh h s) = unfold h s
   where unfold :: (b -> List_ a b) -> b -> List' a
         unfold h s = case h s of
           Nil_ -> Nil
           Cons_ x xs -> Cons x (unfold h xs)
+\end{code}
+\ignore{\begin{code}
 {-# RULES "toCh/fromCh fusion" forall x. toCoCh (fromCoCh x) = x #-}
 {-# INLINE [0] toCoCh #-}
 {-# INLINE [0] fromCoCh #-}
-\end{code}
-A generalized natural transformation function is defined to standardize and ease later implementations of transformation functions:
-\begin{code}
+\end{code}}
+% A generalized natural transformation function is defined to standardize and ease later implementations of transformation functions:
+\ignore{\begin{code}
 natCoCh :: (forall c . List_ a c -> List_ b c) -> ListCoCh a -> ListCoCh b
 natCoCh f (ListCoCh h s) = ListCoCh (f . h) s
-\end{code}
+\end{code}}
 \paragraph{Between}
 The between function is defined in three different fashions: Normally, with the Church encoding, and with the Cochurch encoding.
 We leverage \tt{INLINE} pragmas to make sure that the fusion pragmas can effectively work.
@@ -249,9 +255,6 @@ pipeline11 = sum11 . map10 (+2) . filter10 trodd . between10
 
 
 
-
-
-
 \subsubsection{The Filter Problem}\label{sec:filter_prob}
 I have moved the discussion for Church and Cochurch encoded filter functions down here, as I think it warrants more discussion and illustrates a few interesting points.
 There are multiple ways of implementing them, none of them trivial according to \cite{Harper2011}'s description of how it should be implemented as a natural transformation.
@@ -270,7 +273,7 @@ filter3 :: (a -> Bool) -> Tree a -> Tree a
 filter3 p = fromCoCh . natCoCh (filt p) . toCoCh
 \end{spec}
 This \tt{filt} function was then subsequently used in the Church and Cochurch encoded function.
-Let's try this for the \tt{List} datatype:
+Let us try this for the \tt{List} datatype:
 \begin{spec}
 filt :: (a -> Bool) -> List_ a c -> List_ a c
 filt p Nil_ = Nil_
@@ -286,8 +289,7 @@ One that modifies the definition of \tt{filter2} and \tt{filter3}, such that the
 The other modifies the definition of the underlying type such that the filter function is still possible to express as a transformation.
     
 \paragraph{Solution 1: Abandoning Natural Transformations}
-\subparagraph{Church}
-Whereas before we wanted to implement our \tt{filter} function in the following manner:
+\subparagraph{Church} Before we wanted to implement our \tt{filter} function in the following manner:
 \begin{spec}
 filterCh :: (forall c . List_ a c -> List_ b c) -> ListCh a -> ListCh b
 filterCh p (ListCh g) = ListCh (\a -> g (a . (filt p)))
@@ -297,9 +299,9 @@ filter2 p = fromCh . filterCh p . toCh
 We now need to modify the \tt{filterCh} function such that we can still express a filter function \textit{without} using a natural transformation:
 \begin{spec}
 filterCh :: (forall c . List_ a c -> List_ b c) -> ListCh a -> ListCh b
-filterCh p (ListCh g) = ListCh (\a -> g ?)
+filterCh p (ListCh g) = ListCh (\a -> g (?))
 \end{spec}
-Replacing the \tt{?} above such that we apply the \tt{a} selectively we can yield:
+Replacing the hole \tt{?} in the expression \tt{g (?)} above such that we apply the \tt{a} selectively we can yield:
 \begin{code}
 filterCh :: (a -> Bool) -> ListCh a -> ListCh a
 filterCh p (ListCh g) = ListCh (\a -> g (\case
@@ -310,9 +312,9 @@ filter2 :: (a -> Bool) -> List' a -> List' a
 filter2 p = fromCh . filterCh p . toCh
 {-# INLINE filter2 #-}
 \end{code}
-Notice how we do not apply \tt{a} to \tt{xs}, and, in doing so, can put \tt{xs} in the place where wanted to.
-Before we were limited because the \tt{natCh} function forced a postcomposition of \tt{a} in all cases.
-Instead, we can create a new algebra from an existing one, \tt{a}, that selectively postcomposes \tt{a}.
+We create a new algebra from an existing one, \tt{a}, that selectively postcomposes \tt{a}.
+We do not apply \tt{a} to \tt{xs}, and, in doing so, can put \tt{xs} in the place where we wanted to earlier.
+Before we were limited because the \tt{natCh} function forced a postcomposition of \tt{a} in all cases, which is now lifted by abandoning the \tt{natCh} function.
 
 % I was just reading this: https://link.springer.com/chapter/10.1007/978-3-540-30477-7_22
 % This is one of the fusion rules that is leveraged in GHC.List fusion.
@@ -373,7 +375,7 @@ data BinTree a = Leaf a | Fork (BinTree a) (BinTree a)
 data LeafTree a = Empty | Leaf a | Fork (LeafTree a) (LeafTree a)
 \end{spec}
 The \tt{Leaf} constructor of \tt{BinTree} is also made nullable.
-I will leave the following question to future work: Is this generalizable?
+We will leave the following question to future work: Is this generalizable?
 
 
 

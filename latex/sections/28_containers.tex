@@ -1,9 +1,9 @@
 
 \subsection{Containers}
-In my Agda formalization I needed to represent functors.
+In my Agda formalization we need to represent functors.
 While a \tt{RawFunctor} datatype does exist, it does not provide the necessary data such that proofs can easily be done over it, such as the functor laws.
 
-Instead, I have opted to use Containers to represent strictly positive functors as described by \cite{Abbott2005}.
+Instead, we opt to use Containers to represent strictly positive functors as described by \cite{Abbott2005}.
 \input{sections/agda/examples/container.tex}
 % Description of container 'interpretation'
 
@@ -34,7 +34,7 @@ Taking an example:
     \tt{0 $\to$ Fin 0} and \tt{const n $\to$ Fin 2}.
     % Clean this up
 \end{itemize}
-I summarize the above \autoref{tab:cont_der}.
+We summarize the above \autoref{tab:cont_der}.
 For a concrete example of how a datatype is implemented, see \autoref{sec:agda_church_list}.
 \begin{table}[h]
   \centering

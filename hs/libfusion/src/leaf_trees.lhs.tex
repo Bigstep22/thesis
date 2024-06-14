@@ -12,7 +12,7 @@ import Test.Tasty.Bench
 \end{code}
 }
 \subsection{Leaf Trees}
-In this section, I describe my replication of \cite{Harper2011}'s code.
+In this section, we discuss my replication of \cite{Harper2011}'s code.
 We start with his motivating example at the beginning of the paper, followed by the `fused' version that we want the pipeline to become, once compiled:
 \begin{code}
 f :: (Int, Int) -> Int
@@ -32,7 +32,13 @@ Furthermore, the base functor of \tt{Tree} was defined, as \tt{Tree\_}, with the
 data Tree a = Empty | Leaf a | Fork (Tree a) (Tree a)
 data Tree_ a b = Empty_ | Leaf_ a | Fork_ b b
 \end{code}
-\paragraph{Church encoding} The Church encoding of the \tt{Tree} datatype is defined using the base functor:
+\paragraph{Church encoding}
+We encode our function using Church encodings using non-recusive algebras combined with induction principles rather than solely recursive functions.
+This way, the algebras can first be composed by Haskell's optimizer and then passed to the recursion principle.
+This ensures that the fused result only traverses the datastructure once.
+
+The algebra being encoded is in this case (\textit{Tree\_ a b $\to$ b}).
+The Church encoding of the \tt{Tree} datatype is defined using the base functor for \tt{Tree}:
 \begin{code}
 data TreeCh a = TreeCh (forall b . (Tree_ a b -> b) -> b)
 \end{code}
@@ -53,7 +59,8 @@ fromCh (TreeCh fold) = fold in'
         in' (Fork_ l r) = Fork l r
 \end{code}
 From here, the fusion rule is defined using a \tt{RULES} pragma. Along with a couple of other rules, this core construct is responsible for doing the actual `fusion'.
-The \tt{INLINE} pragmas are also included, to delay any inlining of the \tt{toCh/fromCh} functions to the latest possible moment, maximizing the opportunity for fusion throughout the compilation process:
+The \tt{INLINE} pragmas are also included, to delay any inlining of the \tt{toCh/fromCh} functions to the latest possible moment.
+This way the \tt{toCh/fromCh} functions exist for as long as possible, maximizing the opportunity for the \tt{RULES} pragma to identify adjacent \tt{toCh/fromCh} pairs and fuse them away throughout the compilation process:
 \begin{code}
 {-# RULES "toCh/fromCh fusion" forall x. toCh (fromCh x) = x #-}
 {-# INLINE [0] toCh #-}
@@ -64,7 +71,11 @@ A generalized natural transformation function is defined to standardize and ease
 natCh :: (forall c . Tree_ a c -> Tree_ b c) -> TreeCh a -> TreeCh b
 natCh f (TreeCh g) = TreeCh (\a -> g (a . f))
 \end{code}
-\paragraph{Cochurch encoding} Conversely, the Cochurch encoding is defined, again using the base functor for \tt{Tree}:
+\paragraph{Cochurch encoding} Conversely to Church encodings, for Cochurch encodings we encode our function using non-recusive coalgebras combined with coinduction principles rather than solely recursive functions.
+Similarly to Church encodings, the coalgebras can first be composed by Haskell's optimizer after which they are passed to the corecursion principle.
+This again ensures that the fused result only traverses the datastructure once.
+
+Conversely, the Cochurch encoding is defined, again using the base functor for \tt{Tree}:
 \begin{code}
 data TreeCoCh a = forall s . TreeCoCh (s -> Tree_ a s) s
 \end{code}
@@ -83,7 +94,8 @@ fromCoCh (TreeCoCh h s) = unfold h s
           Leaf_ a -> Leaf a
           Fork_ sl sr -> Fork (unfold h sl) (unfold h sr)
 \end{code}
-Similar to Church encodings, the proper pragmas are included to enable fusion:
+Similar to Church encodings, the proper pragmas are included to enable fusion.
+These work in the same fashion within Haskell as they do for Church encodings:
 \begin{code}
 {-# RULES "toCh/fromCh fusion" forall x. toCoCh (fromCoCh x) = x #-}
 {-# INLINE [0] toCoCh #-}

@@ -55,7 +55,7 @@ mapping f x | (inj₂ (a , x')) = (cons a , const x')
 unfold' : {F : Container 0ℓ 0ℓ}{A X : Set}(f : X → ⊤ ⊎ (A × X)) → X → List A
 unfold' {A}{X} f = A⟦ mapping f ⟧
 \end{code}
-\subparagraph{between}
+\subparagraph{Between}
 The corecursion principle \tt{b}, which when used, represents the between function.
 It uses \tt{b'} to assist in termination checking:
 \begin{code}
@@ -76,7 +76,7 @@ between2 = prod b
 eqbetween : between1 ≡ between2
 eqbetween = refl
 \end{code}
-\subparagraph{map}
+\subparagraph{Map}
 The natural transformation \tt{m}, which when used in a natrual transformation function, represents the map function:
 \begin{code}
 m : {A B C : Set}(f : A → B) → List' A C → List' B C
@@ -94,7 +94,7 @@ map2 f = natTrans (m f)
 eqmap : {f : ℕ → ℕ} → map1 f ≡ map2 f
 eqmap = refl
 \end{code}
-\subparagraph{sum}
+\subparagraph{Sum}
 The coalgebra \tt{s}, which when used in a consumer function, represents the sum function.
 Note that it is currently set to be non-terminating.
 \begin{code}
@@ -115,7 +115,7 @@ sum2 = consu s
 eqsum : sum1 ≡ sum2
 eqsum = refl
 \end{code}
-\subparagraph{equality}
+\subparagraph{Equality}
 The below proof shows the equality between the non-cochurch-endcoded pipeline and the cochurch-encoded pipeline:
 \begin{code}
 eq : {f : ℕ → ℕ}(x : ℕ × ℕ) → (sum1 ∘ map1 f ∘ between1) x ≡ (sum2 ∘ map2 f ∘ between2) x
