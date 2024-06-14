@@ -7,7 +7,6 @@ open import Data.Bool
 open import Agda.Builtin.Nat
 open import agda.church.defs
 open import agda.church.proofs
-open import agda.funct.funext
 open import agda.church.initial hiding (const)
 \end{code}
 \begin{code}

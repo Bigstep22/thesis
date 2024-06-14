@@ -64,13 +64,13 @@ comp-law a = refl
 \end{code}
 The \textit{reflection law} \citep{Harper2011}:
 \begin{code}
-reflection : {F : Container 0ℓ 0ℓ}(y : μ F) →
+reflection : {F : Container 0ℓ 0ℓ}{y : μ F} →
              ⦅ in' ⦆ y ≡ y
-reflection y@(in' (op , ar)) = begin
+reflection {_}{y@(in' (op , ar))} = begin
      ⦅ in' ⦆ y
    ≡⟨⟩ -- Dfn of ⦅_⦆
      in' (op , ⦅ in' ⦆ ∘ ar)
-   ≡⟨ cong (λ x → in' (op , x)) (funext (reflection ∘ ar)) ⟩
+   ≡⟨ cong (λ x → in' (op , x)) (funext (λ y → reflection {_}{ar y})) ⟩
      in' (op , ar)
    ≡⟨⟩ -- Dfn of y
      y

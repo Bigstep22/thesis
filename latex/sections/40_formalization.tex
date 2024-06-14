@@ -1,11 +1,11 @@
 \section{Agda Formalization of the Optimization}\label{sec:formalization}
-In \cite{Harper2011}'s work ``A Library Writer's Guide to Shortcut Fusion'', he describes the practice of implementing Church and Cochurch encodings, as well a paper proof necessary to show that the encodings employed are correct.
+In \cite{Harper2011}'s work ``A Library Writer's Guide to Shortcut Fusion'', he describes the practice of implementing Church and Cochurch encodings, as well as a paper proof necessary to show that the encodings employed are correct.
 In this section I discuss the work I have done to formalize these proofs in the programming language Agda, as well as additional proofs to support the claims made in the paper.
 
 The code can be presented in roughly 2 parts:
 \begin{itemize}[noitemsep]
-  \item The proofs of the category theory truths, as described by Harper
-  \item The proofs about the (Co)Church encodings, again as described by Harper
+  \item The proofs of the category theory properties, as described and used by Harper.
+  \item The proofs about the (Co)Church encodings, again as described by Harper.
 \end{itemize}
 
 The Agda code makes use of two libraries: agda-stdlib\footnote{\url{https://github.com/agda/agda-stdlib}} v2.0 and agda-categories\footnote{\url{https://github.com/agda/agda-categories}} v0.2.0

@@ -1,9 +1,9 @@
 \subsection{Performance Comparison}\label{sec:hask_perf}
-I tested the performance of the following pipeline:
+We tested the performance of the following pipeline:
 \begin{spec}
 f = sum . map (+2) . filter odd . between
 \end{spec}
-I defined 11 different variants of the above functions which can be categorized into the following five groups:
+We define 11 different variants of the above functions which can be categorized into the following five groups:
 \begin{itemize}[noitemsep]
 \item Unfused
 \item Hand fused

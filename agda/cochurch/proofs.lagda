@@ -17,7 +17,7 @@ from-to-id {F} x = begin
      fromCoCh (CoCh out x)
   ≡⟨⟩ -- Definition of fromCh
     A⟦ out ⟧ x
-  ≡⟨ reflection x ⟩
+  ≡⟨ reflection ⟩
     x
   ≡⟨⟩ -- Definition of identity
     id x

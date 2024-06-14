@@ -82,14 +82,14 @@ computation-law c = refl
 The \textit{reflection law} \cite{Harper2011}:
 \begin{code}
 {-# NON_TERMINATING #-}
-reflection : {F : Container 0ℓ 0ℓ}(x : ν F) →
+reflection : {F : Container 0ℓ 0ℓ}{x : ν F} →
              A⟦ out ⟧ x ≡ x
-reflection x = let (op , ar) = out x in
+reflection {_}{x} = let (op , ar) = out x in
   out-injective (begin
     out (A⟦ out ⟧ x)
   ≡⟨⟩
     op , A⟦ out ⟧ ∘ ar
-  ≡⟨ cong (λ f → op , f) (funext $ reflection ∘ ar) ⟩
+  ≡⟨ cong (λ f → op , f) (funext λ x → reflection {_}{ar x}) ⟩
     out x
   ∎)
 \end{code}

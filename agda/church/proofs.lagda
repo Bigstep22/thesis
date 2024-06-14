@@ -20,7 +20,7 @@ from-to-id x = begin
     (λ a → ⦅ a ⦆ x) in'
   ≡⟨⟩ -- function application
     ⦅ in' ⦆ x
-  ≡⟨ reflection x ⟩
+  ≡⟨ reflection ⟩
     x
   ∎
 \end{code}

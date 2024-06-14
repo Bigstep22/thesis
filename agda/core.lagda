@@ -10,6 +10,7 @@ open import agda.church.inst.list
 --open import agda.church.inst.free
 
 open import agda.cochurch.terminal
+open import agda.cochurch.terminalbisim
 open import agda.cochurch.defs
 open import agda.cochurch.proofs
 open import agda.cochurch.inst.list
