@@ -72,10 +72,10 @@ open _≣_ public
 invnueq : {F : Container 0ℓ 0ℓ}{a b : ν F}(_ : a ≡ b) → a ≣ b
 invnueq Eq.refl = refl
 postulate nueq : {F : Container 0ℓ 0ℓ}{a b : ν F}(eq : a ≣ b) → a ≡ b
---nueq' : {F : Container 0ℓ 0ℓ}{a b : ν F}
+--nueq : {F : Container 0ℓ 0ℓ}{a b : ν F}
 --        (eq : head a ≡ head b)(eq' : ∀{x} →
 --        tail a x ≣ tail b (subst (Position F) eq x)) → a ≡ b
---nueq' outfst outsnd = {!!}
+--nueq outfst outsnd = {!!}
 \end{code}
 It is shown that any A$\anam{\_}$ is a valid F-Coalgebra homomorphism from \tt{out} to any other object \tt{a};
 i.e. the forward direction of the \textit{universal property of unfolds} \cite{Harper2011}.
@@ -83,21 +83,8 @@ This constitutes a proof of existence:
 \begin{code}
 univ-to : {F : Container 0ℓ 0ℓ}{C : Set}(h : C → ν F)
           {c : C → ⟦ F ⟧ C}(eq : ∀ {x} → h x ≣ A⟦ c ⟧ x)(x : C) →
-          head (h x) ≡ proj₁ (c x)
-univ-to _ eq _ = outfst eq
-univ-to' : {F : Container 0ℓ 0ℓ}{C : Set}{h : C → ν F}
-           {c : C → ⟦ F ⟧ C}(eq : ∀ {x} → h x ≣ A⟦ c ⟧ x) → ∀(x : C){y} →
-           tail (h x) y ≣ (h ∘ snd (c x) ∘ subst (Position F) (univ-to h eq x)) y
-univ-to' {F}{_}{_}{c} eq x {y} = trans (outsnd eq {y}) (sym $ eq)
-
-conv : {F : Container _ _}{C : Set}(h : C → ν F){c : C → ⟦ F ⟧ C} →
-       (eq : ∀{x} → out (h x) ≡ map h (c x)) → {x : C} → head (h x) ≡ proj₁ (c x)
-conv h eq = ,-injectiveˡ eq
-conv' : {F : Container _ _}{C : Set}(h : C → ν F){c : C → ⟦ F ⟧ C} →
-       (eq : ∀{x} → out (h x) ≡ map h (c x)) →
-       ∀{x}{y} → tail (h x) y ≣ h (snd (c x) (subst (Position F) (,-injectiveˡ eq) y))
-outfst (conv' {F} h {c} eq {x} {y}) = {!!}
-outsnd (conv' {F} h {c} eq {x} {y}) {z} = {!!}
+          out (h x) ≡ map h (c x)
+univ-to {F}{C} h {c} eq x = {!!}
 \end{code}
 It is shown that any other valid F-Coalgebra homomorphism from \tt{out} to \tt{a} is equal to the A$\anam{\_}$ defined;
 i.e. the backward direction of the \textit{universal property of unfolds} \cite{Harper2011}.
@@ -106,11 +93,10 @@ This uses \tt{out} injectivity.
 Currently, Agda's termination checker does not seem to notice that the proof in question terminates:
 \begin{code}
 univ-from : {F : Container _ _}{C : Set}(h : C → ν F)(c : C → ⟦ F ⟧ C) →
-            (eq1 : ∀{x} → head (h x) ≡ proj₁ (c x)) →
-            (eq2 : ∀{x y} → tail (h x) y ≣ h (snd (c x) (subst (Position F) eq1 y))) →
+            (eq : ∀{x} → out (h x) ≡ map h (c x)) →
             {x : C} → h x ≣ A⟦ c ⟧ x
-outfst (univ-from h c eq1 _) = eq1
-outsnd (univ-from {F} h c eq1 eq2 {x}) {y} = trans eq2 $ {!!} --univ-from h c eq1 eq2
+outfst (univ-from h c eq) = ,-injectiveˡ eq
+outsnd (univ-from {F} h c eq1 {x}) {y} = {!!}
   where open ≡-Reasoning
 \end{code}
 The two previous proofs, constituting a proof of existence and uniqueness, together show terminality of \tt{($\nu$ F, out)}.
