@@ -1,9 +1,8 @@
 \section{Conclusion and Future Work}\label{sec:conclusion}
 I have presented my work on implementing and formalizing shortcut fusion of (Co)Church encodings as described by \cite{Harper2011}.
-I have replicated Harper's work of Church and Cochurch encoded functions operating on leaf trees: \tt{between}, \tt{map}, \tt{filter}, and \tt{sum}.
-And shown the generalizability of his example by also implementing the functions on lists.
+I have replicated Harper's work of Church and Cochurch encoded functions operating on leaf trees: \tt{between}, \tt{map}, \tt{filter}, and \tt{sum};  and shown the generalizability of his example by also implementing the functions on lists.
 In doing so I discovered that in Haskell full fusion is not currently possible for the Cochurch encoded filter function.
-Needing either proper loopification using join points\footnote{\url{https://gitlab.haskell.org/ghc/ghc/-/issues/22227\#note_551000}}, or additional encoding techniques such as those described by \cite{Coutts2007}.
+GHC needs either proper loopification using join points\footnote{See \url{https://gitlab.haskell.org/ghc/ghc/-/issues/22227\#note_551000}}, or additional encoding techniques such as those described by \cite{Coutts2007}.
 
 I benchmarked the performance of multiple different variants of the same pipeline: unencoded, hand-fused, Church fused, Cochurch fused, and GHC.List fused; where the (Co)Church fused pipelines had four variants: tail recursive, stream fused, neither, and both.
 I discovered that changing the underlying datatype for Church encodings from List to Stream datatypes gave no performance improvement, for both tail and non-tail recursive implementations. Implementing tail recursion however did offer a speedup, for Cochurch encodings.
@@ -23,7 +22,7 @@ There are many future avenues that could be taken to continue my research:
     \item Implement (Co)Church fused versions of Haskell's library functions.
     \item See if it is possible to implement warm fusion in Haskell or some other language as described by \cite{Launchbury1995}.
     \item Investigate if creating a new programming language that has this fusion as a first-class feature can enable fusion to be compiled more efficiently and consistently.
-    \item It may be possible to generalize the work of \cite{Coutts2007} to more datastrcutures, with a motivating example being Leaf Trees.
+    \item Investige whether it is to generalize the work of \cite{Coutts2007} to more datastrcutures, with a motivating example being Leaf Trees.
     \item Use Agda --bridges to see if it is possible to prove the free theorems currently postulated in my work.
     \item Implement a bisimilarity relation for the coinductive \tt{M}/$\nu$  type in Agda to prove its terminality. After which modifying all the code resting on top of this proof to properly use this new relation.
     \item Merge into Agda the Church and Cochurch encodings, as well as the bisimilarity across the guarged \tt{M} type.

@@ -34,7 +34,7 @@ f (x, y) = loop x
                       then (x+1) + loop (x+1)
                       else loop (x+1)
 \end{code}
-Doing this by hand every time, to get from the nice, elegant, compositional style of programming to the higher-performance, single-traversal style, if repetitive and error-prone.
+Doing this by hand every time, to get from the nice, elegant, compositional style of programming to the higher-performance, single-traversal style, is repetitive and error-prone.
 Especially if this needs to be done, by hand, every single time any two functions are composed.
 Is there some way to automate this process?
 
@@ -61,7 +61,7 @@ My thesis focuses on a specific form of fusion called shortcut fusion through th
 \paragraph{Contributions}
 My thesis centers on formalizing, replicating, and expanding upon \cite{Harper2011}'s work and makes two crucial contributions, answering the two questions above:
 \begin{enumerate}
-    \item The Church and Cochurch encodings' implementation in Haskell, as described by Harper are replicated and investigated further as to their performance characteristics.
+    \item I replicate the Church and Cochurch encodings' implementation in Haskell, as described by Harper and investigate further as to their performance characteristics.
     In this process, I find a weakness in Haskell's optimizer, glean further practical insights as to how to get these encodings to properly fuse, (especially for Cochurch encodings) and what optimizations enable shortcut fusion to do its work.
 
     This is important as Harper gave a good pragmatic explanation of how to implement the (Co)Church encodings in Haskell, gave an example implementation, and benchmarked that implementation.
