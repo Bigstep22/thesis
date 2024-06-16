@@ -27,7 +27,7 @@ The second proof proof is similar to the first, but it proves the composition in
 \tt{toCoCh $\circ$ fromCoCh = id}.
 This proof leverages the parametricity as described by \cite{Wadler1989}.
 It postulates the free theorem of the function g for a fixed Y: \tt{f :$\forall$ X → (X → F X) → X → Y},
-to prove that ``unfolding a Cochurch-encoded structure and then re-encoding it yields an equivalent structure'' \citep{Harper2011}.
+to prove that ``unfolding a Cochurch encoded structure and then re-encoding it yields an equivalent structure'' \citep{Harper2011}.
 This together with the first proof shows that Cochurch encodings are isomorphic to the datatypes they are encoding:
 \begin{code}
 postulate free : {F : Container 0ℓ 0ℓ}
@@ -52,7 +52,7 @@ to-from-id (CoCh c x) = begin
       CoCh c x
     ∎
 \end{code}
-The third proof shows that cochurch-encoded functions constitute an implementation for the producing functions being replaced.
+The third proof shows that Cochurch encoded functions constitute an implementation for the producing functions being replaced.
 The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness.
 This corresponds to the third proof obligation (second diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
@@ -66,7 +66,7 @@ prod-pres c x = begin
     A⟦ c ⟧ x
   ∎
 \end{code}
-The fourth proof shows that cochurch-encoded functions constitute an implementation for the consuming functions being replaced.
+The fourth proof shows that cochurch encoded functions constitute an implementation for the consuming functions being replaced.
 The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness.
 This corresponds to the fourth proof obligation (third diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
@@ -80,7 +80,7 @@ cons-pres f x = begin
     f out x
   ∎
 \end{code}
-The fifth, and final proof shows that cochurch-encoded functions constitute an implementation for the consuming functions being replaced.
+The fifth, and final proof shOws that cochurch encoded functions constitute an implementation for the consuming functions being replaced.
 The proof leverages the categorical fusion property and the naturality of \tt{f}.
 This corresponds to the second proof obligation (first diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
@@ -135,7 +135,7 @@ and consumer function, fuse down to a single function application:
 pipefuse : {F G : Container 0ℓ 0ℓ}{X : Set}(c : X → ⟦ F ⟧ X)
            (nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
            (f : {Y : Set} → (Y → ⟦ G ⟧ Y) → Y → X)(x : X) →
-          (cons f ∘ natTrans nat ∘ prod c) x ≡ f (nat ∘ c) x
+          (destroy f ∘ natTrans nat ∘ unfoldr c) x ≡ f (nat ∘ c) x
 pipefuse c nat f x = begin
     (consCoCh f ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat ∘ toCoCh ∘ fromCoCh ∘ prodCoCh c) x
   ≡⟨ cong (consCoCh f ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh nat) (to-from-id (prodCoCh c x)) ⟩

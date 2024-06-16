@@ -26,12 +26,12 @@ prodCh : {ℓ : Level}{F : Container _ _}{Y : Set ℓ}
          (g : {X : Set} → (⟦ F ⟧ X → X) → Y → X)(y : Y) → Church F
 prodCh g x = Ch (λ a → g a x)
 
-prod   : {ℓ : Level}{F : Container _ _}{Y : Set ℓ}
-         (g : {X : Set} → (⟦ F ⟧ X → X) → Y → X)(y : Y) → μ F
-prod g = fromCh ∘ prodCh g
+build   : {ℓ : Level}{F : Container _ _}{Y : Set ℓ}
+          (g : {X : Set} → (⟦ F ⟧ X → X) → Y → X)(y : Y) → μ F
+build g = fromCh ∘ prodCh g
 
 eqProd : {F : Container _ _}{Y : Set}{g : {X : Set} → (⟦ F ⟧ X → X) → Y → X} →
-         prod g ≡ g in'
+         build g ≡ g in'
 eqProd = refl
 \end{code}
 Second, the natural transformation function:
@@ -55,24 +55,11 @@ consCh : {F : Container _ _}{X : Set}
          (c : ⟦ F ⟧ X → X) → Church F → X
 consCh c (Ch g) = g c
 
-cons   : {F : Container _ _}{X : Set}
+foldr   : {F : Container _ _}{X : Set}
          (c : ⟦ F ⟧ X → X) → μ F → X
-cons c = consCh c ∘ toCh
+foldr c = consCh c ∘ toCh
 
 eqCons : {F : Container _ _}{X : Set}{c : ⟦ F ⟧ X → X} →
-         cons c ≡ ⦅ c ⦆
+         foldr c ≡ ⦅ c ⦆
 eqCons = refl
-\end{code}
-The below is left as an excercise to the reader:
-\begin{code}
-foldr : {F : Container _ _}{X : Set} → (⟦ F ⟧ X → X) → μ F → X
-foldr c = consCh c ∘ toCh
-build : {F : Container _ _}{X : Set} →
-        ({Y : Set} → (⟦ F ⟧ Y → Y) → X → Y) →
-        X → μ F
-build g = fromCh ∘ prodCh g
---foldr-build-rule : {F : Container _ _}{X : Set} → (a : ⟦ F ⟧ X → X) →
---                   (g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y) →
---                   foldr a ∘ build g ≡ g a
---foldr-build-rule a g =
 \end{code}

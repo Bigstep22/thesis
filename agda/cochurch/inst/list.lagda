@@ -5,7 +5,7 @@ to demonstrate how the fusion works for functions across a cocrete datatype.
 \begin{code}[hide]
 {-# OPTIONS --guardedness #-}
 module agda.cochurch.inst.list where
-open import agda.cochurch.defs renaming (cons to consu)
+open import agda.cochurch.defs
 open import agda.cochurch.proofs
 open import Data.Fin using (Fin; zero)
 open import Data.Unit
@@ -17,7 +17,7 @@ open import Agda.Builtin.Nat
 \end{code}
 In this section is defined: the container, whose interpretation represents the base functor for lists,
 some convenience functions to make type annotations more readable, a producer function \tt{between},
-a transformation function \tt{map}, a consumer function \tt{sum}, and a proof that non-cochurch and cochurch-encoded
+a transformation function \tt{map}, a consumer function \tt{sum}, and a proof that non-Cochurch encoded and Cochurch encoded
 implementations are equal.
 \subparagraph{Datatypes}
 The index set for the container, as well as the container whose interpretation represents the base funtor for list.
@@ -66,13 +66,13 @@ b : ℕ × ℕ → List' ℕ (ℕ × ℕ)
 b (x , y) = b' (x , (suc (y - x)))
 \end{code}
 The functions \tt{between1} and \tt{between2}.
-The former is defined without a cochurch-encoding, the latter with.
+The former is defined without a Cochurch encoding, the latter with.
 A reflexive proof is included to show equality:
 \begin{code}
 between1 : ℕ × ℕ → List ℕ
 between1 = A⟦ b ⟧
 between2 : ℕ × ℕ → List ℕ
-between2 = prod b
+between2 = unfoldr b
 eqbetween : between1 ≡ between2
 eqbetween = refl
 \end{code}
@@ -84,7 +84,7 @@ m f (nil , l) = (nil , l)
 m f (cons n , l) = (cons (f n) , l)
 \end{code}
 The functions \tt{map1} and \tt{map2}.
-The former is defined without a cochurch-encoding, the latter with.
+The former is defined without a Cochurch encoding, the latter with.
 A reflexive proof is included to show equality:
 \begin{code}
 map1 : {A B : Set}(f : A → B) → List A → List B
@@ -105,18 +105,18 @@ s h s' | (nil , f) = 0
 s h s' | (cons x , f) = x + s h (f zero)
 \end{code}
 The functions \tt{sum1} and \tt{sum2}.
-The former is defined without a cochurch-encoding, the latter with.
+The former is defined without a Cochurch encoding, the latter with.
 A reflexive proof is included to show equality:
 \begin{code}
 sum1 : List ℕ → ℕ
 sum1 = s out
 sum2 : List ℕ → ℕ
-sum2 = consu s
+sum2 = destroy s
 eqsum : sum1 ≡ sum2
 eqsum = refl
 \end{code}
 \subparagraph{Equality}
-The below proof shows the equality between the non-cochurch-endcoded pipeline and the cochurch-encoded pipeline:
+The below proof shows the equality between the non-Cochurch endcoded pipeline and the Cochurch encoded pipeline:
 \begin{code}
 eq : {f : ℕ → ℕ}(x : ℕ × ℕ) → (sum1 ∘ map1 f ∘ between1) x ≡ (sum2 ∘ map2 f ∘ between2) x
 eq {f} x = begin
@@ -132,6 +132,6 @@ eq {f} x = begin
           (sym $ to-from-id (prodCoCh b x)) ⟩
   (consCoCh s ∘ toCoCh ∘ fromCoCh ∘ natTransCoCh (m f) ∘ toCoCh ∘ fromCoCh ∘ prodCoCh b) x
   ≡⟨⟩
-    (consu s ∘ natTrans (m f) ∘ prod b) x
+    (destroy s ∘ natTrans (m f) ∘ unfoldr b) x
   ∎
 \end{code}

@@ -51,7 +51,7 @@ to-from-id (Ch g) = begin
       Ch g
     ∎
 \end{code}
-The third proof shows church-encoded functions constitute an implementation for the consumer functions being replaced.
+The third proof shows Church encoded functions constitute an implementation for the consumer functions being replaced.
 The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness.
 This corresponds to the third proof obligation (second diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
@@ -67,7 +67,7 @@ cons-pres b x = begin
     ⦅ b ⦆ x
   ∎
 \end{code}
-The fourth proof shows that church-encoded functions constitute an implementation for the producing functions being replaced.
+The fourth proof shows that Church encoded functions constitute an implementation for the producing functions being replaced.
 The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness.
 This corresponds to the fourth proof obligation (third diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
@@ -83,7 +83,7 @@ prod-pres {F}{X} f s = begin
     f in' s
   ∎
 \end{code}
-The fifth, and final proof shows that church-encoded functions constitute an implementation for the conversion functions being replaced.
+The fifth, and final proof shows that Church encoded functions constitute an implementation for the conversion functions being replaced.
 The proof again leverages the free theorem defined earlier.
 This corresponds to the second proof obligation (first diagram) mentioned in \autoref{sec:obligations}:
 \begin{code}
@@ -125,7 +125,7 @@ and consumer function, fuse down to a single function application:
 \begin{code}
 pipefuse : {F G : Container 0ℓ 0ℓ}{X : Set}(g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y)
           (nat : {Y : Set} → ⟦ F ⟧ Y → ⟦ G ⟧ Y)(c : (⟦ G ⟧ X → X)) →
-          (x : X) → (cons c ∘ natTrans nat ∘ prod g) x ≡ g (c ∘ nat) x
+          (x : X) → (foldr c ∘ natTrans nat ∘ build g) x ≡ g (c ∘ nat) x
 pipefuse {F}{G} g nat c x = begin
     (consCh c ∘ toCh ∘ fromCh ∘ natTransCh nat ∘ toCh ∘ fromCh ∘ prodCh g) x
   ≡⟨ cong (consCh c ∘ toCh ∘ fromCh ∘ natTransCh nat) (to-from-id (prodCh g x)) ⟩

@@ -110,7 +110,7 @@ univ-from : {F : Container _ _}{C : Set}(h : C → ν F)(c : C → ⟦ F ⟧ C) 
             (eq2 : ∀{x y} → tail (h x) y ≣ h (snd (c x) (subst (Position F) eq1 y))) →
             {x : C} → h x ≣ A⟦ c ⟧ x
 outfst (univ-from h c eq1 _) = eq1
-outsnd (univ-from {F} h c eq1 eq2 {x}) {y} = trans eq2 $ univ-from h c eq1 eq2
+outsnd (univ-from {F} h c eq1 eq2 {x}) {y} = trans eq2 $ {!!} --univ-from h c eq1 eq2
   where open ≡-Reasoning
 \end{code}
 The two previous proofs, constituting a proof of existence and uniqueness, together show terminality of \tt{($\nu$ F, out)}.

@@ -1,8 +1,11 @@
 \subsubsection{Definition of Cochurch encodings}
 This section defines Cochurch encodings and the two conversion functions \tt{con} and \tt{abs}, called \tt{toCoCh} and \tt{fromCoCh} here, respectively.
 It also defines the generalized producing, transformation, and consuming functions, as described by \cite{Harper2011}.
-The definition of the CoChurch datatypes is defined slightly differently to how it is initially defined by \cite{Harper2011}.
+The definition of the CoChurch datatypes is defined differently to how it is initially defined by \cite{Harper2011}.
 Instead an Isomorphic definition is used, whose type is described later on on the same page.
+This was done by Harper such that the free theorem about the datatype being encoded, is easier to work with.
+It is also a datatype that lends itself to better to theorem proving, as otherwise a coproduct datatype would need to be involved.
+See the bottom of page 52 of Harper's work for his discussion on the isomorphism.
 The original definition is included as \tt{CoChurch'}.
 \begin{code}[hide]
 {-# OPTIONS --guardedness #-}
@@ -30,12 +33,12 @@ prodCoCh : {F : Container 0ℓ 0ℓ}{Y : Set} → (g : Y → ⟦ F ⟧ Y) →
            Y → CoChurch F
 prodCoCh g x = CoCh g x
 
-prod : {F : Container 0ℓ 0ℓ}{Y : Set} → (g : Y → ⟦ F ⟧ Y) →
-       Y → ν F
-prod g = fromCoCh ∘ prodCoCh g
+unfoldr : {F : Container 0ℓ 0ℓ}{Y : Set} → (g : Y → ⟦ F ⟧ Y) →
+          Y → ν F
+unfoldr g = fromCoCh ∘ prodCoCh g
 
 eqprod : {F : Container 0ℓ 0ℓ}{Y : Set}{g : (Y → ⟦ F ⟧ Y)} →
-         prod g ≡ A⟦ g ⟧
+         unfoldr g ≡ A⟦ g ⟧
 eqprod = refl
 \end{code}
 Second the transformation function:
@@ -58,12 +61,12 @@ consCoCh : {F : Container 0ℓ 0ℓ}{Y : Set} → (c : {S : Set} → (S → ⟦ 
            CoChurch F → Y
 consCoCh c (CoCh h s) = c h s
 
-cons : {F : Container 0ℓ 0ℓ}{Y : Set} → (c : {S : Set} → (S → ⟦ F ⟧ S) → S → Y) →
-       ν F → Y
-cons c = consCoCh c ∘ toCoCh
+destroy : {F : Container 0ℓ 0ℓ}{Y : Set} → (c : {S : Set} → (S → ⟦ F ⟧ S) → S → Y) →
+          ν F → Y
+destroy c = consCoCh c ∘ toCoCh
 
 eqcons : {F : Container 0ℓ 0ℓ}{X : Set}{c : {S : Set} → (S → ⟦ F ⟧ S) → S → X} →
-         cons c ≡ c out
+         destroy c ≡ c out
 eqcons = refl
 \end{code}
 The original CoChurch definition is included here for completeness' sake, but it is not used elsewhere in the code.
@@ -80,9 +83,9 @@ toConv (cochurch (S , (h , x))) = CoCh {_}{S} h x
 fromConv : {F : Container _ _} → CoChurch F → CoChurch' F
 fromConv (CoCh {X} h x) = cochurch ((X , h , x))
 
-to-from-conv-id : {F : Container 0ℓ 0ℓ}(x : CoChurch F) → (toConv ∘ fromConv) x ≡ id x
+to-from-conv-id : {F : Container 0ℓ 0ℓ}(x : CoChurch F) → (toConv ∘ fromConv) x ≡ x
 to-from-conv-id (CoCh h x) = refl
 
-from-to-conv-id : {F : Container 0ℓ 0ℓ}(x : CoChurch' F) → (fromConv ∘ toConv) x ≡ id x
+from-to-conv-id : {F : Container 0ℓ 0ℓ}(x : CoChurch' F) → (fromConv ∘ toConv) x ≡ x
 from-to-conv-id (cochurch (S , (h , x))) = refl
 \end{code}

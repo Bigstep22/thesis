@@ -8,14 +8,14 @@ open import Data.Nat.Base
 open import Agda.Builtin.Nat
 open import Data.Fin using (Fin; zero)
 open import Data.Bool
-open import agda.church.defs renaming (cons to consu)
+open import agda.church.defs
 open import agda.church.proofs
 open import agda.church.initial
 module agda.church.inst.list where
 \end{code}
 This section defines: the container, whose interpretation represents the base functor for lists,
 some convenience functions to make type annotations more readable, a producer function \tt{between},
-a transformation function \tt{map}, a consumer function \tt{sum}, and a proof that non-church and church-encoded
+a transformation function \tt{map}, a consumer function \tt{sum}, and a proof that non-church and Church encoded
 implementations are equal.
 
 \subparagraph{Datatypes}
@@ -59,13 +59,13 @@ b : {B : Set} → (a : List' ℕ B → B) → ℕ × ℕ → B
 b a (x , y) = b' a x (suc (y - x))
 \end{code}
 The functions \tt{between1} and \tt{between2}.
-The former is defined without a church-encoding, the latter with.
+The former is defined without a Church encoding, the latter with.
 A reflexive proof of equality and sanity check is included to show equality:
 \begin{code}
 between1 : ℕ × ℕ → List ℕ
 between1 xy = b in' xy
 between2 : ℕ × ℕ → List ℕ
-between2 = prod b
+between2 = build b
 eqbetween : between1 ≡ between2
 eqbetween = refl
 checkbetween : 2 :: 3 :: 4 :: 5 :: 6 :: [] ≡ between2 (2 , 6)
@@ -79,7 +79,7 @@ m f (nil , _) = (nil , λ())
 m f (cons n , l) = (cons (f n) , l)
 \end{code}
 The functions \tt{map1} and \tt{map2}.
-The former is defined without a church-encoding, the latter with.
+The former is defined without a Church encoding, the latter with.
 A reflexive proof of equality and sanity check is included to show equality:
 \begin{code}
 map1 : {A B : Set}(f : A → B) → List A → List B
@@ -102,21 +102,21 @@ s (nil , _) = 0
 s (cons n , f) = n + f zero
 \end{code}
 The functions \tt{sum1} and \tt{sum2}.
-The former is defined without a church-encoding, the latter with.
+The former is defined without a Church encoding, the latter with.
 A reflexive proof of equality and sanity check is included to show equality:
 \begin{code}
 sum1 : List ℕ → ℕ
 sum1 = ⦅ s ⦆
 sum2 : List ℕ → ℕ
-sum2 = consu s
+sum2 = foldr s
 sum2' : List ℕ → ℕ
-sum2' l = consu s' l 0
+sum2' l = foldr s' l 0
 checksum : sum2 (5 :: 6 :: 7 :: []) ≡ 18
 checksum = refl
 \end{code}
 \subparagraph{Equality}
-The below proof shows the equality between the non-church-endcoded pipeline and
-the church-encoded pipeline:
+The below proof shows the equality between the non-Church endcoded pipeline and
+the Church encoded pipeline:
 \begin{code}
 eq : {f : ℕ → ℕ}{x : ℕ × ℕ} → (sum1 ∘ map1 f ∘ between1) x ≡ (sum2 ∘ map2 f ∘ between2) x
 eq {f}{x} = begin
@@ -131,7 +131,7 @@ eq {f}{x} = begin
           (sym $ to-from-id (prodCh b x)) ⟩
     (consCh s ∘ toCh ∘ fromCh ∘ natTransCh (m f) ∘ toCh ∘ fromCh ∘ prodCh b) x
   ≡⟨⟩
-    (consu s ∘ natTrans (m f) ∘ prod b) x
+    (foldr s ∘ natTrans (m f) ∘ build b) x
   ∎
 \end{code}
 \begin{code}

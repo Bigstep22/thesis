@@ -52,9 +52,9 @@ univ-to {_}{_}{h}{c} eq {x} = let (op , ar) = c x in begin
     ∎
 \end{code}
 Injectivity of the \tt{out} constructor is postulated.
-I made a serious attempt to prove the terminality of \tt{M} types in agda through the use of a bisimilation relation,
-but at the cutoff moment for the work there was still too much work remaining to warrant continuing it.
-Instead, this postulate is used:
+I made an attempt to prove the terminality of \tt{M} types in agda through the use of a bisimilation relation,
+but due to time constraings there was too much work remaining to warrant continuing it.
+Instead, injectivity of the \tt{out} constructor is postulated:
 \begin{code}
 postulate out-injective : {F : Container 0ℓ 0ℓ}{x y : ν F} →
                           out x ≡ out y → x ≡ y
