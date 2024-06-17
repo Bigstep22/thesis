@@ -1,13 +1,4 @@
-
-\subsection{Containers}
-In my Agda formalization we need to represent functors.
-While a \tt{RawFunctor} datatype does exist, it does not provide the necessary data such that proofs can easily be done over it, such as the functor laws.
-
-Instead, we opt to use Containers to represent strictly positive functors as described by \cite{Abbott2005}.
-\input{sections/agda/examples/container.tex}
-% Description of container 'interpretation'
-
-The main benefit of leveraging containers to represent functions is that it maintains positivity as well as that the functor laws are true by definition.
+\paragraph{Deriving a container from a functor}
 Deriving the container from a given (polynomial) functor can be done in a few steps:
 \begin{enumerate}
     \item Analyze how many constructors your functor has, take as an example 2.
@@ -47,3 +38,4 @@ For a concrete example of how a datatype is implemented, see \autoref{sec:agda_c
   \caption{This table shows two examples of deriving the implementation of a container from a base functor.}
   \label{tab:cont_der}
 \end{table}
+An example of the implementation for Lists is discussed in \autoref{sec:agda_church_list}

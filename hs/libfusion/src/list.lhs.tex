@@ -118,21 +118,9 @@ between3 = fromCoCh . ListCoCh betweenCoCh
         {-# INLINE betweenCoCh #-}
 {-# INLINE between3 #-}
 \end{code}
-\paragraph{Filter}
-
-The filter function is, again, implemented in three different ways:
-In a non-encoded fashion, using a Church encoding, and using a Cochurch encoding.
-The non-encoded function simply uses recursion:
-\begin{code}
-filter1 :: (a -> Bool) -> List' a -> List' a
-filter1 _ Nil = Nil
-filter1 p (Cons x xs) = if p x then Cons x (filter1 p xs) else filter1 p xs
-{-# INLINE filter1 #-}
-\end{code}
-For the Church and Cochurch encoding see the extended discussion in \autoref{sec:filter_prob}.
 
 \paragraph{Map}
-Contrary to filter, it is possible to implement the \tt{map} function using a natural transformation. Again three implementations, the latter two of which leverage the defined natural transformation \tt{m}:
+It is possible to implement the \tt{map} function using a natural transformation. Again three implementations, the latter two of which leverage the defined natural transformation \tt{m}:
 \begin{code}
 map1 :: (a -> b) -> List' a -> List' b
 map1 _ Nil = Nil
@@ -205,7 +193,7 @@ sum8 = sumCoCh . toCoCh
 {-# INLINE sum8 #-}
 \end{code}
 Note that two subfunctions are provided to \tt{su'}, the \tt{loop} and the \tt{loopt} function.
-The former function is implemented as one would naively expect.
+The former function is implemented using typical recursion.
 The latter, interestingly, is implemented using tail-recursion.
 Because this \tt{loopt} function constitutes a corecursion principle, all the algebras (or natural transformations) applied to it, will be inlined in such a way that the resultant function is also tail recursive, in some cases providing a significant speedup!
 For more details, see the discussion in \autoref{sec:tail}.
@@ -216,6 +204,7 @@ Now we can make a pipeline in the following fashion:
 pipeline1 :: (Int, Int) -> Int
 pipeline1 = sum1 . map1 (+2) . filter1 trodd . between1
 \end{code}
+You may notice I have not yet discussed the filter function, this is for a good reason, which I will discuss now.
 \ignore{
 \begin{code}
 trodd :: Int -> Bool
@@ -253,11 +242,23 @@ pipeline11 = sum11 . map10 (+2) . filter10 trodd . between10
 \end{code}
 }
 
+\paragraph{Filter}
+The filter function is, again, implemented in three different ways:
+In a non-encoded fashion, using a Church encoding, and using a Cochurch encoding.
+The non-encoded function simply uses recursion:
+\begin{code}
+filter1 :: (a -> Bool) -> List' a -> List' a
+filter1 _ Nil = Nil
+filter1 p (Cons x xs) = if p x then Cons x (filter1 p xs) else filter1 p xs
+{-# INLINE filter1 #-}
+\end{code}
+However, the (Co)Church encoded version, contrary to \tt{map}, can not be implemented using a natural transformation.
 
+The following section will start to answer the following research question:
+What tools and techniques are available to get Haskell's compiler to cooperate and trigger fusion?
 
 \subsubsection{The Filter Problem}\label{sec:filter_prob}
-I have moved the discussion for Church and Cochurch encoded filter functions down here, as I think it warrants more discussion and illustrates a few interesting points.
-There are multiple ways of implementing them, none of them trivial according to \cite{Harper2011}'s description of how it should be implemented as a natural transformation.
+There are multiple ways of implementing Church and Cochurch encoded filter functions, none of them immediately obvious from \cite{Harper2011}'s description of how it should be implemented as a natural transformation.
 
 When replicating Harper's code for lists, there is one major limitation on natural transformation functions:
 How to represent filter as a natural transformation for both Church and Cochurch encodings?
@@ -312,8 +313,12 @@ filter2 :: (a -> Bool) -> List' a -> List' a
 filter2 p = fromCh . filterCh p . toCh
 {-# INLINE filter2 #-}
 \end{code}
-We create a new algebra from an existing one, \tt{a}, that selectively postcomposes \tt{a}.
-We do not apply \tt{a} to \tt{xs}, and, in doing so, can put \tt{xs} in the place where we wanted to earlier.
+We create a new algebra from an existing one, \tt{a}, that selectively postcomposes \tt{a}, this is not a natural transformation anymore in the way that \tt{f} below is.
+\begin{spec}
+natCh :: (forall c . List_ a c -> List_ b c) -> ListCh a -> ListCh b
+natCh f (ListCh g) = ListCh (\a -> g (a . f))
+\end{spec}
+In the new solution we do not apply \tt{a} to \tt{xs}, and, in doing so, can put \tt{xs} in the place where we wanted to earlier.
 Before we were limited because the \tt{natCh} function forced a postcomposition of \tt{a} in all cases, which is now lifted by abandoning the \tt{natCh} function.
 
 % I was just reading this: https://link.springer.com/chapter/10.1007/978-3-540-30477-7_22

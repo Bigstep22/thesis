@@ -1,4 +1,4 @@
-\subsubsection{Universal properties of catamorphisms and initiality}
+\paragraph{Universal properties of catamorphisms and initiality}
 This section proves the universal property of folds.
 It takes the definition of \tt{W} types and shows that the $\catam{\_}$ function defined for it is a catamorphism.
 This is done by proving that the fold is a unique F-algebra homomorphism to any datatype through a proof of existence and uniqueness:
@@ -29,9 +29,10 @@ However, for clarity I'm including the definition here instead of importing it:
 We show that any $\catam{\_}$ is a valid F-Algebra homomorphism from \tt{in'} to any other object \tt{a}
 i.e., the forward direction of the \textit{universal property of folds} \citep{Harper2011}:
 \begin{equation*}
-h = \catam{a} \iff h \circ in = a \circ F h
+h = \catam{a} \Longrightarrow h \circ in = a \circ F h
 \end{equation*}
-This constitutes a proof of existence:
+This constitutes a proof of existence;
+there exists a function (in this case called $\catam{\_}$), that is a valid F-Algebra homomorphism:
 \begin{code}
 univ-to : {F : Container 0ℓ 0ℓ}{X : Set}{a : ⟦ F ⟧ X → X}{h : μ F → X} →
                   ({x : μ F} → h x ≡ ⦅ a ⦆ x) → {x : ⟦ F ⟧ (μ F)} → (h ∘ in') x ≡ (a ∘ map h) x
@@ -49,7 +50,11 @@ univ-to {_}{_}{a}{h} eq {x@(op , ar)} = begin
 \end{code}
 We show that any other valid F-Algebra homomorphism from \tt{in'} to \tt{a} is equal to the $\catam{\_}$ function defined;
 i.e. the backwards direction of the \textit{universal property of folds} \citep{Harper2011}.
-This constitutes a proof of uniqueness:
+\begin{equation*}
+h = \catam{a} \Longleftarrow h \circ in = a \circ F h
+\end{equation*}
+This constitutes a proof of uniqueness;
+for any function that is a valid F-Algebra homomorphism (in this case called $h$), it is equal to $\catam{\_}$:
 \begin{code}
 univ-from : {F : Container 0ℓ 0ℓ}{X : Set}{a : ⟦ F ⟧ X → X}(h : μ F → X) →
             ({x : ⟦ F ⟧ (μ F)} → (h ∘ in') x ≡ (a ∘ map h) x) → {x : μ F} → h x ≡ ⦅ a ⦆ x
@@ -64,8 +69,8 @@ univ-from {_}{_}{a} h eq {in' x@(op , ar)} = begin
     ∎
 \end{code}
 The two previous proofs, constituting a proof of existence and uniqueness, together prove initiality of \tt{(μ F, in')}.
-The \textit{computation law} \citep{Harper2011}:
-\begin{code}
+% The \textit{computation law} \citep{Harper2011}:
+\begin{code}[hide]
 comp-law : {F : Container 0ℓ 0ℓ}{A : Set}{a : ⟦ F ⟧ A → A}{x : ⟦ F ⟧ (μ F)} →
            (⦅ a ⦆ ∘ in') x ≡ (a ∘ map ⦅ a ⦆) x
 comp-law = refl

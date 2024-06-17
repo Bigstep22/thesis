@@ -1,9 +1,10 @@
+- [ ] WRITE ABSTRACT
 - [x] Read feedback from Casper, write todo's
 - [x] Read feedback from Jesper, write todo's
 - [x] Order new todo's
 - [x] Rewrite initial agda file
 - [x] Rewrite terminal agda file
-- [ ] Casper, Chapter 3: My main comments are about writing style. You tend to present your results and insights in a matter-of-fact manner. But the results are often highly non-obvious. There’s room for helping the reader (much) more.
+- [x] Casper, Chapter 3: My main comments are about writing style. You tend to present your results and insights in a matter-of-fact manner. But the results are often highly non-obvious. There’s room for helping the reader (much) more.
 - [ ] Casper, Chapter 3: The analysis of your results in your evaluation section could also be more in-depth. I’ve added some questions in a note in the PDF, for example.
 - [ ] Casper, Chapter 4: I think the point that the theorems enable fusion could be made more clearly if you actually prove that the tail-recursive function you show earlier in the paper is equal to the pipeline
 - [x] Casper, Chapter 4: Otherwise, mainly writing things.
@@ -27,7 +28,7 @@
 - [x] Jesper 4: "The definition of the CoChurch datatypes is defined slightly differently" => waarom is de definitie anders?
 - [ ] Jesper, Introduction: De introductie is wat mij betreft oké maar zou nog wat meer context kunnen gebruiken om het toegankelijker te maken: wat is functional programming, waarom zijn we er in geïnteresseerd.- `between` is niet de standaard naam in Haskell, dat is `enumFromTo`. Ik zou eventueel deze naam gebruiken, en iig uitleggen wat de functie doet.  
 - [x] Jesper, Introduction: "if repetitive and error-prone" => "*is* repetitive and error-prone"  
-- [ ] Jesper, Introduction: "Much work already exists" => vage statement, waar gaat dit werk over?  
+- [x] Jesper, Introduction: "Much work already exists" => vage statement, waar gaat dit werk over?  
 - [x] Jesper, Introduction: "are replicated and investigated further " => vermijd passive voice.
 - [x] Jesper, Conclusion: "And shown the generalizability" => begin zinnen niet met "and".  
 - [x] Jesper, Conclusion: "Needing either proper loopification [..]" => Dit is geen volledige zin.  

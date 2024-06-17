@@ -25,7 +25,7 @@ from-to-id x = begin
   ∎
 \end{code}
 The second proof is similar to the first, but it proves the composition in the other direction \tt{toCh $\circ$ fromCh = id}.
-This proofs leverages parametricity as described by \cite{Wadler1989}.
+This proof leverages parametricity as described by \cite{Wadler1989}.
 It postulates the free theorem of the function \tt{g :$\forall$ A . (F A -> A) -> A},
 to prove that ``applying \tt{g} to \tt{b} and then passing the result to \tt{h},
 is the same as just folding \tt{c} over the datatype'' \citep{Harper2011}.
@@ -121,7 +121,8 @@ natfuse {F}{G}{H} nat1 nat2 x@(Ch g) = begin
           ∎
 \end{code}
 The second of these two proofs shows that any pipeline, consisting of a producer, transformer,
-and consumer function, fuse down to a single function application:
+and consumer function, fuse down to a single function application.
+This also shows the foldr/build fusion if the \tt{nat} given is \tt{id}:
 \begin{code}
 pipefuse : {F G : Container 0ℓ 0ℓ}{X : Set}(g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y)
           (nat : {Y : Set} → ⟦ F ⟧ Y → ⟦ G ⟧ Y){Y : Set}(c : ⟦ G ⟧ Y → Y) →

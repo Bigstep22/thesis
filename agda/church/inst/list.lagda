@@ -1,4 +1,4 @@
-\subsubsection{Example: List fusion}\label{sec:agda_church_list}
+\paragraph{Example: List Fusion}
 In order to clearly see how the Church encodings allows functions to fuse, a datatype was selected such that
 the abstracted function, which have so far been used to prove the needed properties, can be instantiated
 to demonstrate how the fusion works for functions across a cocrete datatype.
@@ -177,19 +177,24 @@ eqPips p (suc x) (suc y) with p (suc x)
 ... | true  = cong 2+ (cong (_+_ x) (eqPips p (2+ x) y))
 ... | false = eqPips p (2+ x) y
 
-prodAssoc : {F : Container _ _}{Y : Set₁}{Z : Set}(g : {X : Set} → (⟦ F ⟧ X → X) → Y → X)(f : Z → Y)(z : Z) →
-              (prodCh g ∘ f) z ≡ prodCh (λ a → g a ∘ f) z
+prodAssoc : {F : Container _ _}{Y : Set₁}{Z : Set}(f : Z → Y)
+            (g : {X : Set} → (⟦ F ⟧ X → X) → Y → X)(z : Z) →
+            (prodCh g ∘ f) z ≡ prodCh (λ a → g a ∘ f) z
 prodAssoc _ _ _ = refl
 
 eqPipelines : {p : ℕ → Bool}{xy : ℕ × ℕ} →
               (sum2 ∘ map2 (_+_ 1) ∘ filter2 p ∘ between2) xy ≡ pipeline p xy
 eqPipelines {p}{xy@(x , y)} = begin
-      (foldr s ∘ natTrans (m (_+_ 1)) ∘ fromCh ∘ prodCh (consCh ∘ filt' p) ∘ toCh ∘ fromCh ∘ prodCh b) xy
+      (foldr s ∘ natTrans (m (_+_ 1)) ∘
+        (fromCh ∘ prodCh (consCh ∘ filt' p) ∘ toCh) ∘ build b) xy
    ≡⟨ cong (foldr s ∘ natTrans (m (_+_ 1)) ∘ fromCh)
-           (prodAssoc (consCh ∘ filt' p) (toCh ∘ fromCh ∘ prodCh b) xy) ⟩
-      (foldr s ∘ natTrans (m (_+_ 1)) ∘ fromCh ∘ prodCh (λ a → consCh (filt' p a) ∘ toCh ∘ fromCh ∘ prodCh b)) xy
-   ≡⟨ pipefuse (λ a → consCh (filt' p a) ∘ toCh ∘ fromCh ∘ prodCh b) (m (_+_ 1)) s xy ⟩
-      (λ a → consCh (filt' p a) ∘ toCh ∘ fromCh ∘ prodCh b) (s ∘ m (_+_ 1)) xy
+           (prodAssoc (toCh ∘ build b) (consCh ∘ filt' p) xy) ⟩
+      (foldr s ∘ natTrans (m (_+_ 1)) ∘ fromCh ∘
+        prodCh (λ a → consCh (filt' p a) ∘ toCh ∘ build b)) xy
+   ≡⟨ pipefuse (λ a → consCh (filt' p a) ∘ toCh ∘ build b) (m (_+_ 1)) s xy ⟩
+      (λ a → consCh (filt' p a) ∘ toCh ∘ build b) (s ∘ m (_+_ 1)) xy
+   ≡⟨⟩
+      (consCh (filt' p (s ∘ m (_+_ 1))) ∘ toCh ∘ build b) xy
    ≡⟨⟩
       (consCh (filt' p (s ∘ m (_+_ 1))) ∘ toCh ∘ fromCh ∘ prodCh b) xy
    ≡⟨ cong (consCh (filt' p (s ∘ m (_+_ 1)))) (to-from-id (prodCh b xy)) ⟩

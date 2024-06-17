@@ -4,7 +4,6 @@ Now that the sufficient category theory has been explained, it is possible to de
 In his work, Harper explains the concept of Church and Cochurch encodings in four steps:
 The necessary underlying category theory, the concepts of encodings and the proof obligations necessary for ensuring correctness of the encodings, the concepts of (Co)Church encodings with the proof of correctness, and finally an example implementation for leaf trees.
 We will now go through each step briefly.
-
 \subsubsection{Category Theory}
 For the full overview of the category theory, see \autoref{sec:cat_theory}.
 The main concepts that Harper explains are the \textit{universal property of (un)folds}, the \textit{fusion law}, and the \textit{reflection law}; all of which can be derived from the category theory described earlier.
@@ -113,9 +112,11 @@ He implements four functions, \tt{between}, \tt{filter}, \tt{concat}, and \tt{su
 In doing so, he shows exactly how one goes from using the normal, recursive datatypes and function that are typically used in Haskell, to Church and Cochurch encoded versions.
 To conclude he compares the performance of different compositions of functions to show the performance benefits and differences between the three different variants of functions.
 
-So far we have mentioned the so-called `free theorems' multiple times.
-They are important to Harper's proof as the correctness of the (Co)Church encodings depend on them.
-We will describe how these free theorems of \textit{parametricity} works in \autoref{sec:free}.
+We are omitting details for the description of Harper's example implementation because my work replicates this example implementation and is therefore described in detail in \autoref{sec:haskell}
+
+% So far we have mentioned the so-called `free theorems' multiple times.
+% They are important to Harper's proof as the correctness of the (Co)Church encodings depend on them.
+% We will describe how these free theorems of \textit{parametricity} works in \autoref{sec:free}.
 
 \iffalse
 \begin{itemize}

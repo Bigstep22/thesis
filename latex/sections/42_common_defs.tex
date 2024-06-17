@@ -1,0 +1,15 @@
+\subsection{Common definitions}
+Both the Church (initial) and Cochurch (terminal) halves of the formalization use these definitions.
+\input{sections/agda/funct/funext.tex}
+
+\paragraph{Containers}
+In the Agda formalization we need to represent functors.
+While a \tt{RawFunctor} datatype does exist in Agda's stdlib, it does not provide the necessary data such that proofs can easily be done over it, such as the functor laws.
+
+Instead, we opt to use Containers to represent strictly positive functors as described by \cite{Abbott2005}.
+\input{sections/agda/examples/container.tex}
+
+The main benefit of leveraging containers to represent functions is that it maintains positivity as well as that the functor laws are true by definition.
+We will discuss the process for deriving a container from a given (polynomial) later on when we need to derive it for lists, in \autoref{label}.
+
+

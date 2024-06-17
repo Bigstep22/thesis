@@ -25,7 +25,7 @@ from-to-id {F} x = begin
 \end{code}
 The second proof proof is similar to the first, but it proves the composition in the other direction
 \tt{toCoCh $\circ$ fromCoCh = id}.
-This proof leverages the parametricity as described by \cite{Wadler1989}.
+This proof leverages parametricity as described by \cite{Wadler1989}.
 It postulates the free theorem of the function g for a fixed Y: \tt{f :$\forall$ X → (X → F X) → X → Y},
 to prove that ``unfolding a Cochurch encoded structure and then re-encoding it yields an equivalent structure'' \citep{Harper2011}.
 This together with the first proof shows that Cochurch encodings are isomorphic to the datatypes they are encoding:
@@ -111,11 +111,13 @@ trans-pres f nat (CoCh h x) = begin
       A⟦ f ∘ out ⟧ (fromCoCh (CoCh h x))
     ∎
 \end{code}
-Finally two additional proofs were made to clearly show that any pipeline made using cochurch
-encodings will fuse down to a simple function application.
-The first of these two proofs shows that any two composed natural transformation fuse down
-to one single natural transformation:
-\begin{code}
+Two additional proofs, \tt{natfuse} and \tt{pipefuse}, were made in a similary fashion to how they were done
+for Church encodings they are omitted here for brevity and can be found in the artifacts.
+% Finally two additional proofs were made to clearly show that any pipeline made using cochurch
+% encodings will fuse down to a simple function application.
+% The first of these two proofs shows that any two composed natural transformation fuse down
+% to one single natural transformation:
+\begin{code}[hide]
 natfuse : {F G H : Container 0ℓ 0ℓ}
           (nat1 : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
           (nat2 : {X : Set} → ⟦ G ⟧ X → ⟦ H ⟧ X)(x : CoChurch F) →
@@ -129,9 +131,9 @@ natfuse nat1 nat2 x@(CoCh g s) = begin
             natTransCoCh (nat2 ∘ nat1) x
           ∎
 \end{code}
-The second of these two proofs shows that any pipeline, consisting of a producer, transformer,
-and consumer function, fuse down to a single function application:
-\begin{code}
+% The second of these two proofs shows that any pipeline, consisting of a producer, transformer,
+% and consumer function, fuse down to a single function application:
+\begin{code}[hide]
 pipefuse : {F G : Container 0ℓ 0ℓ}{X : Set}(c : X → ⟦ F ⟧ X)
            (nat : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
            (f : {Y : Set} → (Y → ⟦ G ⟧ Y) → Y → X)(x : X) →

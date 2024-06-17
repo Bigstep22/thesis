@@ -13,19 +13,19 @@ import Test.Tasty.Bench
 }
 \subsection{Leaf Trees}
 In this section, we discuss my replication of \cite{Harper2011}'s code.
-We start with his motivating example at the beginning of the paper, followed by the `fused' version that we want the pipeline to become, once compiled:
-\begin{code}
-f :: (Int, Int) -> Int
-f = sum1 . map1 (+1) . filter1 odd . between1
+% We start with his motivating example at the beginning of the paper, followed by the `fused' version that we want the pipeline to become, once compiled:
+% \begin{code}
+% f :: (Int, Int) -> Int
+% f = sum1 . map1 (+1) . filter1 odd . between1
 
-f' :: (Int, Int) -> Int
-f' (x, y) = loop x
-  where loop x = if x > y
-                 then 0
-                 else if odd x
-                      then (x + 1) + loop (x + 1)
-                      else loop (x + 1)
-\end{code}
+% f' :: (Int, Int) -> Int
+% f' (x, y) = loop x
+%   where loop x = if x > y
+%                  then 0
+%                  else if odd x
+%                       then (x + 1) + loop (x + 1)
+%                       else loop (x + 1)
+% \end{code}
 \paragraph{Datatypes} In his paper Harper implemented his example functions using leaf trees, this is defined as \tt{Tree} below.
 Furthermore, the base functor of \tt{Tree} was defined, as \tt{Tree\_}, with the recursive positions of the functor turned into a parameter of the datatype:
 \begin{code}

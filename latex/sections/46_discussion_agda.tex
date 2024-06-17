@@ -10,6 +10,17 @@ After defining all of this, I formalized Harper's proof that shortcut fusion is 
 Building on this, I implemented a \tt{List} datastructure using containers.
 Across this datastructure I implemented normal and (Co)Church encoded functions across these lists: \tt{between}, \tt{map}, and \tt{sum}.
 
+Repeating my qustion:
+Are the transformations used to enable fusion safe? Meaning:
+\begin{itemize}[noitemsep]
+  \item Do the transformations in Haskell preserve the semantics of the language?
+  \item If the mathematics and the encodings are implemented in a dependently typed language, is it possible to prove them to be correct?
+\end{itemize}
+The first question can be answered as a conditional: Yes, as long as Haskell's type system contains parametricity.
+The second question can be answered as: Yes it is possible, with some limitations, which are discussed below.
+The question as a whole can be answered as a tentative `yes', again keeping in mind the weaknesses discussed below.
+
+
 \paragraph{Remaining Weaknesses}
 There are two main remaining weaknesses in my current work:
 First, the proof of terminality of terminal coalgebras is currently not terminating.
@@ -17,14 +28,6 @@ Second, the free theorems are currently postulated to be true instead of being p
 
 \subparagraph{Termination Checking}
 I made an attempt to construct a terminating proof of terminality of \tt{M} types in agda through the use of a bisimulation, but due to time constraints I reverted to a version of the code that type checked, but did not terminate for a few proofs.
-Before reverting to the previous state, the state of the code was as follows:
-\begin{itemize}[noitemsep]
-  \item The reflection law was proven (as a bisimilarity)
-  \item The computation law was proven (as a propositional equality)
-  \item The termination of the `proof of uniqueness' part of the proof of terminality (also as a bisimilarity)
-  \item The plan and execution of restructuring the further code that rests on the above proofs.
-  Most likely the use of propositional equalities throughout the following proofs need to be modified to instead use some combination of the bisimilarity and propositional equality in Agda.
-\end{itemize}
 The functions are currently proved using a postulate called \tt{out-injective} that postulates that the constructor of the coinductive datatype is injective.
 The above three functions are now non-terminating in the final state of the code.
 Furthermore, the implementation of the Cochurch encoded list \tt{sum} function also was set to be non-terminating.
@@ -46,6 +49,7 @@ I'll go through them in increasing order of noteworthiness:
   New research does exist by \cite{Muylder2024} that would enable the proving of the two free theorems, using internalized parametricity as originally described by \cite{Bernardy2012}.
   Doing so falls outside the scope of this research and is left to future work.
 \end{itemize}
+
 
 My Agda formalization has shown that Harper's work is correct, with a couple limitations, namely with respect to the proof of terminality of $\nu$.
 There are multiple of future avenues that this research can take, this is discussed more extensively in \autoref{sec:conclusion}.

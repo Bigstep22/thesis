@@ -2,9 +2,18 @@
 \section{Haskell Optimizations}\label{sec:haskell}
 In \cite{Harper2011}'s work there were still multiple open questions left regarding the exact mechanics of what Church and Cochurch encodings did while making their way through the compiler. Why are Cochurch encodings faster in some pipelines, but slower in others?
 
+So I pose the following research question(s):
+To implement (Co)Church encodings, what is necessary to make the code reliably fuse? This leads to the following sub-questions:
+\begin{itemize}[noitemsep]
+  \item What optimizations are present in Haskell that enable fusion to work?
+  \item What tools and techniques are available to get Haskell's compiler to cooperate and trigger fusion?
+\end{itemize}
+
 In this section we will discuss my work replicating the fused Haskell code of Harper's work and further optimization opportunities that were discovered along the way.
 
 We will start off with the existing working code, followed by a discussion of the discoveries made throughout the process of writing, replicating, and further optimization of Harper's example code, starting in \autoref{sec:filter_prob}.
+We then discuss the performance impact of implementing fusion on an example function pipeline.
+The section is finished by a discussion of the results.
 
 %include haskell/leaf_trees.lhs.tex
 %include haskell/list.lhs.tex

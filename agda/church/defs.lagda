@@ -1,4 +1,4 @@
-\subsubsection{Definition of Church encodings}
+\paragraph{Definition of Church encodings}
 \begin{code}[hide]
 open import agda.church.initial
 module agda.church.defs where

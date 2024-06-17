@@ -1,16 +1,14 @@
 
 \section{Background}
 Before discussing my work, it is important to describe the necessary background.
-My work builds on a body of existing work, namely foldr/build fusion and variants \citep{Gill1993,Svenningsson2002,Coutts2007}, some category theory \citep{Ahrens2022}, (Co)Church encodings \citep{Harper2011}, Containers \citep{Abbott2005}, parametricity (free theorems) \citep{Wadler1989}, and optimizations in Haskell's optimization pipeline that are relevant for fusion \citep{Jones1996}.
+For the reader I assume familiarity with Agda and Haskell.
+I also assume familiarity with the work of \cite{Harper2011}, it is recommended to have his work close at hand when reading mine; I do summarize parts of it, but I do not want to embed his work in mine.
 
-We will be describing each of these works briefly.
-After that, in the next subsections, we will describe the work that I have done that builds on these topics.
-Furthermore, for this thesis I assume familiarity with Agda and Haskell as well as Harper's work.
+My work builds on a body of existing work, namely foldr/build fusion and variants \citep{Gill1993,Svenningsson2002,Coutts2007}, some category theory \citep{Ahrens2022}, (Co)Church encodings \citep{Harper2011}, Containers \citep{Abbott2005}, parametricity (free theorems) \citep{Wadler1989}, and optimizations in Haskell's optimization pipeline that are relevant for fusion \citep{Jones1996}.
+We will be describing some of these works briefly, others will be described when needed.
 
 %include 22_fusion.lhs.tex
+%include 27_free_theorems.lhs.tex
 \input{sections/24_category_theory}
 %include 26_libfusion.lhs.tex
-%include 27_free_theorems.lhs.tex
-\input{sections/28_containers.tex}
-%include 29_haskell_optimization.lhs.tex
 
