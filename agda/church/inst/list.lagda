@@ -113,6 +113,8 @@ sum2' : List ℕ → ℕ
 sum2' l = foldr s' l 0
 checksum : sum2 (5 :: 6 :: 7 :: []) ≡ 18
 checksum = refl
+
+
 \end{code}
 \subparagraph{Equality}
 The below proof shows the equality between the non-Church endcoded pipeline and
@@ -134,30 +136,87 @@ eq {f}{x} = begin
     (foldr s ∘ natTrans (m f) ∘ build b) x
   ∎
 \end{code}
-\begin{code}
+\paragraph{Fusing the functions down to a pipeline}
+I present the equality between two functions: One is the \tt{pipeline} function and the other is the composition
+of the three functions presented so far, along with the \tt{filter2} function.
 
+The \tt{pipeline} function has been implemented with the aid of a \tt{pipeline'} function.
+This is to aid in termination checking and the same technique used for \tt{b} and \tt{b'} above.
+
+The \tt{filt'} function is a function that creates a new algebra from an existing one.
+The \tt{filter2} function takes this partial algebra composition and encodes it using a build/foldr pair.
+\begin{code}
+filt' : {A X : Set} → (A → Bool) → (List' A X → X) → (List' A X → X)
+filt' {A}{X} p f (nil , l) = f (nil , l)
+filt' {A}{X} p f (cons a , l) = if (p a) then f (cons a , l) else l zero
+filter2 : {A : Set} → (A → Bool) → List A → List A
+filter2 {A} p = build (foldr ∘ filt' p)
+
+pipeline' : (ℕ → Bool) → ℕ → ℕ → ℕ
+pipeline' p x zero = zero
+pipeline' p x (suc n) = if p x
+                        then (1 + x) + pipeline' p (1 + x) n
+                        else pipeline' p (1 + x) n
+pipeline : (ℕ → Bool) → (ℕ × ℕ) → ℕ
+pipeline p (x , y) = pipeline' p x (suc (y - x))
+\end{code}
+The \tt{eqPips} lemma proves that the fused pipelines are the same for all inputs using induction and pattern matching,
+while the \tt{eqPipelines} lemma proves that the fusion is possible, even with this build/foldr pair.
+One crucial insight for this latter proof is that \tt{prodCh} is associative for functions postcomposed to it.
+This is stated formally in lemma \tt{prodAssoc} and proved via reflexivity.
+
+These lemmas show, in as clear as a fashion as possible, that the composition of the Church encoded functions are equal
+to the hand-fused pipeline written above.
+\begin{code}
+eqPips : (p : ℕ → Bool)(x y : ℕ) → b' (filt' p (s ∘ m (_+_ 1))) x y ≡ pipeline' p x y
+eqPips p _ zero = refl
+eqPips p zero (suc y) with p 0
+... | true  = cong suc (eqPips p 1 y)
+... | false = eqPips p 1 y
+eqPips p (suc x) (suc y) with p (suc x)
+... | true  = cong 2+ (cong (_+_ x) (eqPips p (2+ x) y))
+... | false = eqPips p (2+ x) y
+
+prodAssoc : {F : Container _ _}{Y : Set₁}{Z : Set}(g : {X : Set} → (⟦ F ⟧ X → X) → Y → X)(f : Z → Y)(z : Z) →
+              (prodCh g ∘ f) z ≡ prodCh (λ a → g a ∘ f) z
+prodAssoc _ _ _ = refl
+
+eqPipelines : {p : ℕ → Bool}{xy : ℕ × ℕ} →
+              (sum2 ∘ map2 (_+_ 1) ∘ filter2 p ∘ between2) xy ≡ pipeline p xy
+eqPipelines {p}{xy@(x , y)} = begin
+      (foldr s ∘ natTrans (m (_+_ 1)) ∘ fromCh ∘ prodCh (consCh ∘ filt' p) ∘ toCh ∘ fromCh ∘ prodCh b) xy
+   ≡⟨ cong (foldr s ∘ natTrans (m (_+_ 1)) ∘ fromCh)
+           (prodAssoc (consCh ∘ filt' p) (toCh ∘ fromCh ∘ prodCh b) xy) ⟩
+      (foldr s ∘ natTrans (m (_+_ 1)) ∘ fromCh ∘ prodCh (λ a → consCh (filt' p a) ∘ toCh ∘ fromCh ∘ prodCh b)) xy
+   ≡⟨ pipefuse (λ a → consCh (filt' p a) ∘ toCh ∘ fromCh ∘ prodCh b) (m (_+_ 1)) s xy ⟩
+      (λ a → consCh (filt' p a) ∘ toCh ∘ fromCh ∘ prodCh b) (s ∘ m (_+_ 1)) xy
+   ≡⟨⟩
+      (consCh (filt' p (s ∘ m (_+_ 1))) ∘ toCh ∘ fromCh ∘ prodCh b) xy
+   ≡⟨ cong (consCh (filt' p (s ∘ m (_+_ 1)))) (to-from-id (prodCh b xy)) ⟩
+      (consCh (filt' p (s ∘ m (_+_ 1))) ∘ prodCh b)  xy
+   ≡⟨⟩
+      b (filt' p (s ∘ m (_+_ 1))) xy
+   ≡⟨⟩
+      b' (filt' p (s ∘ m (_+_ 1))) x (suc (y - x))
+   ≡⟨ eqPips p x (suc (y - x)) ⟩
+      pipeline' p x (suc (y - x))
+    ≡⟨⟩
+      pipeline p xy
+    ∎
+\end{code}
+\begin{code}[hide]
 -- Bonus functions
+even : ℕ → Bool
+even 0 = true
+even (suc n) = not (even n)
+odd : ℕ → Bool
+odd 0 = false
+odd (suc n) = not (odd n)
 count : (ℕ → Bool) → μ (F ℕ) → ℕ
 count p = ⦅ (λ where
                (nil , _) → 0
                (cons true , f) → 1 + f zero
                (cons false , f) → f zero) ⦆ ∘ map1 p
-
-even : ℕ → Bool
-even 0 = true
-even (suc n) = not (even n)
-odd : ℕ → Bool
-odd = not ∘ even
-
 countworks : count even (5 :: 6 :: 7 :: 8 :: []) ≡ 2
 countworks = refl
-
-filter : {A : Set} → (A → Bool) → List A → List A
-filter p = fromCh ∘ prodCh (λ f → consCh (λ where
-   (nil , l) → f (nil , l)
-   (cons a , l) → if (p a) then f (cons a , l) else l zero)) ∘ toCh
-filter' : {A : Set} → (A → Bool) → List A → List A
-filter' p = build (λ f → foldr (λ where
-   (nil , l) → f (nil , l)
-   (cons a , l) → if (p a) then f (cons a , l) else l zero))
 \end{code}

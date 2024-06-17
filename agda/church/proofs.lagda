@@ -124,7 +124,7 @@ The second of these two proofs shows that any pipeline, consisting of a producer
 and consumer function, fuse down to a single function application:
 \begin{code}
 pipefuse : {F G : Container 0ℓ 0ℓ}{X : Set}(g : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y)
-          (nat : {Y : Set} → ⟦ F ⟧ Y → ⟦ G ⟧ Y)(c : (⟦ G ⟧ X → X)) →
+          (nat : {Y : Set} → ⟦ F ⟧ Y → ⟦ G ⟧ Y){Y : Set}(c : ⟦ G ⟧ Y → Y) →
           (x : X) → (foldr c ∘ natTrans nat ∘ build g) x ≡ g (c ∘ nat) x
 pipefuse {F}{G} g nat c x = begin
     (consCh c ∘ toCh ∘ fromCh ∘ natTransCh nat ∘ toCh ∘ fromCh ∘ prodCh g) x
