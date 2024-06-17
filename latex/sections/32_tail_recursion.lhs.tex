@@ -4,14 +4,10 @@ Namely, beta reduction, inlining, case-of-case optimizations, and tail call opti
 We will discuss a brief description of each.
 
 Repeating my research question, the first sub-point should be answered here:
-To implement (Co)Church encodings, what is necessary to make the code reliably fuse? This leads to the following sub-questions:
-\begin{itemize}[noitemsep]
-  \item What optimizations are present in Haskell that enable fusion to work?
-  \item What tools and techniques are available to get Haskell's compiler to cooperate and trigger fusion?
-\end{itemize}
+What optimizations are present in Haskell that enable fusion to work?
 
 \subsubsection{Beta reduction}
-Beta reduction is simply the rule where an expression of the form \tt{($\lambda$ x . a[x]) y} can get transformed into \tt{a[y]}.
+Beta reduction is the rule where an expression of the form \tt{($\lambda$ x . a[x]) y} can get transformed into \tt{a[y]}.
 For example \tt{($\lambda$ x . x + x) y} would become \tt{y + y}.
 \subsubsection{Inlining}
 Inlining is the process of taking a function expression and unfolding it into its definition.
@@ -80,12 +76,12 @@ case x of
 No more runtime evaluation of not!
 % To see an example of these optimizations in action, see \autoref{app:cochurch_stream}.
 
-\paragraph{Tail Recursion}\label{sec:tail}
+\subsubsection{Tail Recursion}\label{sec:tail}
 \subparagraph{Definition}
 We call a recursive function tail-recursive, if all its recursive calls return immediately upon completion i.e., they don't do any additional calculations upon the result of the recursive call before returning a result.
 
 When a function is tail-recursive, it is possible to reuse the stack frame of the current function call, reducing a lot of memory overhead, only needing to execute make a jump each time a recursive `call' is made.
-Haskell is able to identify tail-recursive functions and optimize the compiled byte code accordingly.
+Haskell is able to identify tail-recursive functions and optimize the compiled byte code accordingly\footnote{See Simon Peyton Jones' excellent talk on tail recursion and join points here: \url{https://www.youtube.com/watch?v=LMTr8yw0Gk4}}.
 
 \paragraph{Example}
 The following code, when applying fusion, case-of-case, and case-of-known-case optimization:
@@ -142,9 +138,9 @@ b a (x, y) = loop x
                  then a Nil_
                  else a (Cons_ x (loop (x+1)))
     \end{spec}
-    This way, fewer data need to be pushed around in memory for each (recursive) function call.
+    This way, data needs to be pushed around in memory for each (recursive) function call.
     \item Ensure that functions are inlined properly. So for the second example above add a pragma that inlines the function.
-    This ensures that other pragmas, that  do the actual fusion, can fire during the compilation process.
+    This ensures that other pragmas, that  do the actual fusion, can fire during the compilation process:
     \begin{spec}
         {-# INLINE betweenCh #-}
     \end{spec}
@@ -188,15 +184,15 @@ sum7 = flip sumCh 0 . toCh
         su (Cons_ x y) s = y (s + x)
     \end{spec}
 
-\cite{Breitner2018} introduced and subsequently make possible this optimization in Haskell.
-\item Ensure that the fused result is a single recursive function (so no helper functions such as \tt{go}).
-This was a problem when writing the filter function in Cochurch encoded fashion.
-This is only possible if a recursive natural transformation function is used, but it unfortunately does not fuse.
-This is due to \tt{go} being a recursive function, which Haskell does not inline on its own.
-
-The current workaround for this is Stream fusion as described by \cite{Coutts2007}.
-Adding a Skip constructor makes a big difference to enabling the avoidance of recursive functions.
-This workaround is part of my performance analysis.
+\cite{Breitner2018} introduced and subsequently make possible this optimization in Haskell, called call arity.
+    \item Ensure that the fused result is a single recursive function (so no helper functions such as \tt{go}).
+    This was a problem when writing the filter function in Cochurch encoded fashion.
+    This is only possible if a recursive natural transformation function is used, but it unfortunately does not fuse.
+    This is due to \tt{go} being a recursive function, which Haskell does not inline on its own.
+    
+    The current workaround for this is Stream fusion as described by \cite{Coutts2007}.
+    Adding a Skip constructor makes a big difference to enabling the avoidance of recursive functions.
+    This workaround is part of my performance analysis.
 \end{itemize}
 
 

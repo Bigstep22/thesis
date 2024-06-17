@@ -1,6 +1,6 @@
-\paragraph{Deriving a container from a functor}
+\paragraph{Deriving a container from a functor}\label{sec:deriving_container}
 Deriving the container from a given (polynomial) functor can be done in a few steps:
-\begin{enumerate}
+\begin{enumerate}[noitemsep]
     \item Analyze how many constructors your functor has, take as an example 2.
     \item For the left side of the container take the coproduct of types that store the non-recursive sub-elements (such as const).
     \item Count the amount of recursive elements in the constructor, the return type should include that many elements.

@@ -13,7 +13,7 @@ open import agda.church.proofs
 open import agda.church.initial
 module agda.church.inst.list where
 \end{code}
-This section defines: the container, whose interpretation represents the base functor for lists,
+This section defines: The container whose interpretation represents the base functor for lists,
 some convenience functions to make type annotations more readable, a producer function \tt{between},
 a transformation function \tt{map}, a consumer function \tt{sum}, and a proof that non-church and Church encoded
 implementations are equal.
@@ -113,8 +113,6 @@ sum2' : List ℕ → ℕ
 sum2' l = foldr s' l 0
 checksum : sum2 (5 :: 6 :: 7 :: []) ≡ 18
 checksum = refl
-
-
 \end{code}
 \subparagraph{Equality}
 The below proof shows the equality between the non-Church endcoded pipeline and
@@ -193,19 +191,19 @@ eqPipelines {p}{xy@(x , y)} = begin
         prodCh (λ a → consCh (filt' p a) ∘ toCh ∘ build b)) xy
    ≡⟨ pipefuse (λ a → consCh (filt' p a) ∘ toCh ∘ build b) (m (_+_ 1)) s xy ⟩
       (λ a → consCh (filt' p a) ∘ toCh ∘ build b) (s ∘ m (_+_ 1)) xy
-   ≡⟨⟩
+   ≡⟨⟩ -- beta reduction
       (consCh (filt' p (s ∘ m (_+_ 1))) ∘ toCh ∘ build b) xy
-   ≡⟨⟩
+   ≡⟨⟩ -- inlining of build
       (consCh (filt' p (s ∘ m (_+_ 1))) ∘ toCh ∘ fromCh ∘ prodCh b) xy
    ≡⟨ cong (consCh (filt' p (s ∘ m (_+_ 1)))) (to-from-id (prodCh b xy)) ⟩
       (consCh (filt' p (s ∘ m (_+_ 1))) ∘ prodCh b)  xy
-   ≡⟨⟩
+   ≡⟨⟩ -- inlining of consCh and prodCh
       b (filt' p (s ∘ m (_+_ 1))) xy
-   ≡⟨⟩
+   ≡⟨⟩ -- inlining of b
       b' (filt' p (s ∘ m (_+_ 1))) x (suc (y - x))
    ≡⟨ eqPips p x (suc (y - x)) ⟩
       pipeline' p x (suc (y - x))
-    ≡⟨⟩
+    ≡⟨⟩ -- inlining of pipeline
       pipeline p xy
     ∎
 \end{code}

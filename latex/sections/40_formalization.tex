@@ -8,17 +8,16 @@ Are the transformations used to enable fusion safe? Meaning:
 \end{itemize}
 
 In this section we discuss the work that was done to formalize Harper's proofs in the programming language Agda, as well as additional proofs to support the claims made in the paper.
-
-The code is represented in roughly 3 parts, once for Church and once for Cochurch encodings, each part builds on the previous one:
-\begin{itemize}
+My code is represented in roughly 3 parts, once for Church and once for Cochurch encodings, each part builds on the previous one:
+\begin{itemize}[noitemsep]
   \item The proofs of the category theory properties, such as initiality/terminality of datatypes and the reflection property.
   \item The definition and proofs about the (Co)Church encodings, again as described by Harper.
   \item An example implementation of the list datatype, using containers.
 \end{itemize}
 
-The Agda code makes use of two libraries: agda-stdlib\footnote{\url{https://github.com/agda/agda-stdlib}} v2.0 and agda-categories\footnote{\url{https://github.com/agda/agda-categories}} v0.2.0
+The Agda code makes use of two libraries: agda-stdlib\footnote{\url{https://github.com/agda/agda-stdlib}} v2.0 and agda-categories\footnote{\url{https://github.com/agda/agda-categories}} v0.2.0.
 
-The discussion about my implementation can be found in \autoref{sec:agda_form_disc}
+The discussion of my implementation can be found in \autoref{sec:agda_form_disc}
 
 \input{sections/42_common_defs.tex}
 \subsection{Church Encodings}

@@ -14,14 +14,15 @@
     \textbf{Abstract}
 \end{center}
 \begin{adjustwidth}{2cm}{2cm}
-\textsc{Placeholder abstract pulled from ChatGPT:}
-Functional programming's compositional techniques, such as those in Haskell, often incur computational overhead.
-Fusion, an optimization method that combines multiple list operations into a single traversal, addresses this issue.
-This thesis explores shortcut fusion using (Co)Church encodings, focusing on two key questions: how to reliably achieve fusion in Haskell, and the safety of these transformations.
+When writing functional code that composes multiple recursive functions that operate on a datastrcuture, we often incur a lot of computational overhead allocating memory, only to later read, use, and discard this information.
+This can be alleviated using fusion, a technique that combines these multiple recursive datastructure traversals into one.
+This thesis explores shortcut fusion using (Co)Church encodings based on the work of \cite{Harper2011}, focusing on two questions: What is needed to reliably achieve fusion in Haskell, and the correctness of these transformations through a formalization in Agda.
 
-The first contribution replicates and extends Harper's (Co)Church encodings in Haskell, uncovering optimizer weaknesses and practical fusion techniques.
-The second formalizes these encodings in Agda, using category theory and containers, a generalization of strictly positive functors.
-The formalization proves the equivalence of these encoded functions to standard folds, enhancing the understanding and applicability of fusion in functional programming.
+The first contribution replicates and extends Harper's (Co)Church encodings in Haskell, uncovering optimizer weaknesses and providing practical insights for achieving fusion within Haskell.
+The second contribution formalizes these encodings in Agda, leveraging parametricity and the category theory described by Harper.
+The formalization proves the equivalence of these encoded functions to the unencoded ones, showing that the encodings are in fact isomorphisms, as long as parametricity \citep{Wadler1989} is assumed.
+
+These findings highlight the effectiveness and correctness of shortcut fusion techniques and show the promise of shortcut fusion: Reduce the computational overhead associated with functional programming while retaining its nice, compositional properties.
 \end{adjustwidth}
 
 \vfill 

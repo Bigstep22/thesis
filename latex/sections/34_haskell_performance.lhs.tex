@@ -54,6 +54,10 @@ In general, as the scale increases (see \autoref{fig:all_exec} and \autoref{fig:
     \item Most importantly for all fully fused pipelines: The speedup that fusion offers only seems to increase as the order of magnitude of the calculation grows.
 \end{itemize}
 
+These findings highlight how the fusion can provide a significant speedup to compiled Haskell code.
+The replication of Harper's code show that achieving fused, tail-recursive compiled code requires taking into consideration many parts of Haskell's optimizer.
+I believe that there exists big potential for Haskell's library writers to implement many datastructures using in a (Co)Church encodings; especially the foldr/build and destroy/unfoldr functions, from which many standard library functions and other functionalities can be derived.
+
 \begin{figure}[H]
     \centering
     \includesvg[width=0.83\textwidth]{figures/Execution time for all pipelines.svg}
@@ -66,3 +70,4 @@ In general, as the scale increases (see \autoref{fig:all_exec} and \autoref{fig:
     \caption{Comparison of executions times between the different pipelines and input sizes, line chart. This view makes it slightly easier to compare the differences between pipelines across different inputs.}
     \label{fig:results2}
 \end{figure}
+

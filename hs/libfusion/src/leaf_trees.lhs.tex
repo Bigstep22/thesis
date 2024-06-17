@@ -66,7 +66,7 @@ This way the \tt{toCh/fromCh} functions exist for as long as possible, maximizin
 {-# INLINE [0] toCh #-}
 {-# INLINE [0] fromCh #-}
 \end{code}
-A generalized natural transformation function is defined to standardize and ease later implementations of transformation functions:
+A generalized transformation function is defined to standardize and ease later implementations of transformation functions:
 \begin{code}
 natCh :: (forall c . Tree_ a c -> Tree_ b c) -> TreeCh a -> TreeCh b
 natCh f (TreeCh g) = TreeCh (\a -> g (a . f))
@@ -101,7 +101,7 @@ These work in the same fashion within Haskell as they do for Church encodings:
 {-# INLINE [0] toCoCh #-}
 {-# INLINE [0] fromCoCh #-}
 \end{code}
-A generalized natural transformation function is defined to standardize and ease later implementations of transformation functions:
+A generalized transformation function is defined again to standardize and ease later implementations of transformation functions:
 \begin{code}
 natCoCh :: (forall c . Tree_ a c -> Tree_ b c) -> TreeCoCh a -> TreeCoCh b
 natCoCh f (TreeCoCh h s) = TreeCoCh (f . h) s
@@ -201,6 +201,7 @@ filt :: (a -> Bool) -> Tree_ a c -> Tree_ a c
 filt p Empty_ = Empty_
 filt p (Leaf_ x) = if p x then Leaf_ x else Empty_
 filt p (Fork_ l r) = Fork_ l r
+
 filter2 :: (a -> Bool) -> Tree a -> Tree a
 filter2 p = fromCh . natCh (filt p) . toCh
 {-# INLINE filter2 #-}
@@ -214,10 +215,12 @@ map1 :: (a -> b) -> Tree a -> Tree b
 map1 f Empty = Empty
 map1 f (Leaf a) = Leaf (f a)
 map1 f (Fork l r) = append1 (map1 f l) (map1 f r)
+
 m :: (a -> b) -> Tree_ a c -> Tree_ b c
 m f Empty_ = Empty_
 m f (Leaf_ a) = Leaf_ (f a)
 m f (Fork_ l r) = Fork_ l r
+
 map2 :: (a -> b) -> Tree a -> Tree b
 map2 f = fromCh . natCh (m f) . toCh
 {-# INLINE map2 #-}
@@ -258,7 +261,7 @@ sum3 = sumCoCh . toCoCh
                   Fork_ l r -> loop l + loop r
 {-# INLINE sum3 #-}
 \end{code}
-\paragraph{Pipelines} Finally, an example pipeline, whose performance can be measure or Core representation inspected, is defined:
+\paragraph{Pipelines} Finally, an example pipeline, whose performance can be measure or Core representation inspected\footnote{For the documentation for which flags to use on GHC, see \url{https://downloads.haskell.org/ghc/latest/docs/users_guide/debugging.html\#core-representation-and-simplification}}, is defined:
 \begin{code}
 pipeline1 :: (Int, Int) -> Int
 pipeline1 = sum1 . map1 (+2) . filter1 odd . between1

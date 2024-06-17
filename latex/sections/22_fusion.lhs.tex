@@ -20,7 +20,7 @@ all p xs = h xs
 \end{code}
 In this case no intermediate datastructure is generated at the cost of more programmer involvement.
 We've made a custom, specialized version of \tt{and~.~map~p}.
-The compositional style of programming that function programming languages enable (such as Haskell) would be made a lot more difficult if, for every composition, the programmer had to write a specialized function.
+The compositional style of programming that functional programming languages enable (such as Haskell) would be made a lot more difficult if, for every composition, the programmer had to write a specialized function.
 Can this be automated?
 
 Gill's key insight was to note that when using a \tt{foldr k z xs} across a list, the effect of its application: 
@@ -76,7 +76,7 @@ Any adjacent \tt{foldr/build} pair `cancels away'.
 This is an example of shortcut fusion.
 
 One can rewrite many functions in terms of \tt{foldr} and \tt{build} such that this fusion can be applied. This can be seen in \autoref{fig:foldr/build_ex}.
-See \cite{Gill1993}'s work, specifically the end of section 3.3 (\tt{unlines}) for a more expansive example of how fusion, $\beta$ reduction, and inlining can combine to fuse a pipeline of functions down as an efficient minimum as can be expected.
+See \cite{Gill1993}'s work, specifically the end of section 3.3 (\tt{unlines}) for a more expansive example of how fusion, $\beta$ reduction, and inlining can combine to fuse a pipeline of functions down to as an efficient minimum as can be expected.
 \begin{figure}[ht]
     \centering
     \begin{code}
@@ -104,8 +104,8 @@ This foldr/build fusion works for lists, but it has several limitations.
 One is that it only works on lists, which can be alleviated using Church encodings and is described by \cite{Harper2011}.
 Secondly, the functions that we are writing need to be expressible in terms of compositions of foldr's and builds. What if we want to implement the converse approach using an unfoldr?
 This exists and is destroy/unfoldr fusion and is described by \cite{Coutts2007}.
-This work generalized by Cochurch encodings, also described by \cite{Harper2011}.
+This work, generalized by Cochurch encodings, is also described by \cite{Harper2011}.
 
-The generalization by Harper leverages (Co)Church, which uses definitions from category such as F-algebras and initiality.
-Don't know what they are? Read on to \autoref{sec:cat_theory}, where we give these category theory definitions.
+The generalization by Harper leverages (Co)Church encodings, which uses definitions from category theory such as F-algebras and initiality.
+Read on to \autoref{sec:cat_theory}, where we discuss these category theory definitions, after first having discussed free theorems.
 

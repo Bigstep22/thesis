@@ -1,14 +1,14 @@
-
 \subsection{Discussion of Agda Formalization}\label{sec:agda_form_disc}
 I formalized that, given parametricity, the fusion of (Co)Church encodings are the same as their non-encoded counterpart as proved by \cite{Harper2011}.
 
+This was done through multiple steps that build on each other, each step leaning on proofs and definitions from the previos one:
 I did this by first proving initality of \tt{W} ($\mu$) types and terminality of \tt{M} ($\nu$) types.
 Then I formalized the categorical fusion property, which only ended up being used in the proofs for fusion of Cochurch encodings.
 Then I defined the Church and Cochurch encodings, along with their associated conversion functions.
 After defining all of this, I formalized Harper's proof that shortcut fusion is possible for both Church and Cochurch encodings.
 
-Building on this, I implemented a \tt{List} datastructure using containers.
-Across this datastructure I implemented normal and (Co)Church encoded functions across these lists: \tt{between}, \tt{map}, and \tt{sum}.
+Building on this, I implemented the \tt{List} datastructure using containers.
+Across this datastructure I implemented normal and (Co)Church encoded functions across these lists: \tt{between}, \tt{map}, \tt{filter}, and \tt{sum}.
 
 Repeating my qustion:
 Are the transformations used to enable fusion safe? Meaning:
@@ -18,7 +18,7 @@ Are the transformations used to enable fusion safe? Meaning:
 \end{itemize}
 The first question can be answered as a conditional: Yes, as long as Haskell's type system contains parametricity.
 The second question can be answered as: Yes it is possible, with some limitations, which are discussed below.
-The question as a whole can be answered as a tentative `yes', again keeping in mind the weaknesses discussed below.
+The question as a whole can be answered as a tentative `yes', keeping in mind the weaknesses discussed below.
 
 
 \paragraph{Remaining Weaknesses}
@@ -50,6 +50,6 @@ I'll go through them in increasing order of noteworthiness:
   Doing so falls outside the scope of this research and is left to future work.
 \end{itemize}
 
-
-My Agda formalization has shown that Harper's work is correct, with a couple limitations, namely with respect to the proof of terminality of $\nu$.
+My Agda formalization has shown that Harper's work is correct, with some limitation, namely with respect to the proof of terminality of $M$.
+It can be clearly seen, through the proof of some of the lemmas, that the fusion does not destroy the semantics of the functions being fused; that the fusion is correct.
 There are multiple of future avenues that this research can take, this is discussed more extensively in \autoref{sec:conclusion}.

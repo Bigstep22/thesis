@@ -129,6 +129,7 @@ map1 f (Cons x xs) = Cons (f x) (map1 f xs)
 m :: (a -> b) -> List_ a c -> List_ b c
 m f (Cons_ x xs) = Cons_ (f x) xs
 m _ Nil_ = Nil_
+
 map2 :: (a -> b) -> List' a -> List' b
 map2 f = fromCh . natCh (m f) . toCh
 {-# INLINE map2 #-}
@@ -156,6 +157,7 @@ sum2 = sumCh . toCh
         su Nil_ = 0
         su (Cons_ x y) = x + y
 {-# INLINE sum2 #-}
+
 sum7 :: List' Int -> Int
 sum7 = flip sumCh 0 . toCh
   where sumCh :: ListCh Int -> (Int -> Int)
@@ -166,8 +168,7 @@ sum7 = flip sumCh 0 . toCh
 {-# INLINE sum7 #-}
 \end{code}
 A second recursion principle is also implemented that modifies the type of the recursion element in the base functor.
-Leveraging techniques as described by \cite{Breitner2018} to obtain a tail recursive implementation of sum for Church encodings.
-For more detail and a motivated example see \autoref{sec:hask_perf}. 
+Leveraging call arity techniques as described and made possible by \cite{Breitner2018} to obtain a tail recursive implementation of sum for Church encodings.
 
 The Cochurch encoded function implements a corecursion principle and applies the existing coalgebra (and input) to it:
 \begin{code}
@@ -181,6 +182,7 @@ sum3 = sumCoCh . toCoCh
                   Nil_ -> sum
                   Cons_ x xs -> loopt xs (x + sum)
 {-# INLINE sum3 #-}
+
 sum8 :: List' Int -> Int
 sum8 = sumCoCh . toCoCh
   where sumCoCh :: ListCoCh Int -> Int
@@ -294,9 +296,12 @@ The other modifies the definition of the underlying type such that the filter fu
 \begin{spec}
 filterCh :: (forall c . List_ a c -> List_ b c) -> ListCh a -> ListCh b
 filterCh p (ListCh g) = ListCh (\a -> g (a . (filt p)))
+\end{spec}
+\begin{code}
 filter2 :: (a -> Bool) -> List a -> List a
 filter2 p = fromCh . filterCh p . toCh
-\end{spec}
+{-# INLINE filter2 #-}
+\end{code}
 We now need to modify the \tt{filterCh} function such that we can still express a filter function \textit{without} using a natural transformation:
 \begin{spec}
 filterCh :: (forall c . List_ a c -> List_ b c) -> ListCh a -> ListCh b
@@ -309,9 +314,6 @@ filterCh p (ListCh g) = ListCh (\a -> g (\case
     Nil_ -> a Nil_
     Cons_ x xs -> if (p x) then a (Cons_ x xs) else xs
   ))
-filter2 :: (a -> Bool) -> List' a -> List' a
-filter2 p = fromCh . filterCh p . toCh
-{-# INLINE filter2 #-}
 \end{code}
 We create a new algebra from an existing one, \tt{a}, that selectively postcomposes \tt{a}, this is not a natural transformation anymore in the way that \tt{f} below is.
 \begin{spec}
@@ -333,7 +335,7 @@ filter3 :: (a -> Bool) -> List a -> List a
 filter3 p = fromCoCh . natCoCh (filt p) . toCoCh
 \end{spec}
 For the Cochurch encoding, a natural transformation can be defined, but it is not a simple coalgebra, instead it is a recursive function.\footnote{And not necessarily guaranteed to terminate, the seed could generate an infinite structure.}
-The core idea is: we combine the natural transformation and postcomposition again, but this time we make the function recursively grab elements from the seed until we find one that satisfies the predicate.
+The core idea is: we combine the natural transformation and postcomposition again, but this time we make the function recursively grab elements from the seed until it finds one that satisfies the predicate.
 \begin{code}
 filt :: (a -> Bool) -> (s -> List_ a s) -> s -> List_ a s
 filt p h s = go s
@@ -379,8 +381,8 @@ One other example of this is already the difference between a \tt{Binary Tree} a
 data BinTree a = Leaf a | Fork (BinTree a) (BinTree a)
 data LeafTree a = Empty | Leaf a | Fork (LeafTree a) (LeafTree a)
 \end{spec}
-The \tt{Leaf} constructor of \tt{BinTree} is also made nullable.
-We will leave the following question to future work: Is this generalizable?
+The \tt{Leaf} constructor of \tt{BinTree} is made nullable.
+We will leave the following question to future work: Is this generalizable to any datastructure (perhaps containers)?
 
 
 

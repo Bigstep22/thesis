@@ -15,7 +15,7 @@ h \circ \catam{a} &= \catam{b}~\Longleftarrow && h \circ a &&= b \circ F h \\
 \text{And the reflection law as:} \\
 \catam{in} &= id
 \end{alignat*}
-We formalized and proved all of these properties in my Agda formalization.
+I formalized and proved all of these properties in my Agda formalization.
 It is also interesting to note that, for the universal property of unfolds, the forward direction is the proof of existence and the backward direction the proof of uniqueness, for the proof of initiality of an algebra.
 Converse definitions exist for terminal coalgebras, and can be found in the formalization in \autoref{sec:term}.
 
@@ -35,35 +35,35 @@ This requirement above is a proof obligation, Harper states three additional one
             \mu F  \arrow[d,"f",swap] & C \arrow[l,"abs"] \arrow[d, "f_C"] \\
             \mu F & C \arrow[l,"abs"]
         \end{tikzcd}\hfill\null
-        \caption{$f\circ abs = abs\circ f_C$}
+        \caption*{$f\circ abs = abs\circ f_C$}
     \end{subfigure}
     \begin{subfigure}{0.32\textwidth}
         \hfill\begin{tikzcd}
             S  \arrow[d,"p",swap] \arrow[dr,"p_C"] \\
             \mu F & C \arrow[l,"abs"]
         \end{tikzcd}\hfill\null
-        \caption{$p = abs\circ p_C$}
+        \caption*{$p = abs\circ p_C$}
     \end{subfigure}
     \begin{subfigure}{0.32\textwidth}
         \hfill\begin{tikzcd}
             \mu F  \arrow[d,"c",swap] \arrow[r,"con"] & C \arrow[dl, "c_C"] \\
             T
         \end{tikzcd}\hfill\null
-        \caption{$c = c_C\circ con$}
+        \caption*{$c = c_C\circ con$}
     \end{subfigure}
 \end{figure}
 
 In the second diagram, \tt{p} is a producer function, generating a recursive data structure from a seed of type \tt{S}.
 In the third diagram, \tt{c} is a consumer function, consuming a recursive data structure to produce a value of type \tt{T}.
 
-Harper also describes a fifth proof can also be made: $cons \circ abs = id_C$,
+Harper also describes a fifth lemma: $cons \circ abs = id_C$,
 but he initially mentions that this is too strong of a condition to require from an encoding, requiring it to be an isomorphism.
 However, he did end up proving it later on in his proofs, once for Church encodings and once for Cochurch encodings.
 In fact, he uses the fifth proof as the basis for the fusion pragma in Haskell.
-It seems to form the basis for correctness for the (Co)Church encodings he later ends up presenting in Haskell.
+It is the basis for correctness for the (Co)Church encodings he later ends up presenting in Haskell.
 
 He did end up proving this fifth proof using the free theorems, pulled from the type of the polymorphic functions that the (Co)Church encodings contain.
-This seems a bit inconsistent, but the fact that he did end up proving it and using it for the basis of the fusion he implemented in Haskell indicates that proving this fifth proof \textit{is} important.
+That he first discourages this fifth proof, only to subsequently prove it seems a bit inconsistent, but the fact that he did end up proving it and using it for the basis of the fusion he implemented in Haskell indicates that proving this fifth proof \textit{is} important.
 
 \subsubsection{(Co)Church Encodings}
 Next, \cite{Harper2011} proposes two encodings, \tt{Church} and \tt{CoChurch}.
@@ -81,7 +81,7 @@ fromCh :: Church F -> mu F
 fromCh (Ch g) = g in
 \end{code}
 Where \tt{in} is the initial algebra $in:F(\mu F) \to \mu F$.
-From these definitions, Harper proves the four proof obligations, showing Church encodings to be a faithful encoding; along with a fifth proof, proving the other composition of \tt{con} and \tt{abs} to be equal to \tt{id} and thereby showing isomorphism.
+From these definitions, Harper proves the four proof obligations, showing Church encodings to be a faithful encoding; along with a fifth proof, thereby showing isomorphism.
 For the proof of transformers and \tt{con $\circ$ abs = id}, Harper makes use of the free theorem for the polymorphic recursion principle \tt{g}.
 In all the five proofs for Church encodings, Harper does not use the fusion property.
 
@@ -89,7 +89,7 @@ In all the five proofs for Church encodings, Harper does not use the fusion prop
 \begin{code}
 data CoChurch' F = exists S . CoCh (S -> F S) S
 \end{code}
-An isomorphic definition which Harper later uses is the one we end up using in my formalization:
+An isomorphic definition which Harper later uses and is the one we end up using in my formalization:
 \begin{code}
 data CoChurch F = forall S . CoCh (S -> F S) S
 \end{code}
@@ -101,7 +101,7 @@ toCoCh x = CoCh out x
 fromCoCh :: CoChurch F -> nu F
 fromCoCh (CoCh h x) = unfold h x  
 \end{code}
-Similarly to his description of Church encodings, Harper proves the four proof obligations as well as the additional fifth one.
+Where \tt{out} is the terminal coalgebra $out : \nu F \to F(\nu F)$. Similarly to his description of Church encodings, Harper proves the four proof obligations as well as the additional fifth one.
 The \tt{con $\circ$ abs = id} proof, leverages the free theorem for the corecursion principle of the type \tt{CoChurch}.
 The proof for natural transformations uses the free theorem and, in addition, the fusion property for unfolds.
 
@@ -109,7 +109,7 @@ The proof for natural transformations uses the free theorem and, in addition, th
 After describing (Co)Church encodings, Harper goes on to demonstrate how they are used by implementing an example (Co)Church encoding of Leaf Trees.
 He implements four functions, \tt{between}, \tt{filter}, \tt{concat}, and \tt{sum}, as a normal, recursive function, in Church encoded form, and in Cochurch encoded form.
 
-In doing so, he shows exactly how one goes from using the normal, recursive datatypes and function that are typically used in Haskell, to Church and Cochurch encoded versions.
+In doing so, he shows exactly how one goes from using the normal, recursive datatypes and functions that are typically used in Haskell, to Church and Cochurch encoded versions.
 To conclude he compares the performance of different compositions of functions to show the performance benefits and differences between the three different variants of functions.
 
 We are omitting details for the description of Harper's example implementation because my work replicates this example implementation and is therefore described in detail in \autoref{sec:haskell}

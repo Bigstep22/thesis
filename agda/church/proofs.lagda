@@ -132,7 +132,7 @@ trans-pres f (Ch g) = begin
         \hfill\begin{tikzcd}
             \mu F  \arrow[d,"\catam{in \circ f}",swap] & C \arrow[l,"fromCh"] \arrow[d, "natTransCh~f"] \\
             \mu F & C \arrow[l,"fromCh"]
-        \end{tikzcd}\hfill\null
+        \end{tikzcd}\null
         \caption*{$\catam{in \circ f}\circ fromCh = fromCh\circ natTransCh~f$}
     \end{subfigure}
 \end{figure}

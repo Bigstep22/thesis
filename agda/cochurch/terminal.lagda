@@ -38,7 +38,7 @@ i.e. the forward direction of the \textit{universal property of unfolds} \citep{
 h = A\anam{a} \Longrightarrow out \circ h = F h \circ c
 \end{equation*}
 This constitutes a proof of existence;
-there exists a function (in this case called $\anam{\_}$), that is a valid F-Algebra homomorphism:
+there exists a function (in this case called A$\anam{\_}$), that is a valid F-Algebra homomorphism:
 \begin{code}
 univ-to : {F : Container 0ℓ 0ℓ}{C : Set}{h : C → ν F}{c : C → ⟦ F ⟧ C} →
                  ({x : C} → h x ≡ A⟦ c ⟧ x) → {x : C} → (out ∘ h) x ≡ (map h ∘ c) x
