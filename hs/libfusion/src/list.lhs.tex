@@ -46,16 +46,20 @@ We omit the pragmas defined for \tt{toCh} and \tt{fromCh} as well as the \tt{nat
 % We introduce three important pragmas.
 % One is the actual fusion rule, taking two functions and removing them from the compilation process.
 % The second and third are to make sure that the \tt{toCh} and \tt{fromCh} functions are inlined as late as possible; maximizing the time that they can be fused during the compilation process:
-\ignore{\begin{code}
+\ignore{
+\begin{code}
 {-# RULES "toCh/fromCh fusion" forall x. toCh (fromCh x) = x #-}
 {-# INLINE [0] toCh #-}
 {-# INLINE [0] fromCh #-}
-\end{code}}
+\end{code}
+}
 % A generalized natural transformation function is defined to standardize and ease later implementations of transformation functions:
-\ignore{\begin{code}
+\ignore{
+\begin{code}
 natCh :: (forall c . List_ a c -> List_ b c) -> ListCh a -> ListCh b
 natCh f (ListCh g) = ListCh (\a -> g (a . f))
-\end{code}}
+\end{code}
+}
 \paragraph{Cochurch encodings} We defined the Cochurch encodings conversely:
 \begin{code}
 data ListCoCh a = forall s . ListCoCh (s -> List_ a s) s
@@ -72,16 +76,20 @@ fromCoCh (ListCoCh h s) = unfold h s
           Nil_ -> Nil
           Cons_ x xs -> Cons x (unfold h xs)
 \end{code}
-\ignore{\begin{code}
+\ignore{
+\begin{code}
 {-# RULES "toCh/fromCh fusion" forall x. toCoCh (fromCoCh x) = x #-}
 {-# INLINE [0] toCoCh #-}
 {-# INLINE [0] fromCoCh #-}
-\end{code}}
+\end{code}
+}
 % A generalized natural transformation function is defined to standardize and ease later implementations of transformation functions:
-\ignore{\begin{code}
+\ignore{
+\begin{code}
 natCoCh :: (forall c . List_ a c -> List_ b c) -> ListCoCh a -> ListCoCh b
 natCoCh f (ListCoCh h s) = ListCoCh (f . h) s
-\end{code}}
+\end{code}
+}
 \paragraph{Between}
 The between function is defined in three different fashions: Normally, with the Church encoding, and with the Cochurch encoding.
 We leverage \tt{INLINE} pragmas to make sure that the fusion pragmas can effectively work.
@@ -298,7 +306,7 @@ filterCh :: (forall c . List_ a c -> List_ b c) -> ListCh a -> ListCh b
 filterCh p (ListCh g) = ListCh (\a -> g (a . (filt p)))
 \end{spec}
 \begin{code}
-filter2 :: (a -> Bool) -> List a -> List a
+filter2 :: (a -> Bool) -> List' a -> List' a
 filter2 p = fromCh . filterCh p . toCh
 {-# INLINE filter2 #-}
 \end{code}
