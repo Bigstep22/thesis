@@ -54,6 +54,8 @@ to-from-id (Ch g) = begin
 The third proof shows Church encoded functions constitute an implementation for the consumer functions being replaced.
 The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness.
 This corresponds to the third proof obligation (second diagram) mentioned in \autoref{sec:obligations}:
+\begin{figure}[H]
+\begin{subfigure}{0.7\textwidth}
 \begin{code}
 cons-pres : {F : Container 0ℓ 0ℓ}{X : Set}(b : ⟦ F ⟧ X → X) →
             (x : μ F) → (consCh b ∘ toCh) x ≡ ⦅ b ⦆ x
@@ -67,9 +69,20 @@ cons-pres b x = begin
     ⦅ b ⦆ x
   ∎
 \end{code}
+\end{subfigure}
+    \begin{subfigure}{0.25\textwidth}
+        \hfill\begin{tikzcd}
+            S  \arrow[d,"\catam{b}",swap] \arrow[dr,"consCh b"] \\
+            \mu F & C \arrow[l,"toCh"]
+        \end{tikzcd}\hfill\null
+        \caption*{$\catam{b} = toCh\circ consCh b$}
+    \end{subfigure}
+\end{figure}
 The fourth proof shows that Church encoded functions constitute an implementation for the producing functions being replaced.
 The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness.
 This corresponds to the fourth proof obligation (third diagram) mentioned in \autoref{sec:obligations}:
+\begin{figure}[H]
+\begin{subfigure}{0.7\textwidth}
 \begin{code}
 prod-pres : {F : Container 0ℓ 0ℓ}{X : Set}(f : {Y : Set} → (⟦ F ⟧ Y → Y) → X → Y) →
             (s : X) → (fromCh ∘ prodCh f) s ≡ f in' s
@@ -83,9 +96,20 @@ prod-pres {F}{X} f s = begin
     f in' s
   ∎
 \end{code}
+\end{subfigure}
+  \begin{subfigure}{0.25\textwidth}
+      \hfill\begin{tikzcd}
+          \mu F  \arrow[d,"f~in",swap] \arrow[r,"fromCh"] & C \arrow[dl, "prodCh~f"] \\
+          T
+      \end{tikzcd}\hfill\null
+      \caption*{$f~in = prodCh~f\circ fromCh$}
+  \end{subfigure}
+\end{figure}
 The fifth, and final proof shows that Church encoded functions constitute an implementation for the conversion functions being replaced.
 The proof again leverages the free theorem defined earlier.
 This corresponds to the second proof obligation (first diagram) mentioned in \autoref{sec:obligations}:
+\begin{figure}[H]
+\begin{subfigure}{0.5\textwidth}
 \begin{code}
 trans-pres : {F G : Container 0ℓ 0ℓ}(f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X) →
              (x : Church F) → (fromCh ∘ natTransCh f) x ≡ (⦅ in' ∘ f ⦆ ∘ fromCh) x
@@ -103,6 +127,15 @@ trans-pres f (Ch g) = begin
       ⦅ in' ∘ f ⦆ (fromCh (Ch g))
     ∎
 \end{code}
+\end{subfigure}
+    \begin{subfigure}{0.48\textwidth}
+        \hfill\begin{tikzcd}
+            \mu F  \arrow[d,"\catam{in \circ f}",swap] & C \arrow[l,"fromCh"] \arrow[d, "natTransCh~f"] \\
+            \mu F & C \arrow[l,"fromCh"]
+        \end{tikzcd}\hfill\null
+        \caption*{$\catam{in \circ f}\circ fromCh = fromCh\circ natTransCh~f$}
+    \end{subfigure}
+\end{figure}
 Finally, two additional proofs were made to clearly show that any pipeline made using church
 encodings will fuse down to a simple function application.
 The first of these two proofs shows that any two composed natural transformation fuse down

@@ -55,6 +55,8 @@ to-from-id (CoCh c x) = begin
 The third proof shows that Cochurch encoded functions constitute an implementation for the producing functions being replaced.
 The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness.
 This corresponds to the third proof obligation (second diagram) mentioned in \autoref{sec:obligations}:
+\begin{figure}[H]
+\begin{subfigure}{0.6\textwidth}
 \begin{code}
 prod-pres : {F : Container 0ℓ 0ℓ}{X : Set}(c : X → ⟦ F ⟧ X) →
             (x : X) → (fromCoCh ∘ prodCoCh c) x ≡ A⟦ c ⟧ x
@@ -66,9 +68,20 @@ prod-pres c x = begin
     A⟦ c ⟧ x
   ∎
 \end{code}
+\end{subfigure}
+    \begin{subfigure}{0.35\textwidth}
+        \hfill\begin{tikzcd}
+            S  \arrow[d,"A\anam{c}",swap] \arrow[dr,"prodCoCh~c"] \\
+            \mu F & C \arrow[l,"fromCoCh"]
+        \end{tikzcd}\hfill\null
+        \caption*{$A\anam{c} = fromCoCh\circ prodCoCh~c$}
+    \end{subfigure}
+\end{figure}
 The fourth proof shows that cochurch encoded functions constitute an implementation for the consuming functions being replaced.
 The proof is proved via reflexivity, but \cite{Harper2011}'s original proof steps are included here for completeness.
 This corresponds to the fourth proof obligation (third diagram) mentioned in \autoref{sec:obligations}:
+\begin{figure}[H]
+\begin{subfigure}{0.6\textwidth}
 \begin{code}
 cons-pres : {F : Container 0ℓ 0ℓ}{X : Set} → (f : {Y : Set} → (Y → ⟦ F ⟧ Y) → Y → X) →
             (x : ν F) → (consCoCh f ∘ toCoCh) x ≡ f out x
@@ -80,9 +93,20 @@ cons-pres f x = begin
     f out x
   ∎
 \end{code}
+\end{subfigure}
+    \begin{subfigure}{0.35\textwidth}
+        \hfill\begin{tikzcd}
+            \mu F  \arrow[d,"f out",swap] \arrow[r,"toCoCh"] & C \arrow[dl, "consCoCh~f"] \\
+            T
+        \end{tikzcd}\hfill\null
+        \caption*{$f out = consCoCh~f\circ toCoCh$}
+    \end{subfigure}
+\end{figure}
 The fifth, and final proof shOws that cochurch encoded functions constitute an implementation for the consuming functions being replaced.
 The proof leverages the categorical fusion property and the naturality of \tt{f}.
 This corresponds to the second proof obligation (first diagram) mentioned in \autoref{sec:obligations}:
+\begin{figure}[H]
+\begin{subfigure}{0.4\textwidth}
 \begin{code}
 valid-hom : {F G : Container 0ℓ 0ℓ}{X : Set}(h : X → ⟦ F ⟧ X)
             (f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)
@@ -95,7 +119,17 @@ valid-hom h f nat {x} = begin
   ≡⟨⟩ -- dfn of A⟦_⟧
     (f ∘ out ∘ A⟦ h ⟧) x
   ∎
-
+\end{code}
+\end{subfigure}
+    \begin{subfigure}{0.55\textwidth}
+        \hfill\begin{tikzcd}
+            \mu F  \arrow[d,"A\anam{f \circ out}",swap] & C \arrow[l,"fromCoCh"] \arrow[d, "natTransCoCh~f"] \\
+            \mu F & C \arrow[l,"fromCoCh"]
+        \end{tikzcd}
+        \caption*{$A\anam{f \circ out}\circ fromCoCh = fromCoCh\circ natTransCoCh~f$}
+    \end{subfigure}
+\end{figure}
+\begin{code}
 trans-pres : {F G : Container 0ℓ 0ℓ}(f : {X : Set} → ⟦ F ⟧ X → ⟦ G ⟧ X)
              (nat : {X : Set}(g : X → ν F)(x : ⟦ F ⟧ X) → (map g ∘ f) x ≡ (f ∘ map g) x)
              (x : CoChurch F) → (fromCoCh ∘ natTransCoCh f) x ≡ (A⟦ f ∘ out ⟧ ∘ fromCoCh) x
@@ -111,6 +145,7 @@ trans-pres f nat (CoCh h x) = begin
       A⟦ f ∘ out ⟧ (fromCoCh (CoCh h x))
     ∎
 \end{code}
+
 Two additional proofs, \tt{natfuse} and \tt{pipefuse}, were made in a similary fashion to how they were done
 for Church encodings they are omitted here for brevity and can be found in the artifacts.
 % Finally two additional proofs were made to clearly show that any pipeline made using cochurch
